@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sand Dissolve Slideshow</title>
+  <title>Slideshow + Widgets</title>
 
-  <!-- Manrope ExtraLight -->
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -14,229 +13,199 @@
 
       /* Slideshow timings */
       --slide-duration: 6s;
-      --transition-duration: 1.6s;
+      --transition-duration: 1.2s;
 
-      /* Widget sizing + independent margins (visual px) */
-      --ui-scale: 2.0;      /* overall widget scale */
-      --top-gap:  24px;     /* distance from top wrappers to edges */
-      --left-gap: 24px;
-      --right-gap: 24px;
-      --bottom-gap:24px;
+      /* Global widget scale + margins (screen-px) */
+      --ui-scale: 2.0;
+      --top-gap:  24px;       /* vertical gap for both columns */
+      --left-gap: 24px;       /* left column distance from edge */
+      --right-gap: 24px;      /* right column distance from edge */
 
       /* Card widths (unscaled logical px) */
-      --widget-width: 200px; /* weather/aqi */
-      --news-width:   200px; /* news/qr */
+      --widget-width: 200px;  /* Weather / Time / AQI */
+      --news-width:   200px;  /* News / QR / Calendar */
+
+      /* Logo placement (top-center) */
+      --logo-top-gap:  180px;
+      --logo-height:   10px;
     }
 
-    html, body {
+    html, body{
       height:100%; margin:0; background:var(--bg-color);
       font-family:'Manrope',sans-serif; font-weight:200;
       overflow:hidden; color:#eef1f5;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
-    .stage { position:fixed; inset:0; overflow:hidden; background:var(--bg-color); }
+    .stage{ position:fixed; inset:0; overflow:hidden; background:var(--bg-color); }
 
-    /* Center the canvas; JS sets pixel size to preserve aspect (no distortion) */
+    /* Canvas centered; JS sizes pixel buffer */
     canvas{
-      position:absolute;
-      top:50%; left:50%;
-      transform: translate(-50%, -50%);
-      width:auto; height:auto;
-      display:block; z-index:0;
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%); width:auto; height:auto; display:block; z-index:0;
     }
-
     .vignette::after{ content:""; position:absolute; inset:0; pointer-events:none;
-      background: radial-gradient(120% 120% at 50% 60%, transparent 45%, rgba(0,0,0,0.28) 100%);
-      mix-blend-mode:multiply; }
+      background:radial-gradient(120% 120% at 50% 60%, transparent 45%, rgba(0,0,0,0.28) 100%); mix-blend-mode:multiply; }
 
-    .badge{ position:absolute; right:24px; bottom:20px; color:#fff; opacity:0; font:200 14px 'Manrope',sans-serif; }
-    @media (prefers-reduced-motion: reduce){ :root{ --transition-duration: 0s; } }
+    .badge{ position:absolute; right:24px; bottom:20px; color:#fff; opacity:0; font:200 14px Manrope,sans-serif; }
+    @media (prefers-reduced-motion:reduce){ :root{ --transition-duration:0s; } }
 
-    /* === LEFT column (Weather + AQI) === */
+    /* ===== Logo (TOP–CENTER) ===== */
+    .logo-wrap{
+      position:fixed;
+      top:var(--logo-top-gap);
+      left:50%;
+      transform:translateX(-50%);
+      z-index:1200;
+      pointer-events:none;
+    }
+    .logo-wrap img{ height:var(--logo-height); width:auto; display:block; }
+
+    /* ===== LEFT column (Weather → Time → AQI) ===== */
     .widgets-left{
-      position: fixed;
-      top:  calc(var(--top-gap)  / var(--ui-scale));
-      left: calc(var(--left-gap) / var(--ui-scale));
+      position:fixed;
+      top:calc((var(--top-gap) + var(--logo-height) + 10px) / var(--ui-scale)); /* sits under centered logo */
+      left:calc(var(--left-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-start;
-      transform: scale(var(--ui-scale)) translateZ(0);
-      transform-origin: top left;
-      -webkit-font-smoothing: antialiased;
+      transform:scale(var(--ui-scale)) translateZ(0);
+      transform-origin:top left;
     }
 
-    /* === RIGHT column (News + QR) === */
+    /* ===== RIGHT column (News → QR → Calendar) ===== */
     .widgets-right{
-      position: fixed;
-      top:   calc(var(--top-gap)   / var(--ui-scale));
-      right: calc(var(--right-gap) / var(--ui-scale));
+      position:fixed;
+      top:calc(var(--top-gap) / var(--ui-scale));
+      right:calc(var(--right-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-end;
-      transform: scale(var(--ui-scale)) translateZ(0);
-      transform-origin: top right;
+      transform:scale(var(--ui-scale)) translateZ(0);
+      transform-origin:top right;
     }
 
-    /* Card base */
+    /* ===== Card base ===== */
     .card{
-      border-radius: 22px;
-      padding: 10px;
-      background: rgba(18, 20, 24, 0.45);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.25);
-      font-weight: 200; color: #eef1f5;
+      border-radius:22px; padding:10px;
+      background:rgba(18,20,24,.45);
+      backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 8px 28px rgba(0,0,0,.25);
+      font-weight:200; color:#eef1f5;
     }
-
     .card-header{
       display:flex; justify-content:space-between; align-items:center;
-      padding: 8px 12px;
-      margin: -2px -2px 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      font-size: 13px; letter-spacing:.3px;
+      padding:8px 12px; margin:-2px -2px 10px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:16px; font-size:13px; letter-spacing:.3px;
     }
+    .muted{opacity:.7}
 
-    /* ===== News card (top-right) ===== */
-    #newsCard{
-      width: var(--news-width);
-      border-radius: 22px;
-      padding: 10px;
-      background: rgba(18, 20, 24, 0.50);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-    }
-    #newsCard .card-header{ margin-bottom: 6px; }
-    .news-slide{
-      position: relative;
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .news-media{
-      width:100%; aspect-ratio:16/9; display:block;
-      object-fit:cover; border-radius:12px; background:#222;
-      margin-bottom:8px;
-    }
-    .news-title{
-      font-size: 16px; line-height: 1.25; font-weight: 300;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-      margin: 0 0 6px 0; color:#eef1f5; text-decoration:none;
-    }
-    .news-title:hover{ text-decoration:underline; }
-    .news-meta{ font-size: 12px; opacity: .85; display:flex; gap:8px; align-items:center; }
-    .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius: 2px; display:inline-block; }
-    .news-fade-enter{ opacity: 0; transform: translateY(6px); }
-    .news-fade-leave{ opacity: 0; transform: translateY(-6px); }
-    .news-fade{ transition: opacity .35s ease, transform .35s ease; }
-
-    /* Pagination dots */
-    .news-dots{
-      display:flex; gap:6px; justify-content:center; margin-top:10px;
-    }
-    .news-dot{
-      width:6px; height:6px; border-radius:3px; background:#fff6; cursor:pointer;
-      transition: transform .2s ease, background .2s ease;
-    }
-    .news-dot.active{ background:#fff; transform: scale(1.25); }
-
-    /* ===== QR card (top-right under news) ===== */
-    #qrCard{ width: var(--news-width); }
-    #qrCard .qr-body{
-      display:flex; flex-direction:column; align-items:center; gap:10px;
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      text-align:center;
-    }
-    #qrImage{
-      width:100%; max-width:260px; aspect-ratio:1/1; object-fit:contain;
-      border-radius:12px; background:#fff; padding:10px;
-    }
-    #qrCaption{ font-size:13px; opacity:.9; }
-    #qrLink{ color:#eef1f5; text-decoration:underline; }
-
-    /* ===== Weather card (left) ===== */
-    #weatherCard{ width: var(--widget-width); }
+    /* ===== Weather ===== */
+    #weatherCard{ width:var(--widget-width); }
     #weatherCard .weather-row{
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
-      padding: 10px 12px 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      margin-bottom: 10px;
+      padding:10px 12px 12px; background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.10); border-radius:16px; margin-bottom:10px;
     }
-    #weatherCard .weather-icon{
-      font-size: 24px; line-height:1;
-      width: 100%; text-align: center; align-self: center; margin-top: 2px;
-      /* colored icons: NO grayscale filter */
-    }
-    #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
-    #weatherCard .weather-desc{ font-size: 13px; opacity:.92; }
-
-    #weatherCard .weather-forecast{ display: grid; grid-template-columns: 1fr; gap: 8px; }
+    #weatherCard .weather-icon{ font-size:24px; line-height:1; width:100%; text-align:center; margin-top:2px; }
+    #weatherCard .weather-temp{ font-size:42px; line-height:1; font-weight:200; margin-top:2px; }
+    #weatherCard .weather-desc{ font-size:13px; opacity:.92; }
+    #weatherCard .weather-forecast{ display:grid; grid-template-columns:1fr; gap:8px; }
     #weatherCard .forecast-item{
-      display:grid;
-      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp */
-      align-items:center;
-      padding: 8px 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 14px;
+      display:grid; grid-template-columns:1fr 40px 48px; align-items:center; padding:8px 10px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:14px;
     }
-    #weatherCard .forecast-time{ font-size: 12px; opacity:.9; }
-    #weatherCard .wx{
-      display:flex; align-items:center; justify-content:center;
-      width:40px; height:20px; margin:0 auto; text-align:center;
-      /* colored icons: NO grayscale filter */
-    }
+    #weatherCard .forecast-time{ font-size:12px; opacity:.9; }
+    #weatherCard .wx{ display:flex; align-items:center; justify-content:center; width:40px; height:20px; }
     #weatherCard .forecast-temp{
-      justify-self:end;
-      font-size: 13px; padding: 6px 8px; min-width: 42px; text-align:center;
-      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95;
+      justify-self:end; font-size:13px; padding:6px 8px; min-width:42px; text-align:center;
+      background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12); border-radius:10px; opacity:.95;
     }
 
-    /* ===== AQI card (left) ===== */
-    #aqiCard{ width: var(--widget-width); }
+    /* ===== TIME (replaces old left extra) ===== */
+    #timeCard{ width:var(--widget-width); }
+    .time-body{
+      padding:12px; background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10); border-radius:16px;
+      display:flex; flex-direction:column; gap:6px; align-items:flex-start;
+    }
+    .clock{
+      font-weight:400; letter-spacing:.5px;
+      display:flex; align-items:baseline; gap:6px;
+    }
+    .clock .hhmm{ font-size:42px; line-height:1; }
+    .clock .ss{ font-size:16px; opacity:.85; }
+    .clock .ampm{ font-size:14px; opacity:.85; }
+    .clock-date{ font-size:13px; opacity:.9; }
+
+    /* ===== AQI ===== */
+    #aqiCard{ width:var(--widget-width); }
     #aqiCard .aqi-body{
       display:flex; flex-direction:column; gap:8px; align-items:center;
-      padding: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
+      padding:12px; background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.10); border-radius:16px;
     }
     #aqiValue{ font-size:40px; line-height:1; }
     #aqiCat{ font-size:13px; opacity:.92; }
-    #aqiBadge{
-      font-size:12px; padding:4px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      line-height:1;
-    }
-    .aqi-bar{
-      width:100%; height:6px; border-radius:4px;
-      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
-      opacity:.75; position: relative; overflow:hidden;
-    }
-    .aqi-pointer{
-      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%;
-    }
+    #aqiBadge{ font-size:12px; padding:4px 8px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); line-height:1; }
+    .aqi-bar{ width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
+    .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
     .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
-    .pill{
-      font-size:11px; padding:6px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
+    .pill{ font-size:11px; padding:6px 8px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
     .pill strong{ font-weight:400; margin-left:6px; }
+
+    /* ===== News (with image) ===== */
+    #newsCard{ width:var(--news-width); }
+    #newsCard .card-header{ margin-bottom:6px; }
+    .news-slide{
+      position:relative; padding:10px 12px;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; overflow:hidden;
+    }
+    .news-media{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; background:#222; margin-bottom:8px; }
+    .news-title{ font-size:16px; line-height:1.25; font-weight:300; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin:0 0 6px 0; color:#eef1f5; text-decoration:none; }
+    .news-title:hover{ text-decoration:underline; }
+    .news-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; }
+    .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius:2px; display:inline-block; }
+    .news-fade-enter{ opacity:0; transform:translateY(6px); }
+    .news-fade-leave{ opacity:0; transform:translateY(-6px); }
+    .news-fade{ transition:opacity .35s ease, transform .35s ease; }
+    .news-dots{ display:flex; gap:6px; justify-content:center; margin-top:10px; }
+    .news-dot{ width:6px; height:6px; border-radius:3px; background:#fff6; cursor:pointer; transition:transform .2s ease, background .2s ease; }
+    .news-dot.active{ background:#fff; transform:scale(1.25); }
+
+    /* ===== QR ===== */
+    #qrCard{ width:var(--news-width); }
+    #qrCard .qr-body{
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; text-align:center;
+    }
+    #qrImage{ width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:12px; background:#fff; padding:10px; }
+    #qrCaption{ font-size:13px; opacity:.9; }
+    #qrLink{ color:#eef1f5; text-decoration:underline; }
+
+    /* ===== Calendar (replaces old right extra) ===== */
+    #calendarCard{ width:var(--news-width); }
+    .cal-body{
+      padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
+    }
+    .cal-grid{
+      display:grid; grid-template-columns:repeat(7,1fr); gap:6px; font-size:12px;
+    }
+    .cal-head{ opacity:.75; text-align:center; }
+    .cal-cell{
+      text-align:center; padding:6px 0; border-radius:10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+    }
+    .cal-cell.muted{ opacity:.45; }
+    .cal-cell.today{ background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.35); font-weight:600; }
   </style>
 </head>
 <body>
   <div class="stage vignette">
     <canvas id="glcanvas"></canvas>
     <div class="badge" id="badge"></div>
+
+    <!-- TOP-CENTER LOGO -->
+    <div class="logo-wrap"><img src="images/logo1.png" alt="Logo" id="logo1" /></div>
 
     <!-- LEFT column -->
     <div class="widgets-left">
@@ -256,11 +225,23 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
+      <!-- TIME -->
+      <div class="card" id="timeCard">
+        <div class="card-header"><span>Time</span><span id="tzName" class="muted">—</span></div>
+        <div class="time-body">
+          <div class="clock">
+            <div class="hhmm" id="clockHHMM">--:--</div>
+            <div class="ss"   id="clockSS">--</div>
+            <div class="ampm" id="ampm">—</div>
+          </div>
+          <div class="clock-date" id="clockDate">—</div>
+        </div>
+      </div>
+
       <!-- AQI -->
       <div class="card" id="aqiCard">
         <div class="card-header">
-          <span>Air Quality</span>
-          <span id="aqiCity">Sultanpur, India</span>
+          <span>Air Quality</span><span id="aqiCity">Sultanpur, India</span>
         </div>
         <div class="aqi-body">
           <div id="aqiBadge">AQI —</div>
@@ -279,486 +260,202 @@
     <div class="widgets-right">
       <!-- News -->
       <div class="card" id="newsCard">
-        <div class="card-header">
-          <span>Headlines</span>
-          <span id="newsSource">updating…</span>
-        </div>
+        <div class="card-header"><span>Headlines</span><span id="newsSource">updating…</span></div>
         <div class="news-slide">
           <img id="newsImg" class="news-media" alt="" referrerpolicy="no-referrer">
           <div id="newsContainer" class="news-fade">
             <a id="newsLink" href="#" target="_blank" rel="noopener noreferrer" class="news-title">Loading headlines…</a>
             <div class="news-meta">
-              <span id="newsSourceInline">—</span>
-              <span class="dot"></span>
-              <span id="newsTime">—</span>
+              <span id="newsSourceInline">—</span><span class="dot"></span><span id="newsTime">—</span>
             </div>
           </div>
           <div class="news-dots" id="newsDots"></div>
         </div>
       </div>
 
-      <!-- Instagram QR (under news) -->
+      <!-- Instagram QR -->
       <div class="card" id="qrCard">
-        <div class="card-header">
-          <span>Follow us on Instagram</span><span class="muted">@mcbee.in</span>
-        </div>
+        <div class="card-header"><span>Follow us on Instagram</span><span class="muted">@mcbee.in</span></div>
         <div class="qr-body">
           <img id="qrImage" alt="QR to Instagram" />
-          <div id="qrCaption">Scan the QR or visit <a id="qrLink" href="https://www.instagram.com/mcbee.in/" target="_blank" rel="noopener noreferrer">instagram.com/mcbee.in</a></div>
+          <div id="qrCaption">Scan or visit <a id="qrLink" href="https://www.instagram.com/mcbee.in/" target="_blank" rel="noopener noreferrer">instagram.com/mcbee.in</a></div>
+        </div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="card" id="calendarCard">
+        <div class="card-header"><span>Calendar</span><span id="calMonthLabel" class="muted">—</span></div>
+        <div class="cal-body">
+          <div class="cal-grid" id="calGrid"></div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
-  // ========= Config =========
-  const CITY_LABEL = "Sultanpur, India";             // label only
-  const COORDS = { lat: 28.4959, lon: 77.1500 };     // fixed coords for Sultanpur
+  /* ========= CONFIG ========= */
+  const CITY_LABEL = "Sultanpur, India";
+  const COORDS = { lat: 28.4959, lon: 77.1500 };
   const INSTA_URL = "https://www.instagram.com/mcbee.in/";
+  const ANIMATION_MODE = 'crossfade';
+  const RENDER_SCALE   = 0.75;
 
-  // Slideshow behaviour
-  const ANIMATION_MODE = 'crossfade';  // 'crossfade' | 'wipe' | 'cut' | 'sand' (heavy)
-  const RENDER_SCALE   = 0.75;         // 1 = full viewport res; lower to reduce GPU work
+  const IMAGES = ["images/slide1.png","images/slide2.png","images/slide3.png","images/slide4.png","images/slide5.png"];
 
-  // Slides (PNG/JPG supported)
-  const IMAGES = [
-    "images/slide1.png",
-    "images/slide2.png",
-    "images/slide3.png",
-    "images/slide4.png",
-    "images/slide5.png",
-  ];
+  function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function readSeconds(n,f){ const v=cssVar(n), x=parseFloat((v||'').replace('s','')); return isFinite(x)?x*1000:f*1000; }
 
-  // CSS var readers
-  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-  function readSeconds(name, fallback){ const v = cssVar(name); const n = parseFloat((v||'').replace('s','')); return isFinite(n)?n*1000:fallback*1000; }
+  const SLIDE_MS = readSeconds('--slide-duration', 6);
+  const TRANSITION_MS = readSeconds('--transition-duration', 1.2);
 
-  // Timers
-  const SLIDE_MS      = readSeconds('--slide-duration', 6);
-  const TRANSITION_MS = readSeconds('--transition-duration', 1.6);
+  /* ========= WebGL slideshow (same as before, trimmed) ========= */
+  const canvas=document.getElementById('glcanvas');
+  const gl=canvas.getContext('webgl2',{premultipliedAlpha:true,antialias:true});
+  function sizeGLBuffer(){ const vw=Math.max(1,Math.floor(innerWidth*RENDER_SCALE)), vh=Math.max(1,Math.floor(innerHeight*RENDER_SCALE)); canvas.width=vw; canvas.height=vh; gl.viewport(0,0,vw,vh); }
+  function fitCanvas(){ canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; }
+  function resize(){ sizeGLBuffer(); fitCanvas(); } resize(); addEventListener('resize',resize);
 
-  // ========= WebGL2 setup =========
-  const canvas = document.getElementById('glcanvas');
-  const gl = canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: true });
-  if(!gl){ alert('WebGL2 not available'); }
-
-  function sizeGLBuffer(){
-    const vw = Math.max(1, Math.floor(window.innerWidth  * RENDER_SCALE));
-    const vh = Math.max(1, Math.floor(window.innerHeight * RENDER_SCALE));
-    canvas.width  = vw;
-    canvas.height = vh;
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-  function fitCanvasToViewport(){
-    canvas.style.width  = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-  }
-  function resize(){ sizeGLBuffer(); fitCanvasToViewport(); }
-  resize(); window.addEventListener('resize', resize);
-
-  // ===== Shaders =====
-  const vs = `#version 300 es
-  precision highp float;
-  const vec2 POS[4] = vec2[4](vec2(-1.,-1.), vec2(1.,-1.), vec2(-1.,1.), vec2(1.,1.));
-  out vec2 vUv;
-  void main(){ vec2 p = POS[gl_VertexID]; vUv = p*0.5+0.5; gl_Position = vec4(p,0.,1.); }`;
-
-  function fsFor(mode){
-    if(mode === 'crossfade'){
-      return `#version 300 es
-      precision highp float; in vec2 vUv; out vec4 frag;
-      uniform sampler2D uTex0, uTex1; uniform vec2 uResolution; uniform float uProgress;
-      vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){
-        float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
-        if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv;
-      }
-      void main(){
-        vec2 rs=uResolution;
-        vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
-        vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
-        vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
-        frag = mix(c0,c1, clamp(uProgress,0.,1.));
-      }`;
-    }
-    if(mode === 'wipe'){
-      return `#version 300 es
-      precision highp float; in vec2 vUv; out vec4 frag;
-      uniform sampler2D uTex0, uTex1; uniform vec2 uResolution; uniform float uProgress;
-      vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){
-        float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
-        if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv;
-      }
-      void main(){
-        vec2 rs=uResolution;
-        vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
-        vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
-        vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
-        float edge = 0.01;
-        float m = smoothstep(uProgress-edge, uProgress+edge, vUv.x);
-        frag = mix(c0,c1,m);
-      }`;
-    }
-    if(mode === 'cut'){
-      return `#version 300 es
-      precision highp float; in vec2 vUv; out vec4 frag;
-      uniform sampler2D uTex0, uTex1; uniform vec2 uResolution; uniform float uProgress;
-      vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){
-        float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
-        if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv;
-      }
-      void main(){
-        vec2 rs=uResolution;
-        vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
-        vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
-        vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
-        frag = (uProgress<0.999) ? c0 : c1;
-      }`;
-    }
+  const vs=`#version 300 es
+  precision highp float; const vec2 P[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.)); out vec2 uv;
+  void main(){ vec2 p=P[gl_VertexID]; uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.);} `;
+  function fsFor(mode){ if(mode==='crossfade') return `#version 300 es
+    precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+    vec2 cover(vec2 u, vec2 ts, vec2 rs){ float rt=ts.x/ts.y, rc=rs.x/rs.y; if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; } return u; }
+    void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+      vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); frag=mix(c0,c1,clamp(t,0.,1.)); }`;
+    if(mode==='wipe') return `#version 300 es
+    precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+    vec2 cover(vec2 u, vec2 ts, vec2 rs){ float rt=ts.x/ts.y, rc=rs.x/rs.y; if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; } return u; }
+    void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+      vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); float e=.01; float m=smoothstep(t-e,t+e,uv.x); frag=mix(c0,c1,m);}`;
     return `#version 300 es
-    precision highp float; in vec2 vUv; out vec4 frag;
-    uniform sampler2D uTex0, uTex1; uniform vec2 uResolution;
-    uniform float uProgress, uTime;
-    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
-    float noise(vec2 p){ vec2 i=floor(p), f=fract(p); float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1)); vec2 u=f*f*(3.-2.*f); return mix(mix(a,b,u.x), mix(c,d,u.x), u.y); }
-    float fbm(vec2 p){ float v=0., a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=.5; } return v; }
-    vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){ float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
-      if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv; }
-    void main(){
-      vec2 rs=uResolution; float n=fbm(vUv*rs/400. + vec2(uTime*.05, uTime*.03));
-      float edge=.18; float mask=(uProgress<=0.)?0.:1.-smoothstep(uProgress-edge,uProgress+edge,n);
-      vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
-      vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
-      vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
-      frag=mix(c0,c1,mask);
-    }`;
+    precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+    vec2 cover(vec2 u, vec2 ts, vec2 rs){ float rt=ts.x/ts.y, rc=rs.x/rs.y; if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; } return u; }
+    void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+      vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); frag = (t<.999)?c0:c1; }`; }
+  function compile(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  function program(vsSrc,fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc)); gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+  const prog=program(vs,fsFor(ANIMATION_MODE)); gl.useProgram(prog);
+  const loc={a:gl.getUniformLocation(prog,'a'), b:gl.getUniformLocation(prog,'b'), res:gl.getUniformLocation(prog,'res'), t:gl.getUniformLocation(prog,'t')};
+  gl.bindVertexArray(gl.createVertexArray());
+  function makeTex(img){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img); return t; }
+  function loadImg(src){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+  let tex=[], idx=0, next=1, phase='dwell', end=performance.now();
+  (async()=>{ try{ const imgs=await Promise.all(IMAGES.map(loadImg)); tex=imgs.map(makeTex);}catch{ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); tex=[t,t]; } start();})();
+  function bind(i0,i1){ gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex[i0%tex.length]); gl.uniform1i(loc.a,0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,tex[i1%tex.length]); gl.uniform1i(loc.b,1); }
+  function start(){ bind(idx,next); phase='dwell'; end=performance.now()+SLIDE_MS; gl.uniform1f(loc.t,0); requestAnimationFrame(loop); initWeatherAndAQI(); initNews(); initQR(); initClock(); renderCalendar(new Date()); }
+  function loop(now){ gl.uniform2f(loc.res,canvas.width,canvas.height);
+    if(now>=end){ if(phase==='dwell'){ phase='transition'; end=now+TRANSITION_MS; bind(idx,next);} else { idx=next; next=(idx+1)%tex.length; bind(idx,next); phase='dwell'; end=now+SLIDE_MS; gl.uniform1f(loc.t,0);} }
+    gl.uniform1f(loc.t, phase==='transition' ? 1 - Math.max(0,(end-now))/Math.max(1,TRANSITION_MS) : 0 );
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4); requestAnimationFrame(loop);
   }
 
-  function compile(type, src){
-    const s=gl.createShader(type);
-    gl.shaderSource(s,src); gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-    return s;
-  }
-  function program(vsSrc, fsSrc){
-    const p=gl.createProgram();
-    gl.attachShader(p, compile(gl.VERTEX_SHADER,vsSrc));
-    gl.attachShader(p, compile(gl.FRAGMENT_SHADER,fsSrc));
-    gl.linkProgram(p);
-    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    return p;
-  }
-
-  const prog = program(vs, fsFor(ANIMATION_MODE));
-  gl.useProgram(prog);
-  const loc = {
-    uTex0: gl.getUniformLocation(prog, 'uTex0'),
-    uTex1: gl.getUniformLocation(prog, 'uTex1'),
-    uResolution: gl.getUniformLocation(prog, 'uResolution'),
-    uProgress: gl.getUniformLocation(prog, 'uProgress'),
-    uTime: gl.getUniformLocation(prog, 'uTime'),
-  };
-  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
-
-  // Textures
-  function createTexture(img){ const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-    return tex; }
-  function createBlankTexture(){ const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
-    const px = new Uint8Array([0,0,0,255]); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,px); return tex; }
-  function loadImage(src){ return new Promise((res, rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
-
-  let textures=[];
-  (async()=>{
-    try{
-      const imgs = await Promise.all(IMAGES.map(loadImage));
-      textures = imgs.map(createTexture);
-    }catch{ textures = [createBlankTexture(), createBlankTexture()]; }
-    start();
-  })();
-
-  // Slideshow engine
-  let currentIndex = 0, nextIndex = 1;
-  let phase = 'dwell', phaseEnd = performance.now();
-
-  function bindTextures(i0, i1){
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[i0 % textures.length]); gl.uniform1i(loc.uTex0, 0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[i1 % textures.length]); gl.uniform1i(loc.uTex1, 1);
-  }
-
-  function start(){
-    bindTextures(currentIndex, nextIndex);
-    phase = 'dwell'; phaseEnd = performance.now() + SLIDE_MS;
-    gl.uniform1f(loc.uProgress, 0.0);
-    requestAnimationFrame(loop);
-
-    initWeatherAndAQI();
-    initNews();
-    initQR();
-  }
-
-  function loop(now){
-    const res = [canvas.width, canvas.height];
-    gl.uniform2f(loc.uResolution, res[0], res[1]);
-    if(now >= phaseEnd){
-      if(phase === 'dwell'){ phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex); }
-      else{ currentIndex=nextIndex; nextIndex=(currentIndex+1)%textures.length; bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); }
-    }
-    if(phase === 'transition'){
-      const dur = Math.max(1.0, TRANSITION_MS);
-      const t = 1.0 - Math.max(0.0, (phaseEnd - now) / dur);
-      const eased = 1.0 - Math.pow(1.0 - t, 3.0);
-      gl.uniform1f(loc.uProgress, eased);
-    } else {
-      gl.uniform1f(loc.uProgress, 0.0);
-    }
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    requestAnimationFrame(loop);
-  }
-
-  // ===== Weather + AQI =====
+  /* ========= Weather + AQI ========= */
   async function initWeatherAndAQI(){
+    document.getElementById('weatherCity').textContent = CITY_LABEL;
+    document.getElementById('aqiCity').textContent     = CITY_LABEL;
     try{
-      document.getElementById('weatherCity').textContent = CITY_LABEL;
-      document.getElementById('aqiCity').textContent     = CITY_LABEL;
-
-      const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${COORDS.lat}&longitude=${COORDS.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
-      const wdata = await fetch(wurl, {cache:'no-cache'}).then(r=>r.json());
-      renderWeather(wdata);
-
-      await fetchAQI(COORDS.lat, COORDS.lon);
-    }catch(e){
-      document.getElementById('weatherDesc').textContent = 'Weather unavailable';
-      document.getElementById('aqiCat').textContent = 'Unavailable';
+      const wurl=`https://api.open-meteo.com/v1/forecast?latitude=${COORDS.lat}&longitude=${COORDS.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
+      const w=await fetch(wurl,{cache:'no-cache'}).then(r=>r.json());
+      renderWeather(w);
+      await fetchAQI(COORDS.lat,COORDS.lon);
+    }catch{ document.getElementById('weatherDesc').textContent='Weather unavailable'; document.getElementById('aqiCat').textContent='Unavailable'; }
+  }
+  function wxIcon(c){ if(c===0)return'☀️'; if([1,2].includes(c))return'🌤️'; if(c===3)return'☁️'; if([45,48].includes(c))return'🌫️'; if([51,53,55,56,57].includes(c))return'🌦️'; if([61,63,65].includes(c))return'🌧️'; if([66,67,71,73,75,77].includes(c))return'🌨️'; if([80,81,82].includes(c))return'🌧️'; if([95,96,99].includes(c))return'⛈️'; return'☁️'; }
+  function wxText(c){ const m={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'}; return m[c]||'—'; }
+  function renderWeather(d){
+    const c=d.current;
+    document.getElementById('weatherTemp').textContent=Math.round(c.temperature_2m)+'°';
+    document.getElementById('weatherDesc').textContent=wxText(c.weather_code);
+    document.getElementById('weatherIcon').textContent=wxIcon(c.weather_code);
+    const fc=document.getElementById('weatherForecast'); fc.innerHTML='';
+    const idx=d.hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
+    for(let i=0;i<3;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
+      const temp=Math.round(d.hourly.temperature_2m[j]); const w=d.hourly.weather_code[j];
+      const div=document.createElement('div'); div.className='forecast-item';
+      div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span><span class="wx">${wxIcon(w)}</span><span class="forecast-temp">${temp}°</span>`;
+      fc.appendChild(div);
     }
   }
-
-  function wxIcon(code){
-    if(code===0) return '☀️';
-    if([1,2].includes(code)) return '🌤️';
-    if(code===3) return '☁️';
-    if([45,48].includes(code)) return '🌫️';
-    if([51,53,55,56,57].includes(code)) return '🌦️';
-    if([61,63,65].includes(code)) return '🌧️';
-    if([66,67,71,73,75,77].includes(code)) return '🌨️';
-    if([80,81,82].includes(code)) return '🌧️';
-    if([95,96,99].includes(code)) return '⛈️';
-    return '☁️';
-  }
-  function wxText(code){
-    const map = {0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
-    return map[code] || '—';
-  }
-  function renderWeather(data){
-    const cur = data.current;
-    document.getElementById('weatherTemp').textContent = Math.round(cur.temperature_2m) + '°';
-    document.getElementById('weatherDesc').textContent = wxText(cur.weather_code);
-    document.getElementById('weatherIcon').textContent = wxIcon(cur.weather_code);
-
-    const fcEl = document.getElementById('weatherForecast');
-    fcEl.innerHTML = '';
-    const nowIdx = data.hourly.time.findIndex(t=> new Date(t).getTime() >= Date.now());
-    for(let i=0;i<3;i++){
-      const idx = Math.min(nowIdx + i, data.hourly.time.length-1);
-      const t = new Date(data.hourly.time[idx]);
-      const temp = Math.round(data.hourly.temperature_2m[idx]);
-      const w = data.hourly.weather_code[idx];
-      const div = document.createElement('div');
-      div.className='forecast-item';
-      div.innerHTML = `
-        <span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span>
-        <span class="wx">${wxIcon(w)}</span>
-        <span class="forecast-temp">${temp}°</span>`;
-      fcEl.appendChild(div);
-    }
-  }
-
-  // ===== AQI =====
-  function aqiInfo(aqi){
-    if (aqi == null || !isFinite(aqi)) return {label:'—', color:'rgba(255,255,255,0.12)', pos:0};
-    if (aqi <= 50)   return {label:'Good',                  color:'#2ecc71', pos: (aqi/500)*100};
-    if (aqi <= 100)  return {label:'Moderate',              color:'#f1c40f', pos: (aqi/500)*100};
-    if (aqi <= 150)  return {label:'Unhealthy (Sensitive)', color:'#e67e22', pos: (aqi/500)*100};
-    if (aqi <= 200)  return {label:'Unhealthy',             color:'#e74c3c', pos: (aqi/500)*100};
-    if (aqi <= 300)  return {label:'Very Unhealthy',        color:'#9b59b6', pos: (aqi/500)*100};
-    return            {label:'Hazardous',                   color:'#7f1d1d', pos: Math.min(100,(aqi/500)*100)};
-  }
-  async function fetchAQI(lat, lon){
+  function aqiInfo(a){ if(a==null||!isFinite(a)) return {label:'—',color:'rgba(255,255,255,.12)',pos:0};
+    if(a<=50) return{label:'Good',color:'#2ecc71',pos:(a/500)*100};
+    if(a<=100)return{label:'Moderate',color:'#f1c40f',pos:(a/500)*100};
+    if(a<=150)return{label:'Unhealthy (Sensitive)',color:'#e67e22',pos:(a/500)*100};
+    if(a<=200)return{label:'Unhealthy',color:'#e74c3c',pos:(a/500)*100};
+    if(a<=300)return{label:'Very Unhealthy',color:'#9b59b6',pos:(a/500)*100};
+    return{label:'Hazardous',color:'#7f1d1d',pos:Math.min(100,(a/500)*100)}; }
+  async function fetchAQI(lat,lon){
     try{
-      const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
-      const data = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
-      const aqi  = data?.current?.us_aqi;
-      const pm25 = data?.current?.pm2_5;
-      const pm10 = data?.current?.pm10;
-
-      const info = aqiInfo(aqi);
-      document.getElementById('aqiBadge').style.borderColor = info.color;
-      document.getElementById('aqiBadge').style.boxShadow   = `inset 0 0 0 1px ${info.color}22`;
-      document.getElementById('aqiBadge').textContent       = `AQI ${Math.round(aqi)}`;
-      document.getElementById('aqiValue').textContent       = Math.round(aqi);
-      document.getElementById('aqiCat').textContent         = info.label;
-      document.getElementById('aqiPointer').style.left      = `${info.pos}%`;
-      document.getElementById('pm25').textContent           = (pm25!=null)? `${Math.round(pm25)} µg/m³` : '—';
-      document.getElementById('pm10').textContent           = (pm10!=null)? `${Math.round(pm10)} µg/m³` : '—';
-    }catch(e){
-      document.getElementById('aqiBadge').textContent = 'AQI —';
-      document.getElementById('aqiCat').textContent   = 'Unavailable';
-    }
+      const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
+      const d=await fetch(url,{cache:'no-cache'}).then(r=>r.json());
+      const a=d?.current?.us_aqi, p25=d?.current?.pm2_5, p10=d?.current?.pm10, info=aqiInfo(a);
+      document.getElementById('aqiBadge').style.borderColor=info.color;
+      document.getElementById('aqiBadge').style.boxShadow=`inset 0 0 0 1px ${info.color}22`;
+      document.getElementById('aqiBadge').textContent=`AQI ${Math.round(a)}`;
+      document.getElementById('aqiValue').textContent=Math.round(a);
+      document.getElementById('aqiCat').textContent=info.label;
+      document.getElementById('aqiPointer').style.left=`${info.pos}%`;
+      document.getElementById('pm25').textContent=(p25!=null)?`${Math.round(p25)} µg/m³`:'—';
+      document.getElementById('pm10').textContent=(p10!=null)?`${Math.round(p10)} µg/m³`:'—';
+    }catch{}
   }
 
-  // ===== GENERAL NEWS with IMAGES (auto-rotate + dots) =====
-  const NEWS_ROTATE_MS = 10000;
-  const MAX_NEWS = 8; // keep dots sane
-
-  function prettyTime(ds){
-    if(!ds) return "just now";
-    const d = new Date(ds);
-    if (isNaN(d)) return "—";
-    const diff = (Date.now() - d.getTime())/1000;
-    if (diff < 60) return "just now";
-    if (diff < 3600) return Math.floor(diff/60) + "m ago";
-    if (diff < 86400) return Math.floor(diff/3600) + "h ago";
-    return d.toLocaleDateString();
-  }
-
-  // Source 1: The Guardian (open CORS, test key)
-  async function fetchGuardian(count=30){
-    const url = 'https://content.guardianapis.com/search'
-      + '?order-by=newest'
-      + '&section=(world|news|sport|culture|business)'
-      + '&show-fields=thumbnail,trailText,byline'
-      + `&page-size=${count}`
-      + '&api-key=test';
-    const json = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
-    const arr = (json.response?.results)||[];
-    return arr.map(r => ({
-      title: r.webTitle,
-      link:  r.webUrl,
-      date:  r.webPublicationDate,
-      source:'The Guardian',
-      image: r.fields?.thumbnail || ''
-    }));
-  }
-
-  // Source 2 (fallback): Reddit r/news + r/worldnews (has preview images)
+  /* ========= NEWS with images (Guardian -> Reddit fallback) ========= */
+  const NEWS_ROTATE_MS=10000;
+  function prettyTime(ds){ if(!ds) return "just now"; const d=new Date(ds); if(isNaN(d)) return "—"; const s=(Date.now()-d)/1000; if(s<60) return "just now"; if(s<3600) return Math.floor(s/60)+"m ago"; if(s<86400) return Math.floor(s/3600)+"h ago"; return d.toLocaleDateString(); }
+  async function fetchGuardian(n=24){ const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
+    const j=await fetch(url,{cache:'no-cache'}).then(r=>r.json()); const a=j.response?.results||[];
+    return a.map(r=>({title:r.webTitle, link:r.webUrl, date:r.webPublicationDate, source:'The Guardian', image:r.fields?.thumbnail||''})); }
   function cleanUrl(u){ return (u||'').replace(/&amp;/g,'&'); }
-  async function fetchRedditNews(count=30){
-    const url = `https://www.reddit.com/r/news+worldnews/top.json?limit=${count}&t=day`;
-    const json = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
-    const posts = json.data?.children || [];
-    return posts.map(({data})=>{
-      const preview = data.preview?.images?.[0]?.source?.url
-                   || (data.thumbnail && data.thumbnail.startsWith('http') ? data.thumbnail : '');
-      return {
-        title: data.title,
-        link:  data.url_overridden_by_dest || ('https://www.reddit.com' + data.permalink),
-        date:  data.created_utc ? new Date(data.created_utc*1000).toISOString() : '',
-        source:'Reddit',
-        image: cleanUrl(preview || '')
-      };
-    });
-  }
+  async function fetchRedditNews(n=24){ const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json()); const p=j.data?.children||[];
+    return p.map(({data})=>({ title:data.title, link:data.url_overridden_by_dest||('https://www.reddit.com'+data.permalink), date:data.created_utc?new Date(data.created_utc*1000).toISOString():'', source:'Reddit', image:cleanUrl(data.preview?.images?.[0]?.source?.url|| (data.thumbnail||'').startsWith('http')?data.thumbnail:'' ) })); }
 
-  let newsList = []; let newsIndex = 0; let newsTimer;
-
-  function buildDots(){
-    const dots = document.getElementById('newsDots');
-    dots.innerHTML = '';
-    newsList.forEach((_, i) => {
-      const d = document.createElement('div');
-      d.className = 'news-dot' + (i===newsIndex ? ' active' : '');
-      d.addEventListener('click', () => {
-        newsIndex = i;
-        renderNews();
-        resetNewsTimer();
-      });
-      dots.appendChild(d);
-    });
-  }
-  function updateDots(){
-    const dots = document.querySelectorAll('#newsDots .news-dot');
-    dots.forEach((el, i)=> el.classList.toggle('active', i===newsIndex));
-  }
-
-  function setNewsSlide(item){
-    const link = document.getElementById('newsLink');
-    const src  = document.getElementById('newsSourceInline');
-    const tim  = document.getElementById('newsTime');
-    const hdr  = document.getElementById('newsSource');
-    const img  = document.getElementById('newsImg');
-
-    link.textContent = item.title || '—';
-    link.href = item.link || '#';
-    src.textContent  = item.source || '—';
-    hdr.textContent  = item.source || 'Headlines';
-    tim.textContent  = prettyTime(item.date);
-
-    if (item.image) {
-      img.src = item.image;
-      img.style.display = 'block';
-    } else {
-      img.removeAttribute('src');
-      img.style.display = 'none';
-    }
-  }
-
-  function renderNews(){
-    if (!newsList.length) return;
-    const cont = document.getElementById('newsContainer');
-    cont.classList.add('news-fade-leave');
-    setTimeout(()=>{
-      setNewsSlide(newsList[newsIndex]);
-      cont.classList.remove('news-fade-leave');
-      cont.classList.add('news-fade-enter');
-      setTimeout(()=>cont.classList.remove('news-fade-enter'), 130);
-      updateDots();
-    }, 130);
-  }
-
-  function stepNews(dir){
-    if (!newsList.length) return;
-    newsIndex = (newsIndex + dir + newsList.length) % newsList.length;
-    renderNews();
-  }
-  function resetNewsTimer(){
-    clearInterval(newsTimer);
-    newsTimer = setInterval(()=> stepNews(+1), 10000);
-  }
-
+  let newsList=[], newsIndex=0, newsTimer;
+  function buildDots(){ const box=document.getElementById('newsDots'); box.innerHTML=''; newsList.forEach((_,i)=>{ const d=document.createElement('div'); d.className='news-dot'+(i===newsIndex?' active':''); d.onclick=()=>{ newsIndex=i; renderNews(); resetNewsTimer(); }; box.appendChild(d); }); }
+  function updateDots(){ document.querySelectorAll('#newsDots .news-dot').forEach((el,i)=>el.classList.toggle('active',i===newsIndex)); }
+  function setNewsSlide(it){ const link=document.getElementById('newsLink'), src=document.getElementById('newsSourceInline'), tim=document.getElementById('newsTime'), hdr=document.getElementById('newsSource'), img=document.getElementById('newsImg');
+    link.textContent=it.title||'—'; link.href=it.link||'#'; src.textContent=it.source||'—'; hdr.textContent=it.source||'Headlines'; tim.textContent=prettyTime(it.date);
+    if(it.image){ img.src=it.image; img.style.display='block'; } else { img.removeAttribute('src'); img.style.display='none'; } }
+  function renderNews(){ if(!newsList.length)return; const cont=document.getElementById('newsContainer'); cont.classList.add('news-fade-leave'); setTimeout(()=>{ setNewsSlide(newsList[newsIndex]); cont.classList.remove('news-fade-leave'); cont.classList.add('news-fade-enter'); setTimeout(()=>cont.classList.remove('news-fade-enter'),130); updateDots(); },130); }
+  function stepNews(){ if(!newsList.length)return; newsIndex=(newsIndex+1)%newsList.length; renderNews(); }
+  function resetNewsTimer(){ clearInterval(newsTimer); newsTimer=setInterval(stepNews,NEWS_ROTATE_MS); }
   async function initNews(){
-    let all = [];
-    try { all = await fetchGuardian(30); } catch(e){ console.warn('Guardian failed', e); }
-    if(!all.length){
-      try { all = await fetchRedditNews(30); } catch(e){ console.warn('Reddit fallback failed', e); }
-    }
-    if(!all.length){
-      all = [{ title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local', image:'' }];
-    }
-
-    all.sort((a,b)=> new Date(b.date) - new Date(a.date));
-    newsList = all.slice(0, 8);
-    newsIndex = 0;
-    setNewsSlide(newsList[0]);
-    buildDots();
-    resetNewsTimer();
+    let all=[]; try{ all=await fetchGuardian(24);}catch(e){console.warn('Guardian failed',e);}
+    if(!all.length){ try{ all=await fetchRedditNews(24);}catch(e){console.warn('Reddit fallback failed',e);} }
+    if(!all.length){ all=[{title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local', image:''}]; }
+    all.sort((a,b)=>new Date(b.date)-new Date(a.date)); newsList=all.slice(0,8); newsIndex=0; setNewsSlide(newsList[0]); buildDots(); resetNewsTimer();
   }
 
-  // ===== Instagram QR =====
-  function initQR(){
-    const url = encodeURIComponent(INSTA_URL);
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${url}`;
-    const img = document.getElementById('qrImage');
-    img.src = qrSrc;
-    document.getElementById('qrLink').href = INSTA_URL;
-  }
-  // =======================================
+  /* ========= QR ========= */
+  function initQR(){ const url=encodeURIComponent(INSTA_URL); document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${url}`; document.getElementById('qrLink').href=INSTA_URL; }
 
+  /* ========= Clock ========= */
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tickClock(){
+    const d=new Date();
+    let h=d.getHours(), m=d.getMinutes(), s=d.getSeconds();
+    const ampm = h>=12?'PM':'AM'; const hh = ((h+11)%12)+1;
+    document.getElementById('clockHHMM').textContent = `${pad(hh)}:${pad(m)}`;
+    document.getElementById('clockSS').textContent   = pad(s);
+    document.getElementById('ampm').textContent      = ampm;
+    document.getElementById('clockDate').textContent = d.toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    try{ document.getElementById('tzName').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch{}
+  }
+  function initClock(){ tickClock(); setInterval(tickClock,1000); }
+
+  /* ========= Calendar ========= */
+  function renderCalendar(baseDate){
+    const grid=document.getElementById('calGrid'); const label=document.getElementById('calMonthLabel'); grid.innerHTML='';
+    const y=baseDate.getFullYear(), m=baseDate.getMonth(); label.textContent = baseDate.toLocaleDateString(undefined,{month:'long', year:'numeric'});
+    const first=new Date(y,m,1), last=new Date(y,m+1,0);
+    const startDay=(first.getDay()+7)%7; // make Monday=1? Keeping Sunday=0 default
+    const names=['Su','Mo','Tu','We','Th','Fr','Sa'];
+    names.forEach(n=>{ const h=document.createElement('div'); h.className='cal-head'; h.textContent=n; grid.appendChild(h); });
+    for(let i=0;i<startDay;i++){ const c=document.createElement('div'); c.className='cal-cell muted'; c.textContent=''; grid.appendChild(c); }
+    const today=new Date(); const todayKey=today.toDateString();
+    for(let d=1; d<=last.getDate(); d++){ const cell=document.createElement('div'); cell.className='cal-cell'; cell.textContent=d;
+      const thisKey=new Date(y,m,d).toDateString(); if(thisKey===todayKey) cell.classList.add('today'); grid.appendChild(cell); }
+  }
   </script>
 </body>
 </html>

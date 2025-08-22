@@ -14,17 +14,18 @@
 
       /* Slideshow */
       --slide-duration: 6s;
-      --transition-duration: 21.6s;
+      --transition-duration: 1.6s;   /* set to 0s on very slow hardware */
       --noise-scale: 2.2;
       --edge-softness: 0.18;
       --drift-speed: 0.06;
 
-      /* Widget sizing/scale */
-      --widget-width: 180px;
-      --widget-scale: 2.5;
+      /* Global widget scaling + visual margins */
+      --ui-scale: 1;        /* <— set to 2.5 on Crestron */
+      --edge-gap: 24px;     /* stays visually constant even when scaled */
 
-      /* Headlines (bottom-right) */
-      --headlines-width: 220px; /* make 260–300px for larger */
+      /* Column/card sizes */
+      --widget-width: 180px;
+      --headlines-width: 220px;
     }
 
     html, body {
@@ -35,13 +36,11 @@
 
     .stage { position:fixed; inset:0; overflow:hidden; background:var(--bg-color); }
 
-    /* Center the canvas; JS sets pixel size to preserve aspect (no distortion) */
+    /* Center the canvas; JS letterboxes it so images are not distorted */
     canvas{
-      position:absolute;
-      top:50%; left:50%;
+      position:absolute; top:50%; left:50%;
       transform: translate(-50%, -50%);
-      width:auto; height:auto;
-      display:block; z-index:0;
+      width:auto; height:auto; display:block; z-index:0;
     }
 
     .vignette::after{ content:""; position:absolute; inset:0; pointer-events:none;
@@ -52,17 +51,35 @@
 
     @media (prefers-reduced-motion: reduce){ :root{ --transition-duration: 0s; } }
 
-    /* === LEFT widgets column (Weather + AQI) === */
-    .widgets-left{
-      position: fixed; top:16px; left:16px; z-index:1000; pointer-events:auto;
-      display:flex; flex-direction:column; gap:14px; align-items:flex-start;
+    /* ========== CORNER WRAPPERS WITH SCALING (fixes spacing/position) ========== */
+    .widgets-left,
+    .widgets-br{
+      position: fixed;
+      z-index:1000; pointer-events:auto;
+      display:flex; flex-direction:column;
     }
 
-    /* Card base */
-    .card{
-      transform: scale(var(--widget-scale));
+    /* Left column pinned top-left */
+    .widgets-left{
+      top: calc(var(--edge-gap) / var(--ui-scale));
+      left: calc(var(--edge-gap) / var(--ui-scale));
+      gap: 14px;                     /* this visually scales with the wrapper */
+      transform: scale(var(--ui-scale));
       transform-origin: top left;
+    }
 
+    /* Bottom-right widget pinned bottom-right */
+    .widgets-br{
+      right: calc(var(--edge-gap) / var(--ui-scale));
+      bottom: calc(var(--edge-gap) / var(--ui-scale));
+      gap: 12px;
+      align-items:flex-end;
+      transform: scale(var(--ui-scale));
+      transform-origin: bottom right;
+    }
+
+    /* Card base (NO per-card scaling anymore) */
+    .card{
       border-radius: 22px;
       padding: 10px;
       background: rgba(18, 20, 24, 0.45);
@@ -70,10 +87,8 @@
       -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: 0 8px 28px rgba(0,0,0,0.25);
-      font-weight: 200;
-      color: #eef1f5;
+      font-weight: 200; color: #eef1f5;
     }
-
     .card-header{
       display:flex; justify-content:space-between; align-items:center;
       padding: 8px 12px;
@@ -91,143 +106,72 @@
       padding: 10px 12px 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      margin-bottom: 10px;
+      border-radius: 16px; margin-bottom: 10px;
     }
     #weatherCard .weather-icon{
-      font-size: 24px; line-height:1;
+      font-size: 24px; line-height:1; width:100%; text-align:center; margin-top:2px;
       filter: grayscale(1) contrast(1.05) brightness(1.05);
-      width: 100%;
-      text-align: center;
-      align-self: center;
-      margin-top: 2px;
     }
     #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
     #weatherCard .weather-desc{ font-size: 13px; opacity:.92; }
 
-    #weatherCard .weather-forecast{ display: grid; grid-template-columns: 1fr; gap: 8px; }
+    #weatherCard .weather-forecast{ display:grid; grid-template-columns: 1fr; gap:8px; }
     #weatherCard .forecast-item{
-      display:grid;
-      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp */
-      align-items:center;
-      padding: 8px 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 14px;
+      display:grid; grid-template-columns: 1fr 40px 48px; align-items:center;
+      padding: 8px 10px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10); border-radius: 14px;
     }
-    #weatherCard .forecast-time{ font-size: 12px; opacity:.9; }
-    #weatherCard .wx{
-      display:flex; align-items:center; justify-content:center;
-      width:40px; height:20px; margin:0 auto;
-      filter: grayscale(1) contrast(1.05) brightness(1.05);
-      text-align:center;
-    }
-    #weatherCard .forecast-temp{
-      justify-self:end;
-      font-size: 13px; padding: 6px 8px; min-width: 42px; text-align:center;
-      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95;
-    }
+    #weatherCard .forecast-time{ font-size:12px; opacity:.9; }
+    #weatherCard .wx{ display:flex; align-items:center; justify-content:center; width:40px; height:20px; margin:0 auto;
+      filter: grayscale(1) contrast(1.05) brightness(1.05); }
+    #weatherCard .forecast-temp{ justify-self:end; font-size:13px; padding:6px 8px; min-width:42px; text-align:center;
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95; }
 
     /* ===== AQI card ===== */
     #aqiCard{ width: var(--widget-width); }
     #aqiCard .aqi-body{
       display:flex; flex-direction:column; gap:8px; align-items:center;
-      padding: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
+      padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.10); border-radius:16px;
     }
     #aqiValue{ font-size:40px; line-height:1; }
     #aqiCat{ font-size:13px; opacity:.92; }
-    #aqiBadge{
-      font-size:12px; padding:4px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      line-height:1;
-    }
-    .aqi-bar{
-      width:100%; height:6px; border-radius:4px;
-      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
-      opacity:.75;
-      position: relative; overflow:hidden;
-    }
-    .aqi-pointer{
-      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9;
-      left:0%;
-    }
+    #aqiBadge{ font-size:12px; padding:4px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); line-height:1; }
+    .aqi-bar{ width:100%; height:6px; border-radius:4px;
+      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
+    .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
     .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
-    .pill{
-      font-size:11px; padding:6px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
+    .pill{ font-size:11px; padding:6px 8px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
     .pill strong{ font-weight:400; margin-left:6px; }
 
     /* ======= Headlines (bottom-right) ======= */
-    .widgets-br{
-      position: fixed; right:16px; bottom:16px; z-index:1000; pointer-events:auto;
-      display:flex; flex-direction:column; gap:12px; align-items:flex-end;
-    }
-    #headlinesCard{
-      width: var(--headlines-width);
-      border-radius: 22px;
-      padding: 10px;
-      background: rgba(18, 20, 24, 0.50);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-    }
-    #headlinesCard .card-header{ margin-bottom: 6px; }
+    #headlinesCard{ width: var(--headlines-width); border-radius:22px; padding:10px;
+      background: rgba(18, 20, 24, 0.50); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+    #headlinesCard .card-header{ margin-bottom:6px; }
 
-    .headline-slide{
-      position: relative;
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      overflow: hidden;
-    }
+    .headline-slide{ position:relative; padding:10px 12px; background: rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10); border-radius:16px; overflow:hidden; }
 
-    .collage{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:6px;
-      margin-bottom:10px;
-    }
-    .collage img{
-      width:100%; height:68px; object-fit:cover;
-      border-radius:10px;
-      background: linear-gradient(180deg,#32363d,#23262c);
-      border:1px solid rgba(255,255,255,0.12);
-      display:block;
-    }
+    .collage{ display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:10px; }
+    .collage img{ width:100%; height:68px; object-fit:cover; border-radius:10px;
+      background: linear-gradient(180deg,#32363d,#23262c); border:1px solid rgba(255,255,255,0.12); display:block; }
 
-    .headline-title{
-      font-size: 14px; line-height: 1.25; font-weight: 300;
-      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-      margin: 0 0 6px 0; color:#eef1f5; text-decoration:none;
-    }
+    .headline-title{ font-size:14px; line-height:1.25; font-weight:300; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
+      overflow:hidden; margin:0 0 6px 0; color:#eef1f5; text-decoration:none; }
     .headline-title:hover{ text-decoration:underline; }
+    .headline-summary{ font-size:12px; opacity:.9; line-height:1.3; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
+      overflow:hidden; margin:0 0 8px 0; }
 
-    .headline-summary{
-      font-size: 12px; opacity:.9; line-height:1.3;
-      display:-webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow:hidden;
-      margin:0 0 8px 0;
-    }
-
-    .headline-meta{
-      font-size: 12px; opacity: .85; display:flex; gap:8px; align-items:center;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
+    .headline-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .dot{ width:4px; height:4px; background:#fff9; border-radius:2px; display:inline-block; }
     .favicon{ width:14px; height:14px; border-radius:3px; background:#333; object-fit:cover; }
 
-    .news-fade-enter{ opacity: 0; transform: translateY(6px); }
-    .news-fade-leave{ opacity: 0; transform: translateY(-6px); }
+    .news-fade-enter{ opacity:0; transform: translateY(6px); }
+    .news-fade-leave{ opacity:0; transform: translateY(-6px); }
     .news-fade{ transition: opacity .4s ease, transform .4s ease; }
 
-    .headline-actions{
-      display:flex; justify-content:center; align-items:center; margin-top:8px;
-    }
+    .headline-actions{ display:flex; justify-content:center; align-items:center; margin-top:8px; }
     .dots{ display:flex; gap:6px; align-items:center; }
     .dot-big{ width:6px; height:6px; border-radius:3px; background:#ffffff44; }
     .dot-big.active{ background:#ffffffcc; }
@@ -238,14 +182,10 @@
     <canvas id="glcanvas"></canvas>
     <div class="badge" id="badge"></div>
 
-    <!-- LEFT widgets column -->
+    <!-- LEFT column (scaled as a group) -->
     <div class="widgets-left">
-      <!-- Weather -->
       <div class="card" id="weatherCard">
-        <div class="card-header">
-          <span>Weather</span>
-          <span id="weatherCity">—</span>
-        </div>
+        <div class="card-header"><span>Weather</span><span id="weatherCity">—</span></div>
         <div class="weather-row">
           <div class="weather-icon" id="weatherIcon" aria-hidden="true">☁️</div>
           <div class="weather-main">
@@ -256,12 +196,8 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
-      <!-- AQI -->
       <div class="card" id="aqiCard">
-        <div class="card-header">
-          <span>Air Quality</span>
-          <span id="aqiCity">—</span>
-        </div>
+        <div class="card-header"><span>Air Quality</span><span id="aqiCity">—</span></div>
         <div class="aqi-body">
           <div id="aqiBadge">AQI —</div>
           <div id="aqiValue">--</div>
@@ -275,13 +211,10 @@
       </div>
     </div>
 
-    <!-- BOTTOM-RIGHT: Headlines (auto-rotate, no buttons) -->
+    <!-- Bottom-right headlines (scaled as a group) -->
     <div class="widgets-br">
       <div class="card" id="headlinesCard">
-        <div class="card-header">
-          <span>Headlines</span>
-          <span id="hlSource">updating…</span>
-        </div>
+        <div class="card-header"><span>Headlines</span><span id="hlSource">updating…</span></div>
         <div class="headline-slide">
           <div id="hlContainer" class="news-fade">
             <div class="collage">
@@ -298,20 +231,17 @@
               <span id="hlTime">—</span>
             </div>
           </div>
-          <div class="headline-actions">
-            <div class="dots" id="hlDots"></div>
-          </div>
+          <div class="headline-actions"><div class="dots" id="hlDots"></div></div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
   /* =========================
      Config / slideshow setup
      ========================= */
-  const CITY_NAME = "Sultanpur, India";
+  const CITY_NAME = "Sultanpur, Delhi, India";
   const COUNTRY_CODE = "IN";
   const FALLBACK_COORDS = { latitude: 28.4959, longitude: 77.1500, label: "Sultanpur, Delhi, India" };
 
@@ -325,6 +255,12 @@
   const NOISE_SCALE   = parseFloat(cssVar('--noise-scale')) || 2.2;
   const EDGE_SOFT     = parseFloat(cssVar('--edge-softness')) || 0.18;
   const DRIFT_SPEED   = parseFloat(cssVar('--drift-speed')) || 0.06;
+
+  /* -------- Low-power mode for Crestron --------
+     true  = throttle frames during dwell (very light)
+     false = animate continuously
+  */
+  const LOW_POWER = true;
 
   const canvas = document.getElementById('glcanvas');
   const gl = canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: true });
@@ -400,25 +336,65 @@
   let images=[],textures=[];
   (async()=>{ images=await Promise.all(IMAGES.map(loadImage)); textures=images.map(createTexture); start(); })().catch(console.error);
 
-  let currentIndex=0, nextIndex=1 % IMAGES.length, phase='dwell', phaseEnd=performance.now();
-  function bindTextures(i0,i1){ gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,textures[i0]); gl.uniform1i(loc.uTex0,0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,textures[i1]); gl.uniform1i(loc.uTex1,1); }
-  function start(){ bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=performance.now()+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); requestAnimationFrame(loop);
-    initWeatherAndAQI(); initHeadlines(); }
-  function loop(now){
-    const res=[canvas.width,canvas.height];
-    if(now>=phaseEnd){
-      if(phase==='dwell'){ phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex); }
-      else{ currentIndex=nextIndex; nextIndex=(currentIndex+1)%IMAGES.length; bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); }
-    }
-    gl.uniform2f(loc.uResolution,res[0],res[1]); gl.uniform1f(loc.uTime,now*0.001);
-    gl.uniform1f(loc.uNoiseScale,NOISE_SCALE*200.0); gl.uniform1f(loc.uEdgeSoft,EDGE_SOFT); gl.uniform1f(loc.uDrift,DRIFT_SPEED);
-    if(phase==='transition'){ const dur=Math.max(1.0,TRANSITION_MS); const t=1.0-Math.max(0.0,(phaseEnd-now)/dur); const eased=1.0-Math.pow(1.0-t,3.0); gl.uniform1f(loc.uProgress,eased); }
-    else gl.uniform1f(loc.uProgress,0.0);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4); requestAnimationFrame(loop);
+  let currentIndex=0, nextIndex=(currentIndex+1)%IMAGES.length, phase='dwell', phaseEnd=performance.now();
+
+  function bindTextures(i0,i1){
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,textures[i0]); gl.uniform1i(loc.uTex0,0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,textures[i1]); gl.uniform1i(loc.uTex1,1);
   }
 
-  /* ========= Weather + AQI ========= */
+  function start(){
+    bindTextures(currentIndex,nextIndex);
+    phase='dwell'; phaseEnd=performance.now()+SLIDE_MS;
+    gl.uniform1f(loc.uProgress,0.0);
+    requestAnimationFrame(loop);
+
+    initWeatherAndAQI();
+    initHeadlines();
+  }
+
+  function loop(now){
+    const res=[canvas.width,canvas.height];
+
+    // Phase timing
+    if(now >= phaseEnd){
+      if(phase==='dwell'){
+        phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex);
+      }else{
+        currentIndex=nextIndex; nextIndex=(currentIndex+1)%IMAGES.length;
+        bindTextures(currentIndex,nextIndex);
+        phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0);
+      }
+    }
+
+    // Uniforms
+    gl.uniform2f(loc.uResolution,res[0],res[1]);
+    gl.uniform1f(loc.uTime, now*0.001);
+    gl.uniform1f(loc.uNoiseScale, NOISE_SCALE*200.0);
+    gl.uniform1f(loc.uEdgeSoft, EDGE_SOFT);
+    gl.uniform1f(loc.uDrift, DRIFT_SPEED);
+
+    // Progress only during transition
+    if(phase === 'transition'){
+      const dur=Math.max(1.0, TRANSITION_MS);
+      const t = 1.0 - Math.max(0.0, (phaseEnd - now) / dur);
+      const eased = 1.0 - Math.pow(1.0 - t, 3.0);
+      gl.uniform1f(loc.uProgress, eased);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      requestAnimationFrame(loop);                // animate smoothly
+    }else{
+      gl.uniform1f(loc.uProgress, 0.0);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      if (LOW_POWER){
+        // throttle during dwell — tiny CPU/GPU use
+        setTimeout(()=>requestAnimationFrame(loop), 800);
+      }else{
+        requestAnimationFrame(loop);
+      }
+    }
+  }
+
+  /* ========= Weather & AQI ========= */
   async function resolveLocation(q, countryCode=""){
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=en&format=json`;
     const geo = await fetch(url).then(r=>r.json());
@@ -436,11 +412,9 @@
       const place = await resolveLocation(CITY_NAME, COUNTRY_CODE);
       document.getElementById('weatherCity').textContent = place.label;
       document.getElementById('aqiCity').textContent     = place.label;
-
       const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
       const wdata = await fetch(wurl).then(r=>r.json());
       renderWeather(wdata);
-
       await fetchAQI(place.latitude, place.longitude);
     }catch(err){
       document.getElementById('weatherCity').textContent = FALLBACK_COORDS.label;
@@ -470,10 +444,13 @@
       const w=data.hourly.weather_code[idx];
       const div=document.createElement('div');
       div.className='forecast-item';
-      div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span><span class="wx">${wxIcon(w)}</span><span class="forecast-temp">${temp}°</span>`;
+      div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span>
+                     <span class="wx">${wxIcon(w)}</span>
+                     <span class="forecast-temp">${temp}°</span>`;
       fcEl.appendChild(div);
     }
   }
+
   function aqiInfo(aqi){ if(aqi==null||!isFinite(aqi))return{label:'—',color:'rgba(255,255,255,0.12)',pos:0};
     if(aqi<=50) return{label:'Good',color:'#2ecc71',pos:(aqi/500)*100};
     if(aqi<=100)return{label:'Moderate',color:'#f1c40f',pos:(aqi/500)*100};
@@ -487,19 +464,23 @@
       const data=await fetch(url).then(r=>r.json());
       const aqi=data?.current?.us_aqi, pm25=data?.current?.pm2_5, pm10=data?.current?.pm10;
       const info=aqiInfo(aqi);
-      document.getElementById('aqiBadge').style.borderColor=info.color;
-      document.getElementById('aqiBadge').style.boxShadow=`inset 0 0 0 1px ${info.color}22`;
-      document.getElementById('aqiBadge').textContent=`AQI ${Math.round(aqi)}`;
+      const badge=document.getElementById('aqiBadge');
+      badge.style.borderColor=info.color;
+      badge.style.boxShadow=`inset 0 0 0 1px ${info.color}22`;
+      badge.textContent=`AQI ${Math.round(aqi)}`;
       document.getElementById('aqiValue').textContent=Math.round(aqi);
       document.getElementById('aqiCat').textContent=info.label;
       document.getElementById('aqiPointer').style.left=`${info.pos}%`;
       document.getElementById('pm25').textContent=(pm25!=null)?`${Math.round(pm25)} µg/m³`:'—';
       document.getElementById('pm10').textContent=(pm10!=null)?`${Math.round(pm10)} µg/m³`:'—';
-    }catch(e){ document.getElementById('aqiBadge').textContent='AQI —'; document.getElementById('aqiCat').textContent='Unavailable'; }
+    }catch(e){
+      document.getElementById('aqiBadge').textContent='AQI —';
+      document.getElementById('aqiCat').textContent='Unavailable';
+    }
   }
 
-  /* ========= Headlines (Guardian + Reddit r/news) ========= */
-  const HL_ROTATE_MS = 5000;  // <-- auto-advance every 5s
+  /* ========= Headlines ========= */
+  const HL_ROTATE_MS = 5000;
   const dotsCount = 5;
 
   function prettyTime(ds){
@@ -529,7 +510,6 @@
       favicon:faviconFor(r.webUrl)
     }));
   }
-
   function pickRedditImage(d){
     if (d?.preview?.images?.length){
       const src=d.preview.images[0];
@@ -593,7 +573,6 @@
       cont.classList.remove('news-fade-leave');
       cont.classList.add('news-fade-enter');
       setTimeout(()=>cont.classList.remove('news-fade-enter'),140);
-      // dots
       const dots=document.getElementById('hlDots');
       dots.innerHTML='';
       for(let i=0;i<dotsCount;i++){
@@ -616,7 +595,7 @@
     headlines=all.slice(0,60);
     hlIndex=0; renderHeadlines();
     clearInterval(hlTimer);
-    hlTimer=setInterval(()=>stepHL(+1), HL_ROTATE_MS); // auto-advance only
+    hlTimer=setInterval(()=>stepHL(+1), 5000);
   }
   </script>
 </body>

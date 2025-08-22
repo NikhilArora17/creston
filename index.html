@@ -12,20 +12,20 @@
     :root{
       --bg-color:#0b0c10;
 
-      /* Slideshow */
+      /* Slideshow timings */
       --slide-duration: 6s;
-      --transition-duration: 1.0s;   /* set to 0s on very slow hardware */
-      --noise-scale: 2.2;
-      --edge-softness: 0.18;
-      --drift-speed: 0.06;
+      --transition-duration: 1.6s;
 
-      /* Global widget scaling + visual margins */
-      --ui-scale: 2;        /* <— set to 2.5 on Crestron */
-      --edge-gap: 24px;     /* stays visually constant even when scaled */
+      /* Widget sizing + independent margins (visual px) */
+      --ui-scale: 2.5;      /* overall widget scale */
+      --top-gap:  24px;     /* distance from top-left wrapper to edges */
+      --left-gap: 24px;
+      --right-gap: 24px;    /* distance from bottom-right wrapper to edges */
+      --bottom-gap:24px;
 
-      /* Column/card sizes */
-      --widget-width: 220px;
-      --headlines-width: 220px;
+      /* Card widths (unscaled logical px) */
+      --widget-width: 280px;
+      --news-width:   280px;
     }
 
     html, body {
@@ -36,49 +36,45 @@
 
     .stage { position:fixed; inset:0; overflow:hidden; background:var(--bg-color); }
 
-    /* Center the canvas; JS letterboxes it so images are not distorted */
+    /* Center the canvas; JS sets pixel size to preserve aspect (no distortion) */
     canvas{
-      position:absolute; top:50%; left:50%;
+      position:absolute;
+      top:50%; left:50%;
       transform: translate(-50%, -50%);
-      width:auto; height:auto; display:block; z-index:0;
+      width:auto; height:auto;
+      display:block; z-index:0;
     }
 
     .vignette::after{ content:""; position:absolute; inset:0; pointer-events:none;
       background: radial-gradient(120% 120% at 50% 60%, transparent 45%, rgba(0,0,0,0.28) 100%);
       mix-blend-mode:multiply; }
 
-    .badge{ position:absolute; right:24px; bottom:20px; color:#fff; opacity:.0; font:200 14px 'Manrope',sans-serif; }
-
+    .badge{ position:absolute; right:24px; bottom:20px; color:#fff; opacity:0; font:200 14px 'Manrope',sans-serif; }
     @media (prefers-reduced-motion: reduce){ :root{ --transition-duration: 0s; } }
 
-    /* ========== CORNER WRAPPERS WITH SCALING (fixes spacing/position) ========== */
-    .widgets-left,
-    .widgets-br{
-      position: fixed;
-      z-index:1000; pointer-events:auto;
-      display:flex; flex-direction:column;
-    }
-
-    /* Left column pinned top-left */
+    /* === LEFT widgets column (Weather + AQI) === */
     .widgets-left{
-      top: calc(var(--edge-gap) / var(--ui-scale));
-      left: calc(var(--edge-gap) / var(--ui-scale));
-      gap: 14px;                     /* this visually scales with the wrapper */
+      position: fixed;
+      top:  calc(var(--top-gap)  / var(--ui-scale));
+      left: calc(var(--left-gap) / var(--ui-scale));
+      z-index:1000; pointer-events:auto;
+      display:flex; flex-direction:column; gap:14px; align-items:flex-start;
       transform: scale(var(--ui-scale));
       transform-origin: top left;
     }
 
-    /* Bottom-right widget pinned bottom-right */
+    /* === BOTTOM-RIGHT (News) === */
     .widgets-br{
-      right: calc(var(--edge-gap) / var(--ui-scale));
-      bottom: calc(var(--edge-gap) / var(--ui-scale));
-      gap: 12px;
-      align-items:flex-end;
+      position: fixed;
+      right:  calc(var(--right-gap)  / var(--ui-scale));
+      bottom: calc(var(--bottom-gap) / var(--ui-scale));
+      z-index:1000; pointer-events:auto;
+      display:flex; flex-direction:column; gap:12px; align-items:flex-end;
       transform: scale(var(--ui-scale));
       transform-origin: bottom right;
     }
 
-    /* Card base (NO per-card scaling anymore) */
+    /* Card base */
     .card{
       border-radius: 22px;
       padding: 10px;
@@ -89,6 +85,7 @@
       box-shadow: 0 8px 28px rgba(0,0,0,0.25);
       font-weight: 200; color: #eef1f5;
     }
+
     .card-header{
       display:flex; justify-content:space-between; align-items:center;
       padding: 8px 12px;
@@ -106,75 +103,114 @@
       padding: 10px 12px 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px; margin-bottom: 10px;
+      border-radius: 16px;
+      margin-bottom: 10px;
     }
     #weatherCard .weather-icon{
-      font-size: 24px; line-height:1; width:100%; text-align:center; margin-top:2px;
+      font-size: 24px; line-height:1;
       filter: grayscale(1) contrast(1.05) brightness(1.05);
+      width: 100%; text-align: center; align-self: center; margin-top: 2px;
     }
     #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
     #weatherCard .weather-desc{ font-size: 13px; opacity:.92; }
 
-    #weatherCard .weather-forecast{ display:grid; grid-template-columns: 1fr; gap:8px; }
+    #weatherCard .weather-forecast{ display: grid; grid-template-columns: 1fr; gap: 8px; }
     #weatherCard .forecast-item{
-      display:grid; grid-template-columns: 1fr 40px 48px; align-items:center;
-      padding: 8px 10px; background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10); border-radius: 14px;
+      display:grid;
+      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp */
+      align-items:center;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
     }
-    #weatherCard .forecast-time{ font-size:12px; opacity:.9; }
-    #weatherCard .wx{ display:flex; align-items:center; justify-content:center; width:40px; height:20px; margin:0 auto;
-      filter: grayscale(1) contrast(1.05) brightness(1.05); }
-    #weatherCard .forecast-temp{ justify-self:end; font-size:13px; padding:6px 8px; min-width:42px; text-align:center;
-      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95; }
+    #weatherCard .forecast-time{ font-size: 12px; opacity:.9; }
+    #weatherCard .wx{
+      display:flex; align-items:center; justify-content:center;
+      width:40px; height:20px; margin:0 auto;
+      filter: grayscale(1) contrast(1.05) brightness(1.05);
+      text-align:center;
+    }
+    #weatherCard .forecast-temp{
+      justify-self:end;
+      font-size: 13px; padding: 6px 8px; min-width: 42px; text-align:center;
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95;
+    }
 
     /* ===== AQI card ===== */
     #aqiCard{ width: var(--widget-width); }
     #aqiCard .aqi-body{
       display:flex; flex-direction:column; gap:8px; align-items:center;
-      padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.10); border-radius:16px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
     }
     #aqiValue{ font-size:40px; line-height:1; }
     #aqiCat{ font-size:13px; opacity:.92; }
-    #aqiBadge{ font-size:12px; padding:4px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); line-height:1; }
-    .aqi-bar{ width:100%; height:6px; border-radius:4px;
-      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
-    .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
+    #aqiBadge{
+      font-size:12px; padding:4px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      line-height:1;
+    }
+    .aqi-bar{
+      width:100%; height:6px; border-radius:4px;
+      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
+      opacity:.75;
+      position: relative; overflow:hidden;
+    }
+    .aqi-pointer{
+      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9;
+      left:0%;
+    }
     .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
-    .pill{ font-size:11px; padding:6px 8px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+    .pill{
+      font-size:11px; padding:6px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
     .pill strong{ font-weight:400; margin-left:6px; }
 
-    /* ======= Headlines (bottom-right) ======= */
-    #headlinesCard{ width: var(--headlines-width); border-radius:22px; padding:10px;
-      background: rgba(18, 20, 24, 0.50); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
-    #headlinesCard .card-header{ margin-bottom:6px; }
-
-    .headline-slide{ position:relative; padding:10px 12px; background: rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.10); border-radius:16px; overflow:hidden; }
-
-    .collage{ display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:10px; }
-    .collage img{ width:100%; height:68px; object-fit:cover; border-radius:10px;
-      background: linear-gradient(180deg,#32363d,#23262c); border:1px solid rgba(255,255,255,0.12); display:block; }
-
-    .headline-title{ font-size:14px; line-height:1.25; font-weight:300; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
-      overflow:hidden; margin:0 0 6px 0; color:#eef1f5; text-decoration:none; }
-    .headline-title:hover{ text-decoration:underline; }
-    .headline-summary{ font-size:12px; opacity:.9; line-height:1.3; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
-      overflow:hidden; margin:0 0 8px 0; }
-
-    .headline-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .dot{ width:4px; height:4px; background:#fff9; border-radius:2px; display:inline-block; }
-    .favicon{ width:14px; height:14px; border-radius:3px; background:#333; object-fit:cover; }
-
-    .news-fade-enter{ opacity:0; transform: translateY(6px); }
-    .news-fade-leave{ opacity:0; transform: translateY(-6px); }
+    /* ======= News (bottom-right) ======= */
+    #newsCard{
+      width: var(--news-width);
+      border-radius: 22px;
+      padding: 10px;
+      background: rgba(18, 20, 24, 0.50);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+    }
+    #newsCard .card-header{ margin-bottom: 6px; }
+    .news-slide{
+      position: relative;
+      min-height: 88px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .news-title{
+      font-size: 16px; line-height: 1.25; font-weight: 300;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin: 0 0 6px 0;
+      color:#eef1f5; text-decoration:none;
+    }
+    .news-title:visited{ color:#eef1f5; }
+    .news-title:hover{ text-decoration:underline; }
+    .news-meta{ font-size: 12px; opacity: .85; display:flex; gap:8px; align-items:center; }
+    .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius: 2px; display:inline-block; }
+    .news-fade-enter{ opacity: 0; transform: translateY(6px); }
+    .news-fade-leave{ opacity: 0; transform: translateY(-6px); }
     .news-fade{ transition: opacity .4s ease, transform .4s ease; }
-
-    .headline-actions{ display:flex; justify-content:center; align-items:center; margin-top:8px; }
-    .dots{ display:flex; gap:6px; align-items:center; }
-    .dot-big{ width:6px; height:6px; border-radius:3px; background:#ffffff44; }
-    .dot-big.active{ background:#ffffffcc; }
+    .news-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+    .news-btn{
+      font-size: 12px; padding:6px 10px; border-radius: 12px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      cursor:pointer; user-select:none;
+    }
+    .news-btn:active{ transform: translateY(1px); }
   </style>
 </head>
 <body>
@@ -182,10 +218,15 @@
     <canvas id="glcanvas"></canvas>
     <div class="badge" id="badge"></div>
 
-    <!-- LEFT column (scaled as a group) -->
+    <!-- LEFT widgets column -->
     <div class="widgets-left">
+
+      <!-- Weather -->
       <div class="card" id="weatherCard">
-        <div class="card-header"><span>Weather</span><span id="weatherCity">—</span></div>
+        <div class="card-header">
+          <span>Weather</span>
+          <span id="weatherCity">—</span>
+        </div>
         <div class="weather-row">
           <div class="weather-icon" id="weatherIcon" aria-hidden="true">☁️</div>
           <div class="weather-main">
@@ -196,8 +237,12 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
+      <!-- AQI -->
       <div class="card" id="aqiCard">
-        <div class="card-header"><span>Air Quality</span><span id="aqiCity">—</span></div>
+        <div class="card-header">
+          <span>Air Quality</span>
+          <span id="aqiCity">—</span>
+        </div>
         <div class="aqi-body">
           <div id="aqiBadge">AQI —</div>
           <div id="aqiValue">--</div>
@@ -211,190 +256,243 @@
       </div>
     </div>
 
-    <!-- Bottom-right headlines (scaled as a group) -->
+    <!-- BOTTOM-RIGHT: News -->
     <div class="widgets-br">
-      <div class="card" id="headlinesCard">
-        <div class="card-header"><span>Headlines</span><span id="hlSource">updating…</span></div>
-        <div class="headline-slide">
-          <div id="hlContainer" class="news-fade">
-            <div class="collage">
-              <img id="colImg1" alt="">
-              <img id="colImg2" alt="">
-              <img id="colImg3" alt="">
-            </div>
-            <a id="hlLink" href="#" target="_blank" rel="noopener noreferrer" class="headline-title">Loading headlines…</a>
-            <p id="hlSummary" class="headline-summary">—</p>
-            <div class="headline-meta">
-              <img id="hlFav" class="favicon" alt="">
-              <span id="hlSourceInline">—</span>
+      <div class="card" id="newsCard">
+        <div class="card-header">
+          <span>Tech News</span>
+          <span id="newsSource">updating…</span>
+        </div>
+        <div class="news-slide">
+          <div id="newsContainer" class="news-fade">
+            <a id="newsLink" href="#" target="_blank" rel="noopener noreferrer" class="news-title">Loading headlines…</a>
+            <div class="news-meta">
+              <span id="newsSourceInline">—</span>
               <span class="dot"></span>
-              <span id="hlTime">—</span>
+              <span id="newsTime">—</span>
             </div>
           </div>
-          <div class="headline-actions"><div class="dots" id="hlDots"></div></div>
+          <div class="news-actions">
+            <div class="news-btn" id="prevNews">Prev</div>
+            <div class="news-btn" id="nextNews">Next</div>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 
   <script>
-  /* =========================
-     Config / slideshow setup
-     ========================= */
-  const CITY_NAME = "Sultanpur, India";
+  // ========= Config =========
+  const CITY_NAME = "Sultanpur, Delhi, India";
   const COUNTRY_CODE = "IN";
+
+  // Slideshow behaviour
+  const ANIMATION_MODE = 'crossfade';  // 'crossfade' | 'wipe' | 'cut' | 'sand' (heavy)
+  const RENDER_SCALE   = 0.75;         // 1 = full viewport res; lower to reduce GPU work
+
   const FALLBACK_COORDS = { latitude: 28.4959, longitude: 77.1500, label: "Sultanpur, Delhi, India" };
 
-  const IMAGES = ["images/slide1.png","images/slide2.png","images/slide3.png","images/slide4.png","images/slide5.png"];
+  // Slides (PNG supported)
+  const IMAGES = [
+    "images/slide1.png",
+    "images/slide2.png",
+    "images/slide3.png",
+    "images/slide4.png",
+    "images/slide5.png",
+   
+  
+  ];
 
+  // CSS var readers
   function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function readSeconds(name, fallback){ const v = cssVar(name); const n = parseFloat((v||'').replace('s','')); return isFinite(n)?n*1000:fallback*1000; }
 
+  // Declare ONCE (bug before was double-declaring these)
   const SLIDE_MS      = readSeconds('--slide-duration', 6);
   const TRANSITION_MS = readSeconds('--transition-duration', 1.6);
-  const NOISE_SCALE   = parseFloat(cssVar('--noise-scale')) || 2.2;
-  const EDGE_SOFT     = parseFloat(cssVar('--edge-softness')) || 0.18;
-  const DRIFT_SPEED   = parseFloat(cssVar('--drift-speed')) || 0.06;
 
-  /* -------- Low-power mode for Crestron --------
-     true  = throttle frames during dwell (very light)
-     false = animate continuously
-  */
-  const LOW_POWER = true;
-
+  // ========= WebGL2 setup (dynamic buffer + letterboxed sizing) =========
   const canvas = document.getElementById('glcanvas');
   const gl = canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: true });
   if(!gl){ alert('WebGL2 not available'); }
 
-  const NATIVE_SIZE = [4096, 2160];
-  function sizeGLBuffer(){ canvas.width=NATIVE_SIZE[0]; canvas.height=NATIVE_SIZE[1]; gl.viewport(0,0,canvas.width,canvas.height); }
+  function sizeGLBuffer(){
+    const vw = Math.max(1, Math.floor(window.innerWidth  * RENDER_SCALE));
+    const vh = Math.max(1, Math.floor(window.innerHeight * RENDER_SCALE));
+    canvas.width  = vw;
+    canvas.height = vh;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
   function fitCanvasToViewport(){
-    const vw = window.innerWidth, vh = window.innerHeight, aspect = canvas.width / canvas.height;
-    let dispW, dispH;
-    if (vw / vh > aspect) { dispH = vh; dispW = Math.round(vh * aspect); }
-    else { dispW = vw; dispH = Math.round(vw / aspect); }
-    canvas.style.width = dispW + 'px'; canvas.style.height = dispH + 'px';
+    canvas.style.width  = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
   }
   function resize(){ sizeGLBuffer(); fitCanvasToViewport(); }
-  resize(); window.addEventListener('resize', fitCanvasToViewport);
+  resize(); window.addEventListener('resize', resize);
 
-  const vs=`#version 300 es
+  // ===== Shaders =====
+  const vs = `#version 300 es
   precision highp float;
-  const vec2 POS[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.));
+  const vec2 POS[4] = vec2[4](vec2(-1.,-1.), vec2(1.,-1.), vec2(-1.,1.), vec2(1.,1.));
   out vec2 vUv;
-  void main(){ vec2 p=POS[gl_VertexID]; vUv=p*.5+.5; gl_Position=vec4(p,0.,1.); }`;
+  void main(){ vec2 p = POS[gl_VertexID]; vUv = p*0.5+0.5; gl_Position = vec4(p,0.,1.); }`;
 
-  const fs=`#version 300 es
-  precision highp float;
-  in vec2 vUv; out vec4 frag;
-  uniform sampler2D uTex0,uTex1; uniform vec2 uResolution;
-  uniform float uProgress,uTime,uNoiseScale,uEdgeSoft,uDrift;
-  float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }
-  float noise(vec2 p){ vec2 i=floor(p),f=fract(p); float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1)); vec2 u=f*f*(3.-2.*f); return mix(mix(a,b,u.x),mix(c,d,u.x),u.y); }
-  float fbm(vec2 p){ float v=0.,a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=.5; } return v; }
-  vec2 coverUv(vec2 uv, vec2 ts, vec2 res){ float rTex=ts.x/ts.y, rCan=res.x/res.y;
-    if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv; }
-  void main(){
-    vec2 res=uResolution; vec2 drift=vec2(uTime*uDrift,uTime*uDrift*.6);
-    float n=fbm((vUv*res/uNoiseScale)+drift);
-    float mask=(uProgress<=0.)?0.:1.-smoothstep(uProgress-uEdgeSoft,uProgress+uEdgeSoft,n);
-    float d=hash(vUv*res+uTime*10.)*.015; mask=clamp(mask+d,0.,1.);
-    vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
-    vec4 c0=texture(uTex0,coverUv(vUv,s0,res));
-    vec4 c1=texture(uTex1,coverUv(vUv,s1,res));
-    frag=mix(c0,c1,mask);
-  }`;
+  function fsFor(mode){
+    if(mode === 'crossfade'){
+      return `#version 300 es
+      precision highp float; in vec2 vUv; out vec4 frag;
+      uniform sampler2D uTex0, uTex1; uniform vec2 uResolution; uniform float uProgress;
+      vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){
+        float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
+        if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv;
+      }
+      void main(){
+        vec2 rs=uResolution;
+        vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
+        vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
+        vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
+        frag = mix(c0,c1, clamp(uProgress,0.,1.));
+      }`;
+    }
+    if(mode === 'wipe'){
+      return `#version 300 es
+      precision highp float; in vec2 vUv; out vec4 frag;
+      uniform sampler2D uTex0, uTex1; uniform vec2 uResolution; uniform float uProgress;
+      vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){
+        float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
+        if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv;
+      }
+      void main(){
+        vec2 rs=uResolution;
+        vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
+        vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
+        vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
+        float edge = 0.01;
+        float m = smoothstep(uProgress-edge, uProgress+edge, vUv.x);
+        frag = mix(c0,c1,m);
+      }`;
+    }
+    if(mode === 'cut'){
+      return `#version 300 es
+      precision highp float; in vec2 vUv; out vec4 frag;
+      uniform sampler2D uTex0, uTex1; uniform vec2 uResolution; uniform float uProgress;
+      vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){
+        float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
+        if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv;
+      }
+      void main(){
+        vec2 rs=uResolution;
+        vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
+        vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
+        vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
+        frag = (uProgress<0.999) ? c0 : c1;
+      }`;
+    }
+    /* heavy 'sand' fallback (avoid on weak GPU) */
+    return `#version 300 es
+    precision highp float; in vec2 vUv; out vec4 frag;
+    uniform sampler2D uTex0, uTex1; uniform vec2 uResolution;
+    uniform float uProgress, uTime;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
+    float noise(vec2 p){ vec2 i=floor(p), f=fract(p); float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1)); vec2 u=f*f*(3.-2.*f); return mix(mix(a,b,u.x), mix(c,d,u.x), u.y); }
+    float fbm(vec2 p){ float v=0., a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=.5; } return v; }
+    vec2 coverUv(vec2 uv, vec2 ts, vec2 rs){ float rTex=ts.x/ts.y, rCan=rs.x/rs.y;
+      if(rTex>rCan){ float s=rTex/rCan; uv.y=(uv.y-.5)*s+.5; } else { float s=rCan/rTex; uv.x=(uv.x-.5)*s+.5; } return uv; }
+    void main(){
+      vec2 rs=uResolution; float n=fbm(vUv*rs/400. + vec2(uTime*.05, uTime*.03));
+      float edge=.18; float mask=(uProgress<=0.)?0.:1.-smoothstep(uProgress-edge,uProgress+edge,n);
+      vec2 s0=vec2(textureSize(uTex0,0)), s1=vec2(textureSize(uTex1,0));
+      vec4 c0=texture(uTex0, coverUv(vUv,s0,rs));
+      vec4 c1=texture(uTex1, coverUv(vUv,s1,rs));
+      frag=mix(c0,c1,mask);
+    }`;
+  }
 
-  function compile(type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPLETE_STATUS) && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
-  function program(vsSrc,fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc)); gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc)); gl.linkProgram(p);
-    if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+  function compile(type, src){
+    const s=gl.createShader(type);
+    gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function program(vsSrc, fsSrc){
+    const p=gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER,vsSrc));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER,fsSrc));
+    gl.linkProgram(p);
+    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    return p;
+  }
 
-  const prog=program(vs,fs); gl.useProgram(prog);
-  const loc={
-    uTex0:gl.getUniformLocation(prog,'uTex0'),
-    uTex1:gl.getUniformLocation(prog,'uTex1'),
-    uResolution:gl.getUniformLocation(prog,'uResolution'),
-    uProgress:gl.getUniformLocation(prog,'uProgress'),
-    uTime:gl.getUniformLocation(prog,'uTime'),
-    uNoiseScale:gl.getUniformLocation(prog,'uNoiseScale'),
-    uEdgeSoft:gl.getUniformLocation(prog,'uEdgeSoft'),
-    uDrift:gl.getUniformLocation(prog,'uDrift')
+  const prog = program(vs, fsFor(ANIMATION_MODE));
+  gl.useProgram(prog);
+  const loc = {
+    uTex0: gl.getUniformLocation(prog, 'uTex0'),
+    uTex1: gl.getUniformLocation(prog, 'uTex1'),
+    uResolution: gl.getUniformLocation(prog, 'uResolution'),
+    uProgress: gl.getUniformLocation(prog, 'uProgress'),
+    uTime: gl.getUniformLocation(prog, 'uTime'), // only used by 'sand'
   };
-  const vao=gl.createVertexArray(); gl.bindVertexArray(vao);
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
 
-  function createTexture(img){ const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+  // Textures
+  function createTexture(img){ const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     return tex; }
-  async function loadImage(src){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
-  let images=[],textures=[];
-  (async()=>{ images=await Promise.all(IMAGES.map(loadImage)); textures=images.map(createTexture); start(); })().catch(console.error);
+  async function loadImage(src){ return new Promise((res, rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
 
-  let currentIndex=0, nextIndex=(currentIndex+1)%IMAGES.length, phase='dwell', phaseEnd=performance.now();
+  let images=[], textures=[];
+  (async()=>{ images = await Promise.all(IMAGES.map(loadImage)); textures = images.map(createTexture); start(); })().catch(console.error);
 
-  function bindTextures(i0,i1){
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,textures[i0]); gl.uniform1i(loc.uTex0,0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,textures[i1]); gl.uniform1i(loc.uTex1,1);
+  // Slideshow engine
+  let currentIndex = 0, nextIndex = (currentIndex + 1) % IMAGES.length;
+  let phase = 'dwell', phaseEnd = performance.now();
+
+  function bindTextures(i0, i1){
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[i0]); gl.uniform1i(loc.uTex0, 0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[i1]); gl.uniform1i(loc.uTex1, 1);
   }
 
   function start(){
-    bindTextures(currentIndex,nextIndex);
-    phase='dwell'; phaseEnd=performance.now()+SLIDE_MS;
-    gl.uniform1f(loc.uProgress,0.0);
+    bindTextures(currentIndex, nextIndex);
+    phase = 'dwell'; phaseEnd = performance.now() + SLIDE_MS;
+    gl.uniform1f(loc.uProgress, 0.0);
     requestAnimationFrame(loop);
 
     initWeatherAndAQI();
-    initHeadlines();
+    initNews();
   }
 
   function loop(now){
-    const res=[canvas.width,canvas.height];
+    const res = [canvas.width, canvas.height];
+    gl.uniform2f(loc.uResolution, res[0], res[1]);
+    if (loc.uTime) gl.uniform1f(loc.uTime, now*0.001); // used by 'sand'
 
-    // Phase timing
     if(now >= phaseEnd){
-      if(phase==='dwell'){
-        phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex);
-      }else{
-        currentIndex=nextIndex; nextIndex=(currentIndex+1)%IMAGES.length;
-        bindTextures(currentIndex,nextIndex);
-        phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0);
-      }
+      if(phase === 'dwell'){ phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex); }
+      else{ currentIndex=nextIndex; nextIndex=(currentIndex+1)%IMAGES.length; bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); }
     }
 
-    // Uniforms
-    gl.uniform2f(loc.uResolution,res[0],res[1]);
-    gl.uniform1f(loc.uTime, now*0.001);
-    gl.uniform1f(loc.uNoiseScale, NOISE_SCALE*200.0);
-    gl.uniform1f(loc.uEdgeSoft, EDGE_SOFT);
-    gl.uniform1f(loc.uDrift, DRIFT_SPEED);
-
-    // Progress only during transition
     if(phase === 'transition'){
-      const dur=Math.max(1.0, TRANSITION_MS);
+      const dur = Math.max(1.0, TRANSITION_MS);
       const t = 1.0 - Math.max(0.0, (phaseEnd - now) / dur);
       const eased = 1.0 - Math.pow(1.0 - t, 3.0);
       gl.uniform1f(loc.uProgress, eased);
-      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-      requestAnimationFrame(loop);                // animate smoothly
-    }else{
+    } else {
       gl.uniform1f(loc.uProgress, 0.0);
-      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-      if (LOW_POWER){
-        // throttle during dwell — tiny CPU/GPU use
-        setTimeout(()=>requestAnimationFrame(loop), 800);
-      }else{
-        requestAnimationFrame(loop);
-      }
     }
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
   }
 
-  /* ========= Weather & AQI ========= */
+  // ===== Weather + AQI =====
   async function resolveLocation(q, countryCode=""){
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=en&format=json`;
     const geo = await fetch(url).then(r=>r.json());
@@ -412,9 +510,11 @@
       const place = await resolveLocation(CITY_NAME, COUNTRY_CODE);
       document.getElementById('weatherCity').textContent = place.label;
       document.getElementById('aqiCity').textContent     = place.label;
+
       const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
       const wdata = await fetch(wurl).then(r=>r.json());
       renderWeather(wdata);
+
       await fetchAQI(place.latitude, place.longitude);
     }catch(err){
       document.getElementById('weatherCity').textContent = FALLBACK_COORDS.label;
@@ -424,179 +524,172 @@
         const wdata = await fetch(wurl).then(r=>r.json());
         renderWeather(wdata);
         await fetchAQI(FALLBACK_COORDS.latitude, FALLBACK_COORDS.longitude);
-      }catch(e){ document.getElementById('weatherDesc').textContent = 'Weather unavailable'; }
+      }catch(e){
+        document.getElementById('weatherDesc').textContent = 'Weather unavailable';
+      }
     }
   }
-  function wxIcon(c){ if(c===0)return'☀️'; if([1,2].includes(c))return'🌤️'; if(c===3)return'☁️'; if([45,48].includes(c))return'🌫️';
-    if([51,53,55,56,57].includes(c))return'🌦️'; if([61,63,65,80,81,82].includes(c))return'🌧️'; if([66,67,71,73,75,77].includes(c))return'🌨️'; if([95,96,99].includes(c))return'⛈️'; return'☁️';}
-  function wxText(code){ const map={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'}; return map[code]||'—'; }
+
+  function wxIcon(code){
+    if(code===0) return '☀️';
+    if([1,2].includes(code)) return '🌤️';
+    if(code===3) return '☁️';
+    if([45,48].includes(code)) return '🌫️';
+    if([51,53,55,56,57].includes(code)) return '🌦️';
+    if([61,63,65].includes(code)) return '🌧️';
+    if([66,67,71,73,75,77].includes(code)) return '🌨️';
+    if([80,81,82].includes(code)) return '🌧️';
+    if([95,96,99].includes(code)) return '⛈️';
+    return '☁️';
+  }
+  function wxText(code){
+    const map = {0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
+    return map[code] || '—';
+  }
   function renderWeather(data){
-    const cur=data.current;
-    document.getElementById('weatherTemp').textContent=Math.round(cur.temperature_2m)+'°';
-    document.getElementById('weatherDesc').textContent=wxText(cur.weather_code);
-    document.getElementById('weatherIcon').textContent=wxIcon(cur.weather_code);
-    const fcEl=document.getElementById('weatherForecast'); fcEl.innerHTML='';
-    const nowIdx=data.hourly.time.findIndex(t=> new Date(t).getTime()>=Date.now());
+    const cur = data.current;
+    document.getElementById('weatherTemp').textContent = Math.round(cur.temperature_2m) + '°';
+    document.getElementById('weatherDesc').textContent = wxText(cur.weather_code);
+    document.getElementById('weatherIcon').textContent = wxIcon(cur.weather_code);
+
+    const fcEl = document.getElementById('weatherForecast');
+    fcEl.innerHTML = '';
+    const nowIdx = data.hourly.time.findIndex(t=> new Date(t).getTime() >= Date.now());
     for(let i=0;i<3;i++){
-      const idx=Math.min(nowIdx+i,data.hourly.time.length-1);
-      const t=new Date(data.hourly.time[idx]);
-      const temp=Math.round(data.hourly.temperature_2m[idx]);
-      const w=data.hourly.weather_code[idx];
-      const div=document.createElement('div');
+      const idx = Math.min(nowIdx + i, data.hourly.time.length-1);
+      const t = new Date(data.hourly.time[idx]);
+      const temp = Math.round(data.hourly.temperature_2m[idx]);
+      const w = data.hourly.weather_code[idx];
+      const div = document.createElement('div');
       div.className='forecast-item';
-      div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span>
-                     <span class="wx">${wxIcon(w)}</span>
-                     <span class="forecast-temp">${temp}°</span>`;
+      div.innerHTML = `
+        <span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span>
+        <span class="wx">${wxIcon(w)}</span>
+        <span class="forecast-temp">${temp}°</span>`;
       fcEl.appendChild(div);
     }
   }
 
-  function aqiInfo(aqi){ if(aqi==null||!isFinite(aqi))return{label:'—',color:'rgba(255,255,255,0.12)',pos:0};
-    if(aqi<=50) return{label:'Good',color:'#2ecc71',pos:(aqi/500)*100};
-    if(aqi<=100)return{label:'Moderate',color:'#f1c40f',pos:(aqi/500)*100};
-    if(aqi<=150)return{label:'Unhealthy (Sensitive)',color:'#e67e22',pos:(aqi/500)*100};
-    if(aqi<=200)return{label:'Unhealthy',color:'#e74c3c',pos:(aqi/500)*100};
-    if(aqi<=300)return{label:'Very Unhealthy',color:'#9b59b6',pos:(aqi/500)*100};
-    return{label:'Hazardous',color:'#7f1d1d',pos:Math.min(100,(aqi/500)*100)}; }
-  async function fetchAQI(lat,lon){
+  // ===== AQI =====
+  function aqiInfo(aqi){
+    if (aqi == null || !isFinite(aqi)) return {label:'—', color:'rgba(255,255,255,0.12)', pos:0};
+    if (aqi <= 50)   return {label:'Good',                  color:'#2ecc71', pos: (aqi/500)*100};
+    if (aqi <= 100)  return {label:'Moderate',              color:'#f1c40f', pos: (aqi/500)*100};
+    if (aqi <= 150)  return {label:'Unhealthy (Sensitive)', color:'#e67e22', pos: (aqi/500)*100};
+    if (aqi <= 200)  return {label:'Unhealthy',             color:'#e74c3c', pos: (aqi/500)*100};
+    if (aqi <= 300)  return {label:'Very Unhealthy',        color:'#9b59b6', pos: (aqi/500)*100};
+    return            {label:'Hazardous',                   color:'#7f1d1d', pos: Math.min(100,(aqi/500)*100)};
+  }
+
+  async function fetchAQI(lat, lon){
     try{
-      const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
-      const data=await fetch(url).then(r=>r.json());
-      const aqi=data?.current?.us_aqi, pm25=data?.current?.pm2_5, pm10=data?.current?.pm10;
-      const info=aqiInfo(aqi);
-      const badge=document.getElementById('aqiBadge');
-      badge.style.borderColor=info.color;
-      badge.style.boxShadow=`inset 0 0 0 1px ${info.color}22`;
-      badge.textContent=`AQI ${Math.round(aqi)}`;
-      document.getElementById('aqiValue').textContent=Math.round(aqi);
-      document.getElementById('aqiCat').textContent=info.label;
-      document.getElementById('aqiPointer').style.left=`${info.pos}%`;
-      document.getElementById('pm25').textContent=(pm25!=null)?`${Math.round(pm25)} µg/m³`:'—';
-      document.getElementById('pm10').textContent=(pm10!=null)?`${Math.round(pm10)} µg/m³`:'—';
+      const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
+      const data = await fetch(url).then(r=>r.json());
+      const aqi  = data?.current?.us_aqi;
+      const pm25 = data?.current?.pm2_5;
+      const pm10 = data?.current?.pm10;
+
+      const info = aqiInfo(aqi);
+      document.getElementById('aqiBadge').style.borderColor = info.color;
+      document.getElementById('aqiBadge').style.boxShadow   = `inset 0 0 0 1px ${info.color}22`;
+      document.getElementById('aqiBadge').textContent       = `AQI ${Math.round(aqi)}`;
+      document.getElementById('aqiValue').textContent       = Math.round(aqi);
+      document.getElementById('aqiCat').textContent         = info.label;
+      document.getElementById('aqiPointer').style.left      = `${info.pos}%`;
+      document.getElementById('pm25').textContent           = (pm25!=null)? `${Math.round(pm25)} µg/m³` : '—';
+      document.getElementById('pm10').textContent           = (pm10!=null)? `${Math.round(pm10)} µg/m³` : '—';
     }catch(e){
-      document.getElementById('aqiBadge').textContent='AQI —';
-      document.getElementById('aqiCat').textContent='Unavailable';
+      document.getElementById('aqiBadge').textContent = 'AQI —';
+      document.getElementById('aqiCat').textContent   = 'Unavailable';
     }
   }
 
-  /* ========= Headlines ========= */
-  const HL_ROTATE_MS = 5000;
-  const dotsCount = 5;
+  // ===== Tech News (HackerNews + Reddit) =====
+  const NEWS_ROTATE_MS = 12000;
 
   function prettyTime(ds){
     if(!ds) return "just now";
-    const d=new Date(ds); if(isNaN(d)) return "—";
-    const diff=(Date.now()-d.getTime())/1000;
-    if(diff<60) return "just now";
-    if(diff<3600) return Math.floor(diff/60)+"m ago";
-    if(diff<86400) return Math.floor(diff/3600)+"h ago";
+    const d = new Date(ds);
+    if (isNaN(d)) return "—";
+    const diff = (Date.now() - d.getTime())/1000;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff/60) + "m ago";
+    if (diff < 86400) return Math.floor(diff/3600) + "h ago";
     return d.toLocaleDateString();
   }
-  function domainFromUrl(u){ try{ return new URL(u).hostname; }catch(e){ return ""; } }
-  function faviconFor(u){ const d=domainFromUrl(u); return d?`https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=64`:""; }
-  function stripHTML(html){ return (html||"").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim(); }
 
-  async function fetchGuardian(n=30){
-    const url=`https://content.guardianapis.com/search?order-by=newest&show-fields=thumbnail,trailText&api-key=test&page-size=${n}`;
-    const json=await fetch(url).then(r=>r.json());
-    const arr=json?.response?.results||[];
-    return arr.map(r=>({
-      title:r.webTitle,
-      link:r.webUrl,
-      date:r.webPublicationDate,
-      source:"The Guardian",
-      image:r.fields?.thumbnail||null,
-      summary:stripHTML(r.fields?.trailText||""),
-      favicon:faviconFor(r.webUrl)
+  async function fetchHN(count=25){
+    const ids = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json').then(r=>r.json());
+    const head = ids.slice(0, count);
+    const items = await Promise.all(head.map(id =>
+      fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r=>r.json()).catch(()=>null)
+    ));
+    return items.filter(Boolean).map(it=>({
+      title: it.title,
+      link: it.url || `https://news.ycombinator.com/item?id=${it.id}`,
+      date: it.time ? new Date(it.time*1000).toISOString() : '',
+      source: 'Hacker News'
     }));
   }
-  function pickRedditImage(d){
-    if (d?.preview?.images?.length){
-      const src=d.preview.images[0];
-      const res=(src.resolutions||[]).concat(src.source?[src.source]:[]);
-      const best=res.find(r=>r.width>=180)||res[res.length-1];
-      if(best?.url) return best.url.replace(/&amp;/g,'&');
-    }
-    if (d?.thumbnail && /^https?:\/\//i.test(d.thumbnail)) return d.thumbnail;
-    return null;
-  }
-  async function fetchRedditNews(n=20){
-    const json=await fetch(`https://www.reddit.com/r/news/top.json?limit=${n}&t=day`).then(r=>r.json());
-    return (json.data?.children||[]).map(({data})=>{
-      const link=data.url_overridden_by_dest||('https://www.reddit.com'+data.permalink);
-      return{
-        title:data.title,
-        link,
-        date:data.created_utc?new Date(data.created_utc*1000).toISOString():'',
-        source:'r/news',
-        image:pickRedditImage(data),
-        summary:"",
-        favicon:faviconFor(link)
-      };
-    });
+
+  async function fetchReddit(count=20){
+    const json = await fetch(`https://www.reddit.com/r/technology/top.json?limit=${count}&t=day`).then(r=>r.json());
+    return (json.data?.children||[]).map(({data})=>({
+      title: data.title,
+      link: data.url_overridden_by_dest || ('https://www.reddit.com' + data.permalink),
+      date: data.created_utc ? new Date(data.created_utc*1000).toISOString() : '',
+      source: 'r/technology'
+    }));
   }
 
-  let headlines=[], hlIndex=0, hlTimer;
-  const col1=document.getElementById('colImg1'), col2=document.getElementById('colImg2'), col3=document.getElementById('colImg3');
-  const hlLink=document.getElementById('hlLink'), hlSummary=document.getElementById('hlSummary'),
-        hlFav=document.getElementById('hlFav'), hlSrc=document.getElementById('hlSourceInline'),
-        hlTime=document.getElementById('hlTime'), hlHdr=document.getElementById('hlSource');
+  let newsList = []; let newsIndex = 0; let newsTimer;
 
-  function collageImages(idx){
-    const imgs=[];
-    for(let i=0;i<3;i++){
-      const item=headlines[(idx+i)%headlines.length];
-      if(item?.image) imgs.push(item.image);
-      else if(item?.favicon) imgs.push(item.favicon);
-    }
-    while(imgs.length<3) imgs.push('');
-    [col1.src,col2.src,col3.src]=imgs;
+  function setNewsSlide(item){
+    const link = document.getElementById('newsLink');
+    const src  = document.getElementById('newsSourceInline');
+    const tim  = document.getElementById('newsTime');
+    const hdr  = document.getElementById('newsSource');
+
+    link.textContent = item.title || '—';
+    link.href = item.link || '#';
+    src.textContent  = item.source || '—';
+    hdr.textContent  = item.source || 'News';
+    tim.textContent  = prettyTime(item.date);
   }
 
-  function setHeadline(item){
-    hlLink.textContent=item.title||'—';
-    hlLink.href=item.link||'#';
-    hlSummary.textContent=item.summary||'';
-    hlSrc.textContent=item.source||'—';
-    hlHdr.textContent=item.source||'Headlines';
-    hlTime.textContent=prettyTime(item.date);
-    if(item.favicon){ hlFav.src=item.favicon; hlFav.style.visibility='visible'; }
-    else{ hlFav.removeAttribute('src'); hlFav.style.visibility='hidden'; }
-    collageImages(hlIndex);
-  }
-
-  function renderHeadlines(){
-    const cont=document.getElementById('hlContainer');
+  function renderNews(){
+    const cont = document.getElementById('newsContainer');
     cont.classList.add('news-fade-leave');
     setTimeout(()=>{
-      setHeadline(headlines[hlIndex]);
+      setNewsSlide(newsList[newsIndex]);
       cont.classList.remove('news-fade-leave');
       cont.classList.add('news-fade-enter');
-      setTimeout(()=>cont.classList.remove('news-fade-enter'),140);
-      const dots=document.getElementById('hlDots');
-      dots.innerHTML='';
-      for(let i=0;i<dotsCount;i++){
-        const d=document.createElement('span');
-        d.className='dot-big'+(i===hlIndex%dotsCount?' active':'');
-        dots.appendChild(d);
-      }
-    },140);
+      setTimeout(()=>cont.classList.remove('news-fade-enter'), 140);
+    }, 140);
   }
 
-  function stepHL(dir){ if(!headlines.length) return; hlIndex=(hlIndex+dir+headlines.length)%headlines.length; renderHeadlines(); }
-
-  async function initHeadlines(){
-    setHeadline({title:'Loading headlines…',link:'#',summary:'',date:'',source:'',favicon:''});
-    let all=[];
-    try{ all=all.concat(await fetchGuardian(30)); }catch(e){ console.warn('Guardian failed',e); }
-    try{ all=all.concat(await fetchRedditNews(18)); }catch(e){ console.warn('Reddit /r/news failed',e); }
-    if(!all.length){ all=[{title:'Headlines widget initialized (no feeds reachable)', link:'#', date:new Date().toISOString(), source:'Local', image:null, summary:'', favicon:''}]; }
-    all.sort((a,b)=> new Date(b.date)-new Date(a.date));
-    headlines=all.slice(0,60);
-    hlIndex=0; renderHeadlines();
-    clearInterval(hlTimer);
-    hlTimer=setInterval(()=>stepHL(+1), 5000);
+  function stepNews(dir){
+    if (!newsList.length) return;
+    newsIndex = (newsIndex + dir + newsList.length) % newsList.length;
+    renderNews();
   }
+
+  async function initNews(){
+    setNewsSlide({title:'Loading headlines…', link:'#', date:'', source:''});
+    let all = [];
+    try { all = all.concat(await fetchHN(25)); } catch(e){}
+    try { all = all.concat(await fetchReddit(20)); } catch(e){}
+    if(!all.length){ all = [{ title:'Tech widget initialized (no feeds reachable)', link:'#', date:new Date().toISOString(), source:'Local' }]; }
+    all.sort((a,b)=> new Date(b.date) - new Date(a.date));
+    newsList = all.slice(0, 60);
+    newsIndex = 0;
+    renderNews();
+    document.getElementById('prevNews').onclick = ()=> stepNews(-1);
+    document.getElementById('nextNews').onclick = ()=> stepNews(+1);
+    clearInterval(newsTimer);
+    newsTimer = setInterval(()=> stepNews(+1), NEWS_ROTATE_MS);
+  }
+  // =======================================
   </script>
 </body>
 </html>

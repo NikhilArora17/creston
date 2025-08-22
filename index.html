@@ -19,9 +19,9 @@
       --edge-softness: 0.18;
       --drift-speed: 0.06;
 
-      /* Weather sizing/scale */
-      --weather-width: 180px;
-      --weather-scale: 1;
+      /* Widget sizing/scale */
+      --widget-width: 180px;
+      --widget-scale: 1;
     }
 
     html, body {
@@ -49,16 +49,16 @@
 
     @media (prefers-reduced-motion: reduce){ :root{ --transition-duration: 0s; } }
 
-    /* === Weather widget (LEFT) === */
+    /* === Widgets column (LEFT) === */
     .widgets-left{
       position: fixed; top:16px; left:16px; z-index:1000; pointer-events:auto;
-      display:flex; flex-direction:column; gap:12px; align-items:flex-start;
+      display:flex; flex-direction:column; gap:14px; align-items:flex-start;
     }
 
     /* Card base */
-    #weatherCard.card{
-      width: var(--weather-width);
-      transform: scale(var(--weather-scale));
+    .card{
+      width: var(--widget-width);
+      transform: scale(var(--widget-scale));
       transform-origin: top left;
 
       border-radius: 22px;
@@ -72,8 +72,7 @@
       color: #eef1f5;
     }
 
-    /* Header pill: “Weather” | “City, Region, Country” */
-    #weatherCard .card-header{
+    .card-header{
       display:flex; justify-content:space-between; align-items:center;
       padding: 8px 12px;
       margin: -2px -2px 10px;
@@ -83,7 +82,7 @@
       font-size: 13px; letter-spacing:.3px;
     }
 
-    /* Vertical body: icon → temp → desc + AQI */
+    /* ===== Weather card ===== */
     #weatherCard .weather-row{
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
       padding: 10px 12px 12px;
@@ -92,7 +91,6 @@
       border-radius: 16px;
       margin-bottom: 10px;
     }
-    /* Center the main weather icon */
     #weatherCard .weather-icon{
       font-size: 24px; line-height:1;
       filter: grayscale(1) contrast(1.05) brightness(1.05);
@@ -101,33 +99,13 @@
       align-self: center;
       margin-top: 2px;
     }
-    #weatherCard .weather-temp{
-      font-size: 42px; line-height:1; font-weight:200; margin-top: 2px;
-    }
-    #weatherCard .weather-desc{
-      font-size: 13px; opacity:.92;
-    }
+    #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
+    #weatherCard .weather-desc{ font-size: 13px; opacity:.92; }
 
-    /* AQI row */
-    #aqiRow{
-      margin-top: 6px;
-      display:flex; align-items:center; gap:8px;
-    }
-    .aqi-badge{
-      font-size:12px; padding:4px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      line-height:1;
-    }
-    .aqi-label{ font-size:12px; opacity:.9; }
-
-    /* Forecast list (single column) */
-    #weatherCard .weather-forecast{
-      display: grid; grid-template-columns: 1fr; gap: 8px;
-    }
+    #weatherCard .weather-forecast{ display: grid; grid-template-columns: 1fr; gap: 8px; }
     #weatherCard .forecast-item{
       display:grid;
-      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp badge */
+      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp */
       align-items:center;
       padding: 8px 10px;
       background: rgba(255,255,255,0.06);
@@ -135,20 +113,54 @@
       border-radius: 14px;
     }
     #weatherCard .forecast-time{ font-size: 12px; opacity:.9; }
-
-    /* Center the forecast icons perfectly */
     #weatherCard .wx{
       display:flex; align-items:center; justify-content:center;
       width:40px; height:20px; margin:0 auto;
       filter: grayscale(1) contrast(1.05) brightness(1.05);
       text-align:center;
     }
-
     #weatherCard .forecast-temp{
       justify-self:end;
       font-size: 13px; padding: 6px 8px; min-width: 42px; text-align:center;
       background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95;
     }
+
+    /* ===== AQI card ===== */
+    #aqiCard .aqi-body{
+      display:flex; flex-direction:column; gap:8px; align-items:center;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+    }
+    #aqiValue{ font-size:40px; line-height:1; }
+    #aqiCat{ font-size:13px; opacity:.92; }
+    #aqiBadge{
+      font-size:12px; padding:4px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      line-height:1;
+    }
+    .aqi-bar{
+      width:100%; height:6px; border-radius:4px;
+      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
+      opacity:.75;
+      position: relative; overflow:hidden;
+    }
+    .aqi-pointer{
+      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9;
+      left:0%;
+    }
+    .aqi-metrics{
+      margin-top:6px;
+      display:flex; gap:8px;
+    }
+    .pill{
+      font-size:11px; padding:6px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .pill strong{ font-weight:400; margin-left:6px; }
   </style>
 </head>
 <body>
@@ -156,8 +168,10 @@
     <canvas id="glcanvas"></canvas>
     <div class="badge" id="badge"></div>
 
-    <!-- Weather — LEFT (vertical/compact) -->
+    <!-- LEFT widgets column -->
     <div class="widgets-left">
+
+      <!-- Weather -->
       <div class="card" id="weatherCard">
         <div class="card-header">
           <span>Weather</span>
@@ -169,17 +183,30 @@
             <div class="weather-temp" id="weatherTemp">--°</div>
             <div class="weather-desc" id="weatherDesc">Loading…</div>
           </div>
-
-          <!-- AQI -->
-          <div id="aqiRow" style="display:none;">
-            <span class="aqi-badge" id="aqiBadge">AQI —</span>
-            <span class="aqi-label" id="aqiLabel"></span>
-          </div>
         </div>
-
-        <!-- Forecast -->
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
+
+      <!-- AQI -->
+      <div class="card" id="aqiCard">
+        <div class="card-header">
+          <span>Air Quality</span>
+          <span id="aqiCity">—</span>
+        </div>
+        <div class="aqi-body">
+          <div id="aqiBadge">AQI —</div>
+          <div id="aqiValue">--</div>
+          <div id="aqiCat">Loading…</div>
+          <div class="aqi-bar">
+            <div class="aqi-pointer" id="aqiPointer"></div>
+          </div>
+          <div class="aqi-metrics">
+            <div class="pill">PM2.5<strong id="pm25">—</strong></div>
+            <div class="pill">PM10<strong id="pm10">—</strong></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -192,7 +219,7 @@
   const FALLBACK_COORDS = {
     latitude: 28.4959,
     longitude: 77.1500,
-    label: "Sultanpur, Delhi, India"
+    label: "Sultanpur, India"
   };
 
   // Slides (PNG supported)
@@ -298,7 +325,9 @@
 
   function compile(type, src){
     const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    if(!gl.getShaderParameter(s, gl.COMPLETE_STATUS) && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      throw new Error(gl.getShaderInfoLog(s));
+    }
     return s;
   }
   function program(vsSrc, fsSrc){
@@ -356,7 +385,7 @@
     gl.uniform1f(loc.uProgress, 0.0);
     requestAnimationFrame(loop);
 
-    initWeather();
+    initWeatherAndAQI();
   }
 
   function loop(now){
@@ -384,7 +413,7 @@
     requestAnimationFrame(loop);
   }
 
-  // ===== Weather (robust geocoding + fallback) =====
+  // ===== Weather + location resolve =====
   async function resolveLocation(q, countryCode=""){
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=en&format=json`;
     const geo = await fetch(url).then(r=>r.json());
@@ -404,24 +433,25 @@
     throw new Error("No geocoding match");
   }
 
-  async function initWeather(){
+  async function initWeatherAndAQI(){
     try{
       const place = await resolveLocation(CITY_NAME, COUNTRY_CODE);
       document.getElementById('weatherCity').textContent = place.label;
+      document.getElementById('aqiCity').textContent     = place.label;
 
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
-      const data = await fetch(url).then(r=>r.json());
-      renderWeather(data);
+      const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
+      const wdata = await fetch(wurl).then(r=>r.json());
+      renderWeather(wdata);
 
-      // AQI
       await fetchAQI(place.latitude, place.longitude);
     }catch(err){
       console.warn("Geocoding failed, using fallback coords:", err);
       document.getElementById('weatherCity').textContent = FALLBACK_COORDS.label;
+      document.getElementById('aqiCity').textContent     = FALLBACK_COORDS.label;
       try{
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${FALLBACK_COORDS.latitude}&longitude=${FALLBACK_COORDS.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
-        const data = await fetch(url).then(r=>r.json());
-        renderWeather(data);
+        const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${FALLBACK_COORDS.latitude}&longitude=${FALLBACK_COORDS.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
+        const wdata = await fetch(wurl).then(r=>r.json());
+        renderWeather(wdata);
 
         await fetchAQI(FALLBACK_COORDS.latitude, FALLBACK_COORDS.longitude);
       }catch(e){
@@ -443,12 +473,10 @@
     if([95,96,99].includes(code)) return '⛈️';
     return '☁️';
   }
-
   function wxText(code){
     const map = {0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
     return map[code] || '—';
   }
-
   function renderWeather(data){
     const cur = data.current;
     document.getElementById('weatherTemp').textContent = Math.round(cur.temperature_2m) + '°';
@@ -475,36 +503,40 @@
 
   // ===== AQI =====
   function aqiInfo(aqi){
-    if (aqi == null || !isFinite(aqi)) return {label:'—', color:'rgba(255,255,255,0.12)'};
-    if (aqi <= 50)   return {label:'Good',                       color:'#2ecc71'};
-    if (aqi <= 100)  return {label:'Moderate',                   color:'#f1c40f'};
-    if (aqi <= 150)  return {label:'Unhealthy (Sensitive)',      color:'#e67e22'};
-    if (aqi <= 200)  return {label:'Unhealthy',                  color:'#e74c3c'};
-    if (aqi <= 300)  return {label:'Very Unhealthy',             color:'#9b59b6'};
-    return            {label:'Hazardous',                        color:'#7f1d1d'};
+    if (aqi == null || !isFinite(aqi)) return {label:'—', color:'rgba(255,255,255,0.12)', pos:0};
+    if (aqi <= 50)   return {label:'Good',                  color:'#2ecc71', pos: (aqi/500)*100};
+    if (aqi <= 100)  return {label:'Moderate',              color:'#f1c40f', pos: (aqi/500)*100};
+    if (aqi <= 150)  return {label:'Unhealthy (Sensitive)', color:'#e67e22', pos: (aqi/500)*100};
+    if (aqi <= 200)  return {label:'Unhealthy',             color:'#e74c3c', pos: (aqi/500)*100};
+    if (aqi <= 300)  return {label:'Very Unhealthy',        color:'#9b59b6', pos: (aqi/500)*100};
+    return            {label:'Hazardous',                   color:'#7f1d1d', pos: Math.min(100,(aqi/500)*100)};
   }
 
   async function fetchAQI(lat, lon){
     try{
       const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
       const data = await fetch(url).then(r=>r.json());
-      const aqi = data?.current?.us_aqi;
+      const aqi  = data?.current?.us_aqi;
+      const pm25 = data?.current?.pm2_5;
+      const pm10 = data?.current?.pm10;
+
       const info = aqiInfo(aqi);
+      document.getElementById('aqiBadge').style.borderColor = info.color;
+      document.getElementById('aqiBadge').style.boxShadow   = `inset 0 0 0 1px ${info.color}22`;
+      document.getElementById('aqiBadge').textContent       = `AQI ${Math.round(aqi)}`;
+      document.getElementById('aqiValue').textContent       = Math.round(aqi);
+      document.getElementById('aqiCat').textContent         = info.label;
 
-      const row   = document.getElementById('aqiRow');
-      const badge = document.getElementById('aqiBadge');
-      const label = document.getElementById('aqiLabel');
+      // pointer position along the color bar
+      document.getElementById('aqiPointer').style.left = `${info.pos}%`;
 
-      row.style.display = 'flex';
-      badge.textContent = `AQI ${Math.round(aqi)}`;
-      badge.style.background = 'rgba(255,255,255,0.06)';
-      badge.style.borderColor = info.color;
-      badge.style.boxShadow = `inset 0 0 0 1px ${info.color}22`;
-      label.textContent = info.label;
+      // tiny metrics
+      document.getElementById('pm25').textContent = (pm25!=null)? `${Math.round(pm25)} µg/m³` : '—';
+      document.getElementById('pm10').textContent = (pm10!=null)? `${Math.round(pm10)} µg/m³` : '—';
     }catch(e){
       console.warn('AQI fetch failed', e);
-      // Hide AQI if it fails
-      document.getElementById('aqiRow').style.display = 'none';
+      document.getElementById('aqiBadge').textContent = 'AQI —';
+      document.getElementById('aqiCat').textContent   = 'Unavailable';
     }
   }
   </script>

@@ -110,7 +110,6 @@
     }
     #weatherCard .weather-icon{
       font-size: 24px; line-height:1;
-      /* full-color icons (no grayscale) */
       width: 100%; text-align: center; align-self: center; margin-top: 2px;
     }
     #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
@@ -130,7 +129,6 @@
     #weatherCard .wx{
       display:flex; align-items:center; justify-content:center;
       width:40px; height:20px; margin:0 auto;
-      /* full-color icons (no grayscale) */
       text-align:center;
     }
     #weatherCard .forecast-temp{
@@ -159,12 +157,10 @@
     .aqi-bar{
       width:100%; height:6px; border-radius:4px;
       background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
-      opacity:.75;
-      position: relative; overflow:hidden;
+      opacity:.75; position: relative; overflow:hidden;
     }
     .aqi-pointer{
-      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9;
-      left:0%;
+      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%;
     }
     .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
     .pill{
@@ -186,26 +182,28 @@
     #newsCard .card-header{ margin-bottom: 6px; }
     .news-slide{
       position: relative;
-      min-height: 88px;
       padding: 10px 12px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.10);
       border-radius: 16px;
       overflow: hidden;
     }
+    .news-media{
+      width:100%; aspect-ratio:16/9; display:block;
+      object-fit:cover; border-radius:12px; background:#222;
+      margin-bottom:8px;
+    }
     .news-title{
       font-size: 16px; line-height: 1.25; font-weight: 300;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-      margin: 0 0 6px 0;
-      color:#eef1f5; text-decoration:none;
+      margin: 0 0 6px 0; color:#eef1f5; text-decoration:none;
     }
-    .news-title:visited{ color:#eef1f5; }
     .news-title:hover{ text-decoration:underline; }
     .news-meta{ font-size: 12px; opacity: .85; display:flex; gap:8px; align-items:center; }
     .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius: 2px; display:inline-block; }
     .news-fade-enter{ opacity: 0; transform: translateY(6px); }
     .news-fade-leave{ opacity: 0; transform: translateY(-6px); }
-    .news-fade{ transition: opacity .4s ease, transform .4s ease; }
+    .news-fade{ transition: opacity .35s ease, transform .35s ease; }
     .news-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
     .news-btn{
       font-size: 12px; padding:6px 10px; border-radius: 12px;
@@ -262,10 +260,11 @@
     <div class="widgets-br">
       <div class="card" id="newsCard">
         <div class="card-header">
-          <span>News</span>
+          <span>Headlines</span>
           <span id="newsSource">updating…</span>
         </div>
         <div class="news-slide">
+          <img id="newsImg" class="news-media" alt="" referrerpolicy="no-referrer">
           <div id="newsContainer" class="news-fade">
             <a id="newsLink" href="#" target="_blank" rel="noopener noreferrer" class="news-title">Loading headlines…</a>
             <div class="news-meta">
@@ -308,11 +307,11 @@
   function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function readSeconds(name, fallback){ const v = cssVar(name); const n = parseFloat((v||'').replace('s','')); return isFinite(n)?n*1000:fallback*1000; }
 
-  // Declare ONCE
+  // Timers
   const SLIDE_MS      = readSeconds('--slide-duration', 6);
   const TRANSITION_MS = readSeconds('--transition-duration', 1.6);
 
-  // ========= WebGL2 setup (dynamic buffer + letterboxed sizing) =========
+  // ========= WebGL2 setup =========
   const canvas = document.getElementById('glcanvas');
   const gl = canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: true });
   if(!gl){ alert('WebGL2 not available'); }
@@ -389,7 +388,6 @@
         frag = (uProgress<0.999) ? c0 : c1;
       }`;
     }
-    /* heavy 'sand' fallback (avoid on weak GPU) */
     return `#version 300 es
     precision highp float; in vec2 vUv; out vec4 frag;
     uniform sampler2D uTex0, uTex1; uniform vec2 uResolution;
@@ -431,7 +429,7 @@
     uTex1: gl.getUniformLocation(prog, 'uTex1'),
     uResolution: gl.getUniformLocation(prog, 'uResolution'),
     uProgress: gl.getUniformLocation(prog, 'uProgress'),
-    uTime: gl.getUniformLocation(prog, 'uTime'), // only used by 'sand'
+    uTime: gl.getUniformLocation(prog, 'uTime'),
   };
   const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
 
@@ -445,31 +443,22 @@
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     return tex; }
-  function createBlankTexture(){
-    const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
-    const pixel = new Uint8Array([0,0,0,255]);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,pixel);
-    return tex;
-  }
-  async function loadImage(src){ return new Promise((res, rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+  function createBlankTexture(){ const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    const px = new Uint8Array([0,0,0,255]); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,px); return tex; }
+  function loadImage(src){ return new Promise((res, rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
 
-  let images=[], textures=[];
+  let textures=[];
   (async()=>{
     try{
-      images = await Promise.all(IMAGES.map(loadImage));
-      textures = images.map(createTexture);
-    }catch(e){
-      console.warn('Image load failed, using blank texture', e);
-      textures = [createBlankTexture(), createBlankTexture()];
-    } finally {
-      start();                 // ALWAYS start widgets + render loop
-    }
+      const imgs = await Promise.all(IMAGES.map(loadImage));
+      textures = imgs.map(createTexture);
+    }catch{ textures = [createBlankTexture(), createBlankTexture()]; }
+    start();
   })();
 
   // Slideshow engine
   let currentIndex = 0, nextIndex = 1;
   let phase = 'dwell', phaseEnd = performance.now();
-  let widgetsStarted = false;
 
   function bindTextures(i0, i1){
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[i0 % textures.length]); gl.uniform1i(loc.uTex0, 0);
@@ -477,25 +466,22 @@
   }
 
   function start(){
-    if(!widgetsStarted){ widgetsStarted = true; initWeatherAndAQI(); initNews(); } // ensure widgets even if images failed
-    if(textures.length < 2) textures.push(textures[0]); // safe pair
-
     bindTextures(currentIndex, nextIndex);
     phase = 'dwell'; phaseEnd = performance.now() + SLIDE_MS;
     gl.uniform1f(loc.uProgress, 0.0);
     requestAnimationFrame(loop);
+
+    initWeatherAndAQI();
+    initNews();
   }
 
   function loop(now){
     const res = [canvas.width, canvas.height];
     gl.uniform2f(loc.uResolution, res[0], res[1]);
-    if (loc.uTime) gl.uniform1f(loc.uTime, now*0.001); // used by 'sand'
-
     if(now >= phaseEnd){
       if(phase === 'dwell'){ phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex); }
       else{ currentIndex=nextIndex; nextIndex=(currentIndex+1)%textures.length; bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); }
     }
-
     if(phase === 'transition'){
       const dur = Math.max(1.0, TRANSITION_MS);
       const t = 1.0 - Math.max(0.0, (phaseEnd - now) / dur);
@@ -504,7 +490,6 @@
     } else {
       gl.uniform1f(loc.uProgress, 0.0);
     }
-
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     requestAnimationFrame(loop);
   }
@@ -621,7 +606,7 @@
     }
   }
 
-  // ===== News (HackerNews + Reddit). AUTO ROTATE every 10s. Robust even if sources fail. =====
+  // ===== GENERAL NEWS with IMAGES =====
   const NEWS_ROTATE_MS = 10000;
 
   function prettyTime(ds){
@@ -635,30 +620,42 @@
     return d.toLocaleDateString();
   }
 
-  async function fetchHN(count=25){
-    const ids = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json',{cache:'no-cache'}).then(r=>r.json());
-    const head = (ids||[]).slice(0, count);
-    const items = await Promise.all(head.map(id =>
-      fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,{cache:'no-cache'})
-        .then(r=>r.json()).catch(()=>null)
-    ));
-    return items.filter(Boolean).map(it=>({
-      title: it.title,
-      link: it.url || `https://news.ycombinator.com/item?id=${it.id}`,
-      date: it.time ? new Date(it.time*1000).toISOString() : '',
-      source: 'Hacker News'
+  // Source 1: The Guardian (open CORS, test key)
+  async function fetchGuardian(count=30){
+    const url = 'https://content.guardianapis.com/search'
+      + '?order-by=newest'
+      + '&section=(world|news|sport|culture|business)'
+      + '&show-fields=thumbnail,trailText,byline'
+      + `&page-size=${count}`
+      + '&api-key=test';
+    const json = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
+    const arr = (json.response?.results)||[];
+    return arr.map(r => ({
+      title: r.webTitle,
+      link:  r.webUrl,
+      date:  r.webPublicationDate,
+      source:'The Guardian',
+      image: r.fields?.thumbnail || ''
     }));
   }
 
-  async function fetchReddit(count=20){
-    const json = await fetch(`https://www.reddit.com/r/worldnews/top.json?limit=${count}&t=day`,{cache:'no-cache'})
-      .then(r=>r.json());
-    return (json.data?.children||[]).map(({data})=>({
-      title: data.title,
-      link: data.url_overridden_by_dest || ('https://www.reddit.com' + data.permalink),
-      date: data.created_utc ? new Date(data.created_utc*1000).toISOString() : '',
-      source: 'r/worldnews'
-    }));
+  // Source 2 (fallback): Reddit r/news + r/worldnews (has preview images)
+  function cleanUrl(u){ return (u||'').replace(/&amp;/g,'&'); }
+  async function fetchRedditNews(count=30){
+    const url = `https://www.reddit.com/r/news+worldnews/top.json?limit=${count}&t=day`;
+    const json = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
+    const posts = json.data?.children || [];
+    return posts.map(({data})=>{
+      const preview = data.preview?.images?.[0]?.source?.url
+                   || (data.thumbnail && data.thumbnail.startsWith('http') ? data.thumbnail : '');
+      return {
+        title: data.title,
+        link:  data.url_overridden_by_dest || ('https://www.reddit.com' + data.permalink),
+        date:  data.created_utc ? new Date(data.created_utc*1000).toISOString() : '',
+        source:'Reddit',
+        image: cleanUrl(preview || '')
+      };
+    });
   }
 
   let newsList = []; let newsIndex = 0; let newsTimer;
@@ -668,23 +665,33 @@
     const src  = document.getElementById('newsSourceInline');
     const tim  = document.getElementById('newsTime');
     const hdr  = document.getElementById('newsSource');
+    const img  = document.getElementById('newsImg');
 
     link.textContent = item.title || '—';
     link.href = item.link || '#';
     src.textContent  = item.source || '—';
-    hdr.textContent  = item.source || 'News';
+    hdr.textContent  = item.source || 'Headlines';
     tim.textContent  = prettyTime(item.date);
+
+    if (item.image) {
+      img.src = item.image;
+      img.style.display = 'block';
+    } else {
+      img.removeAttribute('src');
+      img.style.display = 'none';
+    }
   }
 
   function renderNews(){
+    if (!newsList.length) return;
     const cont = document.getElementById('newsContainer');
     cont.classList.add('news-fade-leave');
     setTimeout(()=>{
       setNewsSlide(newsList[newsIndex]);
       cont.classList.remove('news-fade-leave');
       cont.classList.add('news-fade-enter');
-      setTimeout(()=>cont.classList.remove('news-fade-enter'), 140);
-    }, 140);
+      setTimeout(()=>cont.classList.remove('news-fade-enter'), 130);
+    }, 130);
   }
 
   function stepNews(dir){
@@ -694,13 +701,14 @@
   }
 
   async function initNews(){
-    // show immediate placeholder (already in DOM)
+    // Try Guardian first, then Reddit fallback
     let all = [];
-    try { all = all.concat(await fetchHN(25)); } catch(e){ console.warn('HN failed', e); }
-    try { all = all.concat(await fetchReddit(20)); } catch(e){ console.warn('Reddit failed', e); }
-
+    try { all = await fetchGuardian(30); } catch(e){ console.warn('Guardian failed', e); }
     if(!all.length){
-      all = [{ title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local' }];
+      try { all = await fetchRedditNews(30); } catch(e){ console.warn('Reddit fallback failed', e); }
+    }
+    if(!all.length){
+      all = [{ title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local', image:'' }];
     }
 
     all.sort((a,b)=> new Date(b.date) - new Date(a.date));
@@ -712,7 +720,7 @@
     document.getElementById('nextNews').onclick = ()=> stepNews(+1);
 
     clearInterval(newsTimer);
-    newsTimer = setInterval(()=> stepNews(+1), NEWS_ROTATE_MS);
+    newsTimer = setInterval(()=> stepNews(+1), 10000); // 10s auto-rotate
   }
   // =======================================
 

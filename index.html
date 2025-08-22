@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Slideshow + Widgets</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg-color:#0b0c10;
@@ -26,17 +25,11 @@
       --news-width:   200px;  /* News / QR / Calendar */
 
       /* Logo placement (top-center) */
-      --logo-top-gap:  340px;
+      --logo-top-gap:  300px;
       --logo-height:   40px;
     }
 
-    html, body{
-      height:100%; margin:0; background:var(--bg-color);
-      font-family:'Manrope',sans-serif; font-weight:200;
-      overflow:hidden; color:#eef1f5;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-    }
-
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:400 14px/1.4 Manrope,system-ui,sans-serif;overflow:hidden}
     .stage{ position:fixed; inset:0; overflow:hidden; background:var(--bg-color); }
 
     /* Canvas centered; JS sizes pixel buffer */

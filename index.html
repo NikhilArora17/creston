@@ -18,14 +18,14 @@
 
       /* Widget sizing + independent margins (visual px) */
       --ui-scale: 2.0;      /* overall widget scale */
-      --top-gap:  24px;     /* distance from top-left wrapper to edges */
+      --top-gap:  24px;     /* distance from top wrappers to edges */
       --left-gap: 24px;
-      --right-gap: 24px;    /* distance from bottom-right wrapper to edges */
+      --right-gap: 24px;
       --bottom-gap:24px;
 
       /* Card widths (unscaled logical px) */
-      --widget-width: 200px;
-      --news-width:   200px;
+      --widget-width: 280px; /* weather/aqi */
+      --news-width:   320px; /* news/qr */
     }
 
     html, body {
@@ -52,7 +52,7 @@
     .badge{ position:absolute; right:24px; bottom:20px; color:#fff; opacity:0; font:200 14px 'Manrope',sans-serif; }
     @media (prefers-reduced-motion: reduce){ :root{ --transition-duration: 0s; } }
 
-    /* === LEFT widgets column (Weather + AQI) === */
+    /* === LEFT column (Weather + AQI) === */
     .widgets-left{
       position: fixed;
       top:  calc(var(--top-gap)  / var(--ui-scale));
@@ -64,16 +64,15 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* === BOTTOM-RIGHT (News) === */
-    .widgets-br{
+    /* === RIGHT column (News + QR) === */
+    .widgets-right{
       position: fixed;
-      right:  calc(var(--right-gap)  / var(--ui-scale));
-      bottom: calc(var(--bottom-gap) / var(--ui-scale));
+      top:   calc(var(--top-gap)   / var(--ui-scale));
+      right: calc(var(--right-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
-      display:flex; flex-direction:column; gap:12px; align-items:flex-end;
+      display:flex; flex-direction:column; gap:14px; align-items:flex-end;
       transform: scale(var(--ui-scale)) translateZ(0);
-      transform-origin: bottom right;
-      -webkit-font-smoothing: antialiased;
+      transform-origin: top right;
     }
 
     /* Card base */
@@ -98,79 +97,7 @@
       font-size: 13px; letter-spacing:.3px;
     }
 
-    /* ===== Weather card ===== */
-    #weatherCard{ width: var(--widget-width); }
-    #weatherCard .weather-row{
-      display:flex; flex-direction:column; gap:6px; align-items:flex-start;
-      padding: 10px 12px 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-      margin-bottom: 10px;
-    }
-    #weatherCard .weather-icon{
-      font-size: 24px; line-height:1;
-      width: 100%; text-align: center; align-self: center; margin-top: 2px;
-    }
-    #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
-    #weatherCard .weather-desc{ font-size: 13px; opacity:.92; }
-
-    #weatherCard .weather-forecast{ display: grid; grid-template-columns: 1fr; gap: 8px; }
-    #weatherCard .forecast-item{
-      display:grid;
-      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp */
-      align-items:center;
-      padding: 8px 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 14px;
-    }
-    #weatherCard .forecast-time{ font-size: 12px; opacity:.9; }
-    #weatherCard .wx{
-      display:flex; align-items:center; justify-content:center;
-      width:40px; height:20px; margin:0 auto;
-      text-align:center;
-    }
-    #weatherCard .forecast-temp{
-      justify-self:end;
-      font-size: 13px; padding: 6px 8px; min-width: 42px; text-align:center;
-      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95;
-    }
-
-    /* ===== AQI card ===== */
-    #aqiCard{ width: var(--widget-width); }
-    #aqiCard .aqi-body{
-      display:flex; flex-direction:column; gap:8px; align-items:center;
-      padding: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 16px;
-    }
-    #aqiValue{ font-size:40px; line-height:1; }
-    #aqiCat{ font-size:13px; opacity:.92; }
-    #aqiBadge{
-      font-size:12px; padding:4px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      line-height:1;
-    }
-    .aqi-bar{
-      width:100%; height:6px; border-radius:4px;
-      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
-      opacity:.75; position: relative; overflow:hidden;
-    }
-    .aqi-pointer{
-      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%;
-    }
-    .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
-    .pill{
-      font-size:11px; padding:6px 8px; border-radius:10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-    .pill strong{ font-weight:400; margin-left:6px; }
-
-    /* ======= News (bottom-right) ======= */
+    /* ===== News card (top-right) ===== */
     #newsCard{
       width: var(--news-width);
       border-radius: 22px;
@@ -204,13 +131,106 @@
     .news-fade-enter{ opacity: 0; transform: translateY(6px); }
     .news-fade-leave{ opacity: 0; transform: translateY(-6px); }
     .news-fade{ transition: opacity .35s ease, transform .35s ease; }
-    .news-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
-    .news-btn{
-      font-size: 12px; padding:6px 10px; border-radius: 12px;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-      cursor:pointer; user-select:none;
+
+    /* Pagination dots */
+    .news-dots{
+      display:flex; gap:6px; justify-content:center; margin-top:10px;
     }
-    .news-btn:active{ transform: translateY(1px); }
+    .news-dot{
+      width:6px; height:6px; border-radius:3px; background:#fff6; cursor:pointer;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .news-dot.active{ background:#fff; transform: scale(1.25); }
+
+    /* ===== QR card (top-right under news) ===== */
+    #qrCard{ width: var(--news-width); }
+    #qrCard .qr-body{
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      text-align:center;
+    }
+    #qrImage{
+      width:100%; max-width:260px; aspect-ratio:1/1; object-fit:contain;
+      border-radius:12px; background:#fff; padding:10px;
+    }
+    #qrCaption{ font-size:13px; opacity:.9; }
+    #qrLink{ color:#eef1f5; text-decoration:underline; }
+
+    /* ===== Weather card (left) ===== */
+    #weatherCard{ width: var(--widget-width); }
+    #weatherCard .weather-row{
+      display:flex; flex-direction:column; gap:6px; align-items:flex-start;
+      padding: 10px 12px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      margin-bottom: 10px;
+    }
+    #weatherCard .weather-icon{
+      font-size: 24px; line-height:1;
+      width: 100%; text-align: center; align-self: center; margin-top: 2px;
+      /* colored icons: NO grayscale filter */
+    }
+    #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
+    #weatherCard .weather-desc{ font-size: 13px; opacity:.92; }
+
+    #weatherCard .weather-forecast{ display: grid; grid-template-columns: 1fr; gap: 8px; }
+    #weatherCard .forecast-item{
+      display:grid;
+      grid-template-columns: 1fr 40px 48px;  /* time | icon | temp */
+      align-items:center;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+    }
+    #weatherCard .forecast-time{ font-size: 12px; opacity:.9; }
+    #weatherCard .wx{
+      display:flex; align-items:center; justify-content:center;
+      width:40px; height:20px; margin:0 auto; text-align:center;
+      /* colored icons: NO grayscale filter */
+    }
+    #weatherCard .forecast-temp{
+      justify-self:end;
+      font-size: 13px; padding: 6px 8px; min-width: 42px; text-align:center;
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; opacity:.95;
+    }
+
+    /* ===== AQI card (left) ===== */
+    #aqiCard{ width: var(--widget-width); }
+    #aqiCard .aqi-body{
+      display:flex; flex-direction:column; gap:8px; align-items:center;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+    }
+    #aqiValue{ font-size:40px; line-height:1; }
+    #aqiCat{ font-size:13px; opacity:.92; }
+    #aqiBadge{
+      font-size:12px; padding:4px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      line-height:1;
+    }
+    .aqi-bar{
+      width:100%; height:6px; border-radius:4px;
+      background: linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d);
+      opacity:.75; position: relative; overflow:hidden;
+    }
+    .aqi-pointer{
+      position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%;
+    }
+    .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
+    .pill{
+      font-size:11px; padding:6px 8px; border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .pill strong{ font-weight:400; margin-left:6px; }
   </style>
 </head>
 <body>
@@ -218,14 +238,13 @@
     <canvas id="glcanvas"></canvas>
     <div class="badge" id="badge"></div>
 
-    <!-- LEFT widgets column -->
+    <!-- LEFT column -->
     <div class="widgets-left">
-
       <!-- Weather -->
       <div class="card" id="weatherCard">
         <div class="card-header">
           <span>Weather</span>
-          <span id="weatherCity">—</span>
+          <span id="weatherCity">Sultanpur, India</span>
         </div>
         <div class="weather-row">
           <div class="weather-icon" id="weatherIcon" aria-hidden="true">☁️</div>
@@ -241,7 +260,7 @@
       <div class="card" id="aqiCard">
         <div class="card-header">
           <span>Air Quality</span>
-          <span id="aqiCity">—</span>
+          <span id="aqiCity">Sultanpur, India</span>
         </div>
         <div class="aqi-body">
           <div id="aqiBadge">AQI —</div>
@@ -256,8 +275,9 @@
       </div>
     </div>
 
-    <!-- BOTTOM-RIGHT: News -->
-    <div class="widgets-br">
+    <!-- RIGHT column -->
+    <div class="widgets-right">
+      <!-- News -->
       <div class="card" id="newsCard">
         <div class="card-header">
           <span>Headlines</span>
@@ -273,10 +293,18 @@
               <span id="newsTime">—</span>
             </div>
           </div>
-          <div class="news-actions">
-            <div class="news-btn" id="prevNews">Prev</div>
-            <div class="news-btn" id="nextNews">Next</div>
-          </div>
+          <div class="news-dots" id="newsDots"></div>
+        </div>
+      </div>
+
+      <!-- Instagram QR (under news) -->
+      <div class="card" id="qrCard">
+        <div class="card-header">
+          <span>Follow us on Instagram</span><span class="muted">@mcbee.in</span>
+        </div>
+        <div class="qr-body">
+          <img id="qrImage" alt="QR to Instagram" />
+          <div id="qrCaption">Scan the QR or visit <a id="qrLink" href="https://www.instagram.com/mcbee.in/" target="_blank" rel="noopener noreferrer">instagram.com/mcbee.in</a></div>
         </div>
       </div>
     </div>
@@ -285,16 +313,15 @@
 
   <script>
   // ========= Config =========
-  const CITY_NAME = "Sultanpur, Delhi, India";
-  const COUNTRY_CODE = "IN";
+  const CITY_LABEL = "Sultanpur, India";             // label only
+  const COORDS = { lat: 28.4959, lon: 77.1500 };     // fixed coords for Sultanpur
+  const INSTA_URL = "https://www.instagram.com/mcbee.in/";
 
   // Slideshow behaviour
   const ANIMATION_MODE = 'crossfade';  // 'crossfade' | 'wipe' | 'cut' | 'sand' (heavy)
   const RENDER_SCALE   = 0.75;         // 1 = full viewport res; lower to reduce GPU work
 
-  const FALLBACK_COORDS = { latitude: 28.4959, longitude: 77.1500, label: "Sultanpur, Delhi, India" };
-
-  // Slides (PNG supported)
+  // Slides (PNG/JPG supported)
   const IMAGES = [
     "images/slide1.png",
     "images/slide2.png",
@@ -473,6 +500,7 @@
 
     initWeatherAndAQI();
     initNews();
+    initQR();
   }
 
   function loop(now){
@@ -495,40 +523,19 @@
   }
 
   // ===== Weather + AQI =====
-  async function resolveLocation(q, countryCode=""){
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=en&format=json`;
-    const geo = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
-    if (geo && geo.results && geo.results.length){
-      const byDelhi = geo.results.find(r => /delhi/i.test(r.admin1 || ""));
-      const byIN    = geo.results.find(r => (r.country_code || "").toUpperCase() === (countryCode || "IN").toUpperCase());
-      const pick    = byDelhi || byIN || geo.results[0];
-      return { latitude: pick.latitude, longitude: pick.longitude, label: [pick.name, pick.country].filter(Boolean).join(', ') };
-    }
-    throw new Error("No geocoding match");
-  }
-
   async function initWeatherAndAQI(){
     try{
-      const place = await resolveLocation(CITY_NAME, COUNTRY_CODE);
-      document.getElementById('weatherCity').textContent = place.label;
-      document.getElementById('aqiCity').textContent     = place.label;
+      document.getElementById('weatherCity').textContent = CITY_LABEL;
+      document.getElementById('aqiCity').textContent     = CITY_LABEL;
 
-      const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
+      const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${COORDS.lat}&longitude=${COORDS.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
       const wdata = await fetch(wurl, {cache:'no-cache'}).then(r=>r.json());
       renderWeather(wdata);
 
-      await fetchAQI(place.latitude, place.longitude);
-    }catch(err){
-      document.getElementById('weatherCity').textContent = FALLBACK_COORDS.label;
-      document.getElementById('aqiCity').textContent     = FALLBACK_COORDS.label;
-      try{
-        const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${FALLBACK_COORDS.latitude}&longitude=${FALLBACK_COORDS.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
-        const wdata = await fetch(wurl, {cache:'no-cache'}).then(r=>r.json());
-        renderWeather(wdata);
-        await fetchAQI(FALLBACK_COORDS.latitude, FALLBACK_COORDS.longitude);
-      }catch(e){
-        document.getElementById('weatherDesc').textContent = 'Weather unavailable';
-      }
+      await fetchAQI(COORDS.lat, COORDS.lon);
+    }catch(e){
+      document.getElementById('weatherDesc').textContent = 'Weather unavailable';
+      document.getElementById('aqiCat').textContent = 'Unavailable';
     }
   }
 
@@ -582,7 +589,6 @@
     if (aqi <= 300)  return {label:'Very Unhealthy',        color:'#9b59b6', pos: (aqi/500)*100};
     return            {label:'Hazardous',                   color:'#7f1d1d', pos: Math.min(100,(aqi/500)*100)};
   }
-
   async function fetchAQI(lat, lon){
     try{
       const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
@@ -606,8 +612,9 @@
     }
   }
 
-  // ===== GENERAL NEWS with IMAGES =====
+  // ===== GENERAL NEWS with IMAGES (auto-rotate + dots) =====
   const NEWS_ROTATE_MS = 10000;
+  const MAX_NEWS = 8; // keep dots sane
 
   function prettyTime(ds){
     if(!ds) return "just now";
@@ -660,6 +667,25 @@
 
   let newsList = []; let newsIndex = 0; let newsTimer;
 
+  function buildDots(){
+    const dots = document.getElementById('newsDots');
+    dots.innerHTML = '';
+    newsList.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'news-dot' + (i===newsIndex ? ' active' : '');
+      d.addEventListener('click', () => {
+        newsIndex = i;
+        renderNews();
+        resetNewsTimer();
+      });
+      dots.appendChild(d);
+    });
+  }
+  function updateDots(){
+    const dots = document.querySelectorAll('#newsDots .news-dot');
+    dots.forEach((el, i)=> el.classList.toggle('active', i===newsIndex));
+  }
+
   function setNewsSlide(item){
     const link = document.getElementById('newsLink');
     const src  = document.getElementById('newsSourceInline');
@@ -691,6 +717,7 @@
       cont.classList.remove('news-fade-leave');
       cont.classList.add('news-fade-enter');
       setTimeout(()=>cont.classList.remove('news-fade-enter'), 130);
+      updateDots();
     }, 130);
   }
 
@@ -699,9 +726,12 @@
     newsIndex = (newsIndex + dir + newsList.length) % newsList.length;
     renderNews();
   }
+  function resetNewsTimer(){
+    clearInterval(newsTimer);
+    newsTimer = setInterval(()=> stepNews(+1), 10000);
+  }
 
   async function initNews(){
-    // Try Guardian first, then Reddit fallback
     let all = [];
     try { all = await fetchGuardian(30); } catch(e){ console.warn('Guardian failed', e); }
     if(!all.length){
@@ -712,15 +742,20 @@
     }
 
     all.sort((a,b)=> new Date(b.date) - new Date(a.date));
-    newsList = all.slice(0, 60);
+    newsList = all.slice(0, 8);
     newsIndex = 0;
-    renderNews();
+    setNewsSlide(newsList[0]);
+    buildDots();
+    resetNewsTimer();
+  }
 
-    document.getElementById('prevNews').onclick = ()=> stepNews(-1);
-    document.getElementById('nextNews').onclick = ()=> stepNews(+1);
-
-    clearInterval(newsTimer);
-    newsTimer = setInterval(()=> stepNews(+1), 10000); // 10s auto-rotate
+  // ===== Instagram QR =====
+  function initQR(){
+    const url = encodeURIComponent(INSTA_URL);
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${url}`;
+    const img = document.getElementById('qrImage');
+    img.src = qrSrc;
+    document.getElementById('qrLink').href = INSTA_URL;
   }
   // =======================================
 

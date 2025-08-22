@@ -59,8 +59,9 @@
       left: calc(var(--left-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-start;
-      transform: scale(var(--ui-scale));
+      transform: scale(var(--ui-scale)) translateZ(0);
       transform-origin: top left;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* === BOTTOM-RIGHT (News) === */
@@ -70,8 +71,9 @@
       bottom: calc(var(--bottom-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:12px; align-items:flex-end;
-      transform: scale(var(--ui-scale));
+      transform: scale(var(--ui-scale)) translateZ(0);
       transform-origin: bottom right;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* Card base */
@@ -108,7 +110,7 @@
     }
     #weatherCard .weather-icon{
       font-size: 24px; line-height:1;
-      filter: grayscale(1) contrast(1.05) brightness(1.05);
+      /* full-color icons (no grayscale) */
       width: 100%; text-align: center; align-self: center; margin-top: 2px;
     }
     #weatherCard .weather-temp{ font-size: 42px; line-height:1; font-weight:200; margin-top: 2px; }
@@ -128,7 +130,7 @@
     #weatherCard .wx{
       display:flex; align-items:center; justify-content:center;
       width:40px; height:20px; margin:0 auto;
-      filter: grayscale(1) contrast(1.05) brightness(1.05);
+      /* full-color icons (no grayscale) */
       text-align:center;
     }
     #weatherCard .forecast-temp{
@@ -260,7 +262,7 @@
     <div class="widgets-br">
       <div class="card" id="newsCard">
         <div class="card-header">
-          <span>Tech News</span>
+          <span>News</span>
           <span id="newsSource">updating…</span>
         </div>
         <div class="news-slide">
@@ -300,15 +302,13 @@
     "images/slide3.png",
     "images/slide4.png",
     "images/slide5.png",
-   
-  
   ];
 
   // CSS var readers
   function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
   function readSeconds(name, fallback){ const v = cssVar(name); const n = parseFloat((v||'').replace('s','')); return isFinite(n)?n*1000:fallback*1000; }
 
-  // Declare ONCE (bug before was double-declaring these)
+  // Declare ONCE
   const SLIDE_MS      = readSeconds('--slide-duration', 6);
   const TRANSITION_MS = readSeconds('--transition-duration', 1.6);
 
@@ -445,28 +445,45 @@
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     return tex; }
+  function createBlankTexture(){
+    const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    const pixel = new Uint8Array([0,0,0,255]);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,pixel);
+    return tex;
+  }
   async function loadImage(src){ return new Promise((res, rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
 
   let images=[], textures=[];
-  (async()=>{ images = await Promise.all(IMAGES.map(loadImage)); textures = images.map(createTexture); start(); })().catch(console.error);
+  (async()=>{
+    try{
+      images = await Promise.all(IMAGES.map(loadImage));
+      textures = images.map(createTexture);
+    }catch(e){
+      console.warn('Image load failed, using blank texture', e);
+      textures = [createBlankTexture(), createBlankTexture()];
+    } finally {
+      start();                 // ALWAYS start widgets + render loop
+    }
+  })();
 
   // Slideshow engine
-  let currentIndex = 0, nextIndex = (currentIndex + 1) % IMAGES.length;
+  let currentIndex = 0, nextIndex = 1;
   let phase = 'dwell', phaseEnd = performance.now();
+  let widgetsStarted = false;
 
   function bindTextures(i0, i1){
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[i0]); gl.uniform1i(loc.uTex0, 0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[i1]); gl.uniform1i(loc.uTex1, 1);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[i0 % textures.length]); gl.uniform1i(loc.uTex0, 0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[i1 % textures.length]); gl.uniform1i(loc.uTex1, 1);
   }
 
   function start(){
+    if(!widgetsStarted){ widgetsStarted = true; initWeatherAndAQI(); initNews(); } // ensure widgets even if images failed
+    if(textures.length < 2) textures.push(textures[0]); // safe pair
+
     bindTextures(currentIndex, nextIndex);
     phase = 'dwell'; phaseEnd = performance.now() + SLIDE_MS;
     gl.uniform1f(loc.uProgress, 0.0);
     requestAnimationFrame(loop);
-
-    initWeatherAndAQI();
-    initNews();
   }
 
   function loop(now){
@@ -476,7 +493,7 @@
 
     if(now >= phaseEnd){
       if(phase === 'dwell'){ phase='transition'; phaseEnd=now+TRANSITION_MS; bindTextures(currentIndex,nextIndex); }
-      else{ currentIndex=nextIndex; nextIndex=(currentIndex+1)%IMAGES.length; bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); }
+      else{ currentIndex=nextIndex; nextIndex=(currentIndex+1)%textures.length; bindTextures(currentIndex,nextIndex); phase='dwell'; phaseEnd=now+SLIDE_MS; gl.uniform1f(loc.uProgress,0.0); }
     }
 
     if(phase === 'transition'){
@@ -495,7 +512,7 @@
   // ===== Weather + AQI =====
   async function resolveLocation(q, countryCode=""){
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=10&language=en&format=json`;
-    const geo = await fetch(url).then(r=>r.json());
+    const geo = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
     if (geo && geo.results && geo.results.length){
       const byDelhi = geo.results.find(r => /delhi/i.test(r.admin1 || ""));
       const byIN    = geo.results.find(r => (r.country_code || "").toUpperCase() === (countryCode || "IN").toUpperCase());
@@ -512,7 +529,7 @@
       document.getElementById('aqiCity').textContent     = place.label;
 
       const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
-      const wdata = await fetch(wurl).then(r=>r.json());
+      const wdata = await fetch(wurl, {cache:'no-cache'}).then(r=>r.json());
       renderWeather(wdata);
 
       await fetchAQI(place.latitude, place.longitude);
@@ -521,7 +538,7 @@
       document.getElementById('aqiCity').textContent     = FALLBACK_COORDS.label;
       try{
         const wurl = `https://api.open-meteo.com/v1/forecast?latitude=${FALLBACK_COORDS.latitude}&longitude=${FALLBACK_COORDS.longitude}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
-        const wdata = await fetch(wurl).then(r=>r.json());
+        const wdata = await fetch(wurl, {cache:'no-cache'}).then(r=>r.json());
         renderWeather(wdata);
         await fetchAQI(FALLBACK_COORDS.latitude, FALLBACK_COORDS.longitude);
       }catch(e){
@@ -584,7 +601,7 @@
   async function fetchAQI(lat, lon){
     try{
       const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
-      const data = await fetch(url).then(r=>r.json());
+      const data = await fetch(url, {cache:'no-cache'}).then(r=>r.json());
       const aqi  = data?.current?.us_aqi;
       const pm25 = data?.current?.pm2_5;
       const pm10 = data?.current?.pm10;
@@ -604,8 +621,8 @@
     }
   }
 
-  // ===== Tech News (HackerNews + Reddit) =====
-  const NEWS_ROTATE_MS = 12000;
+  // ===== News (HackerNews + Reddit). AUTO ROTATE every 10s. Robust even if sources fail. =====
+  const NEWS_ROTATE_MS = 10000;
 
   function prettyTime(ds){
     if(!ds) return "just now";
@@ -619,10 +636,11 @@
   }
 
   async function fetchHN(count=25){
-    const ids = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json').then(r=>r.json());
-    const head = ids.slice(0, count);
+    const ids = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json',{cache:'no-cache'}).then(r=>r.json());
+    const head = (ids||[]).slice(0, count);
     const items = await Promise.all(head.map(id =>
-      fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r=>r.json()).catch(()=>null)
+      fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,{cache:'no-cache'})
+        .then(r=>r.json()).catch(()=>null)
     ));
     return items.filter(Boolean).map(it=>({
       title: it.title,
@@ -633,12 +651,13 @@
   }
 
   async function fetchReddit(count=20){
-    const json = await fetch(`https://www.reddit.com/r/technology/top.json?limit=${count}&t=day`).then(r=>r.json());
+    const json = await fetch(`https://www.reddit.com/r/worldnews/top.json?limit=${count}&t=day`,{cache:'no-cache'})
+      .then(r=>r.json());
     return (json.data?.children||[]).map(({data})=>({
       title: data.title,
       link: data.url_overridden_by_dest || ('https://www.reddit.com' + data.permalink),
       date: data.created_utc ? new Date(data.created_utc*1000).toISOString() : '',
-      source: 'r/technology'
+      source: 'r/worldnews'
     }));
   }
 
@@ -675,21 +694,28 @@
   }
 
   async function initNews(){
-    setNewsSlide({title:'Loading headlines…', link:'#', date:'', source:''});
+    // show immediate placeholder (already in DOM)
     let all = [];
-    try { all = all.concat(await fetchHN(25)); } catch(e){}
-    try { all = all.concat(await fetchReddit(20)); } catch(e){}
-    if(!all.length){ all = [{ title:'Tech widget initialized (no feeds reachable)', link:'#', date:new Date().toISOString(), source:'Local' }]; }
+    try { all = all.concat(await fetchHN(25)); } catch(e){ console.warn('HN failed', e); }
+    try { all = all.concat(await fetchReddit(20)); } catch(e){ console.warn('Reddit failed', e); }
+
+    if(!all.length){
+      all = [{ title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local' }];
+    }
+
     all.sort((a,b)=> new Date(b.date) - new Date(a.date));
     newsList = all.slice(0, 60);
     newsIndex = 0;
     renderNews();
+
     document.getElementById('prevNews').onclick = ()=> stepNews(-1);
     document.getElementById('nextNews').onclick = ()=> stepNews(+1);
+
     clearInterval(newsTimer);
     newsTimer = setInterval(()=> stepNews(+1), NEWS_ROTATE_MS);
   }
   // =======================================
+
   </script>
 </body>
 </html>

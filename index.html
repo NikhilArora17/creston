@@ -17,12 +17,12 @@
       /* Global widget scale + margins (screen-px) */
       --ui-scale: 2.0;
       --top-gap:  500px;       /* vertical gap for both columns */
-      --left-gap: 24px;        /* left column distance from edge */
-      --right-gap: 24px;       /* right column distance from edge */
+      --left-gap: 24px;       /* left column distance from edge */
+      --right-gap: 24px;      /* right column distance from edge */
 
       /* Card widths (unscaled logical px) */
-      --widget-width: 164px;   /* Weather / Time / AQI */
-      --news-width:   164px;   /* News / QR / Calendar */
+      --widget-width: 164px;  /* Weather / Time / AQI */
+      --news-width:   164px;  /* News / QR / Calendar */
 
       /* Logo placement (top-center) */
       --logo-top-gap:  250px;
@@ -54,28 +54,7 @@
     }
     .logo-wrap img{ height:var(--logo-height); width:auto; display:block; }
 
-    /* ===== Daily Quote (BOTTOM–CENTER, opposite logo) ===== */
-    .quote-wrap{
-      position:fixed;
-      bottom:var(--logo-top-gap);     /* same gap from the edge as the logo */
-      left:50%;
-      transform:translateX(-50%);
-      z-index:1200;
-      pointer-events:none;            /* sits above background only */
-    }
-    .quote-card{
-      max-width:720px;
-      padding:12px 16px;
-      border-radius:16px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(6px);
-      -webkit-backdrop-filter:blur(6px);
-      color:#eef1f5;
-      pointer-events:auto;           /* allows text selection if needed */
-    }
-    .quote-text{ font-weight:400; font-size:14px; line-height:1.4; }
-    .quote-author{ margin-top:6px; font-size:12px; opacity:.85; }
+
 
     /* ===== LEFT column (Weather → Time → AQI) ===== */
     .widgets-left{
@@ -130,36 +109,54 @@
     #weatherCard .weather-temp{ font-size:42px; line-height:1; font-weight:200; margin-top:2px; }
     #weatherCard .weather-desc{ font-size:13px; opacity:.92; }
     #weatherCard .weather-forecast{ display:grid; grid-template-columns:1fr; gap:8px; }
-    #weatherCard .forecast-item{
-      display:grid;
-      grid-template-columns:1fr 56px 48px;  /* icon chip = 56px */
-      align-items:center;
-      padding:8px 10px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-    }
+   #weatherCard .forecast-item{
+  display:grid;
+  grid-template-columns:1fr 56px 48px;  /* icon chip = 56px */
+  align-items:center;
+  padding:8px 10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+}
+
     #weatherCard .forecast-time{ font-size:12px; opacity:.9; }
     #weatherCard .wx{
-      display:grid; place-items:center;
-      width:36px; height:32px; background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10); border-radius:10px;
-      line-height:0; font-size:20px; transform:translateY(1px);
-    }
+  /* center perfectly */
+  display:grid;
+  place-items:center;
+
+  /* make the chip itself */
+  width:36px;
+  height:32px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
+
+  /* kill baseline shift on emoji */
+  line-height:0;
+  font-size:20px;
+
+  /* tiny vertical nudge for optical centering (emoji fonts vary) */
+  transform:translateY(1px);
+}
+
 
     #weatherCard .forecast-temp{
       justify-self:end; font-size:13px; padding:6px 8px; min-width:42px; text-align:center;
       background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12); border-radius:10px; opacity:.95;
     }
 
-    /* ===== TIME ===== */
+    /* ===== TIME (replaces old left extra) ===== */
     #timeCard{ width:var(--widget-width); }
     .time-body{
       padding:12px; background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
     }
-    .clock{ font-weight:400; letter-spacing:.5px; display:flex; align-items:baseline; gap:6px; }
+    .clock{
+      font-weight:400; letter-spacing:.5px;
+      display:flex; align-items:baseline; gap:6px;
+    }
     .clock .hhmm{ font-size:36px; line-height:1; }
     .clock .ss{ font-size:16px; opacity:.85; }
     .clock .ampm{ font-size:14px; opacity:.85; }
@@ -181,7 +178,7 @@
     .pill{ font-size:11px; padding:6px 8px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
     .pill strong{ font-weight:400; margin-left:6px; }
 
-    /* ===== News ===== */
+    /* ===== News (with image) ===== */
     #newsCard{ width:var(--news-width); }
     #newsCard .card-header{ margin-bottom:6px; }
     .news-slide{
@@ -224,6 +221,31 @@
     }
     .cal-cell.muted{ opacity:.45; }
     .cal-cell.today{ background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.35); font-weight:600; }
+
+    /* ===== Bottom-center Quote (no box) ===== */
+   /* ===== Quote (BOTTOM–CENTER) ===== */
+.quote-wrap {
+  position: fixed;
+  bottom: 500px;        /* distance from bottom edge */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  text-align: center;
+  max-width: 80%;
+  pointer-events: none;
+}
+.quote-text {
+  font-size: 60px;     /* size of the quote text */
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.4;
+}
+.quote-author {
+  margin-top: 8px;
+  font-size: 36px;     /* size of the author name */
+  font-weight: 300;
+  color: #b1b5c0;      
+
   </style>
 </head>
 <body>
@@ -233,14 +255,6 @@
 
     <!-- TOP-CENTER LOGO -->
     <div class="logo-wrap"><img src="images/logo1.png" alt="Logo" id="logo1" /></div>
-
-    <!-- BOTTOM-CENTER DAILY QUOTE -->
-    <div class="quote-wrap">
-      <div class="quote-card">
-        <div id="quoteText" class="quote-text">—</div>
-        <div id="quoteAuthor" class="quote-author">—</div>
-      </div>
-    </div>
 
     <!-- LEFT column -->
     <div class="widgets-left">
@@ -318,19 +332,28 @@
       </div>
 
       <!-- CALENDAR -->
-      <div class="card" id="calendarCard">
-        <div class="card-header"><span>Today</span></div>
-        <div class="cal-body today-body">
-          <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
-        background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
-        font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">
-        —
-      </div>
-          <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
-          <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
-        </div>
-      </div>
+      <!-- CALENDAR -->
+<!-- CALENDAR -->
+<div class="card" id="calendarCard">
+  <div class="card-header"><span>Today</span></div>
+  <div class="cal-body today-body">
+    <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
+  background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
+  font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">
+  —
+</div>
+    <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
+    <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
+  </div>
+</div>
+
+    <!-- BOTTOM-CENTER DAILY QUOTE -->
+    <div class="quote-wrap">
+      <div id="quoteText" class="quote-text">—</div>
+      <div id="quoteAuthor" class="quote-author">—</div>
     </div>
+
+  </div>
 
   <script>
   /* ========= CONFIG ========= */
@@ -374,7 +397,7 @@
     void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
       vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); frag = (t<.999)?c0:c1; }`; }
   function compile(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
-  function program(vsSrc,fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc)); gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(s)); return p; }
+  function program(vsSrc,fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc)); gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
   const prog=program(vs,fsFor(ANIMATION_MODE)); gl.useProgram(prog);
   const loc={a:gl.getUniformLocation(prog,'a'), b:gl.getUniformLocation(prog,'b'), res:gl.getUniformLocation(prog,'res'), t:gl.getUniformLocation(prog,'t')};
   gl.bindVertexArray(gl.createVertexArray());
@@ -484,63 +507,76 @@
   function initClock(){ tickClock(); setInterval(tickClock,1000); }
 
   /* ========= Calendar ========= */
-  function renderCalendar() {
-    const now = new Date();
-    const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
-    const daynum  = now.getDate();
-    const month   = now.toLocaleDateString(undefined,{ month: 'short' });
+  /* ========= Calendar (Today only) ========= */
+function renderCalendar() {
+  const now = new Date();
+  const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
+  const daynum  = now.getDate();
+  const month   = now.toLocaleDateString(undefined,{ month: 'short' });
 
-    document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
-    const todayDay = document.getElementById('todayDay');
-    todayDay.textContent = daynum;
-    todayDay.style.color = "#ffffff";
-    const todayWeekday = document.getElementById('todayWeekday');
-    todayWeekday.textContent = weekday;
-    todayWeekday.style.color = "#ee0979";
-  }
+  // Badge text
+  document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
 
-  /* ========= Daily Quote (31 items; one per day) ========= */
+  // Vibrant day number
+  const todayDay = document.getElementById('todayDay');
+  todayDay.textContent = daynum;
+  todayDay.style.color = "#ffffff";   // white
+
+  // Vibrant weekday
+  const todayWeekday = document.getElementById('todayWeekday');
+  todayWeekday.textContent = weekday;
+  todayWeekday.style.color = "#ee0979";  // pink accent
+}
+
+  /* ========= Daily Quote (no box) ========= */
   const QUOTES = [
     {t:"Innovation distinguishes between a leader and a follower.", a:"Steve Jobs"},
     {t:"The best way to predict the future is to invent it.", a:"Alan Kay"},
-    {t:"Automation applied to an efficient operation magnifies the efficiency.", a:"Bill Gates"},
-    {t:"Design is not just what it looks like and feels like. Design is how it works.", a:"Steve Jobs"},
-    {t:"Move fast and build things—then make them reliable.", a:"Engineering Maxim"},
-    {t:"Simplicity is the ultimate sophistication.", a:"Leonardo da Vinci"},
-    {t:"First, solve the problem. Then, write the code.", a:"John Johnson"},
-    {t:"Good design is as little design as possible.", a:"Dieter Rams"},
-    {t:"If you can't measure it, you can't improve it.", a:"Peter Drucker"},
-    {t:"The details are not the details. They make the design.", a:"Charles Eames"},
-    {t:"Focus on the user and all else will follow.", a:"Google Principle"},
-    {t:"Premature optimization is the root of all evil.", a:"Donald Knuth"},
-    {t:"Make it work, make it right, make it fast.", a:"Kent Beck"},
-    {t:"Perfection is achieved when there is nothing left to take away.", a:"Antoine de Saint-Exupéry"},
-    {t:"The only way to do great work is to love what you do.", a:"Steve Jobs"},
-    {t:"Every great design begins with an even better story.", a:"Lorinda Mamo"},
     {t:"Your most unhappy customers are your greatest source of learning.", a:"Bill Gates"},
-    {t:"Today's constraints are tomorrow's competitive advantages.", a:"Ops Principle"},
-    {t:"Data beats opinion.", a:"Jeff Bezos"},
-    {t:"If something is important enough, you do it even if the odds are not in your favor.", a:"Elon Musk"},
-    {t:"Don’t make me think.", a:"Steve Krug"},
-    {t:"Innovation happens when people are free to think, experiment and speculate.", a:"Sir Tim Berners-Lee"},
-    {t:"The quieter you become, the more you can hear—listen to your users.", a:"Design Principle"},
+    {t:"First, solve the problem. Then, write the code.", a:"John Johnson"},
+    {t:"Programs must be written for people to read, and only incidentally for machines to execute.", a:"Harold Abelson"},
+    {t:"Any sufficiently advanced technology is indistinguishable from magic.", a:"Arthur C. Clarke"},
+    {t:"Creativity is intelligence having fun.", a:"Albert Einstein"},
+    {t:"Design is intelligence made visible.", a:"Alina Wheeler"},
+    {t:"Design creates culture. Culture shapes values. Values determine the future.", a:"Robert L. Peters"},
+    {t:"Move fast and break things.", a:"Mark Zuckerberg"},
+    {t:"Simplicity is the ultimate sophistication.", a:"Leonardo da Vinci"},
+    {t:"The details are not the details. They make the design.", a:"Charles Eames"},
+    {t:"The only way to do great work is to love what you do.", a:"Steve Jobs"},
+    {t:"Technology like art is a soaring exercise of the human imagination.", a:"Daniel Bell"},
+    {t:"If you can't measure it, you can't improve it.", a:"Peter Drucker"},
+    {t:"Good design is as little design as possible.", a:"Dieter Rams"},
+    {t:"Fall in love with the problem, not the solution.", a:"Uri Levine"},
+    {t:"The only constant in the technology industry is change.", a:"Marc Benioff"},
+    {t:"It’s not a faith in technology. It’s faith in people.", a:"Steve Jobs"},
+    {t:"The question isn’t who is going to let me; it’s who is going to stop me.", a:"Ayn Rand"},
     {t:"Great things are done by a series of small things brought together.", a:"Vincent van Gogh"},
-    {t:"The purpose of automation is to elevate humans, not replace them.", a:"Tech Ethic"},
-    {t:"Quality is not an act, it is a habit.", a:"Aristotle"},
-    {t:"Ship early. Learn. Iterate.", a:"Product Maxim"},
-    {t:"Everything should be made as simple as possible, but not simpler.", a:"Albert Einstein"},
-    {t:"Users don’t remember clicks, they remember outcomes.", a:"UX Principle"},
-    {t:"Culture eats strategy for breakfast—build teams that care.", a:"Peter Drucker"},
-    {t:"Design adds value faster than it adds costs.", a:"Joel Spolsky"}
+    {t:"The real test is not whether you avoid failure, but whether you learn from it.", a:"Barack Obama"},
+    {t:"If you are not embarrassed by the first version of your product, you’ve launched too late.", a:"Reid Hoffman"},
+    {t:"Innovation is saying no to a thousand things.", a:"Steve Jobs"},
+    {t:"Design is not just what it looks like and feels like. Design is how it works.", a:"Steve Jobs"},
+    {t:"The most dangerous phrase in the language is: 'We've always done it this way.'", a:"Grace Hopper"},
+    {t:"What one programmer can do in one month, two programmers can do in two months.", a:"Fred Brooks"},
+    {t:"Stay hungry, stay foolish.", a:"Steve Jobs"},
+    {t:"The true sign of intelligence is not knowledge but imagination.", a:"Albert Einstein"},
+    {t:"Success is a lousy teacher. It seduces smart people into thinking they can't lose.", a:"Bill Gates"},
+    {t:"Art challenges technology, and technology inspires art.", a:"John Lasseter"}
   ];
 
   function setDailyQuote(){
-    const d = new Date().getDate();            // 1..31
+    const d = new Date().getDate();
     const idx = (d - 1) % QUOTES.length;
     const q = QUOTES[idx];
     document.getElementById('quoteText').textContent = `“${q.t}”`;
     document.getElementById('quoteAuthor').textContent = `— ${q.a}`;
   }
+
   </script>
+    <!-- BOTTOM-CENTER DAILY QUOTE -->
+  <div class="quote-wrap">
+    <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
+    <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
+  </div>
+
 </body>
 </html>

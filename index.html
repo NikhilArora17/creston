@@ -16,7 +16,8 @@
 
       /* Global widget scale + margins (screen-px) */
       --ui-scale: 2.0;
-      --top-gap:  500px;       /* vertical gap for both columns */
+      --left-top-gap: 400px;   /* vertical gap for left column */
+    --right-top-gap: 500px;  /* vertical gap for right column */     /* vertical gap for both columns */
       --left-gap: 24px;       /* left column distance from edge */
       --right-gap: 24px;      /* right column distance from edge */
 
@@ -59,7 +60,8 @@
     /* ===== LEFT column (Weather → Time → AQI) ===== */
     .widgets-left{
       position:fixed;
-      top:calc((var(--top-gap) + var(--logo-height) + 10px) / var(--ui-scale)); /* sits under centered logo */
+      top:calc((var(--left-top-gap) + var(--logo-height) + 10px) / var(--ui-scale));
+
       left:calc(var(--left-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-start;
@@ -70,7 +72,7 @@
     /* ===== RIGHT column (News → QR → Calendar) ===== */
     .widgets-right{
       position:fixed;
-      top:calc(var(--top-gap) / var(--ui-scale));
+      top:calc(var(--right-top-gap) / var(--ui-scale));
       right:calc(var(--right-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-end;

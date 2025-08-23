@@ -276,14 +276,22 @@
       </div>
 
       <!-- CALENDAR -->
-      <div class="card" id="calendarCard">
-        <div class="card-header"><span>Calendar</span><span id="calMonthLabel" class="muted">—</span></div>
-        <div class="cal-body">
-          <div class="cal-grid" id="calGrid"></div>
-        </div>
-      </div>
-    </div>
+      <!-- CALENDAR -->
+<!-- CALENDAR -->
+<div class="card" id="calendarCard">
+  <div class="card-header"><span>Today</span></div>
+  <div class="cal-body today-body">
+    <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
+  background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
+  font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">
+  —
+</div>
+    <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
+    <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
   </div>
+</div>
+
+
 
   <script>
   /* ========= CONFIG ========= */
@@ -437,18 +445,33 @@
   function initClock(){ tickClock(); setInterval(tickClock,1000); }
 
   /* ========= Calendar ========= */
-  function renderCalendar(baseDate){
-    const grid=document.getElementById('calGrid'); const label=document.getElementById('calMonthLabel'); grid.innerHTML='';
-    const y=baseDate.getFullYear(), m=baseDate.getMonth(); label.textContent = baseDate.toLocaleDateString(undefined,{month:'long', year:'numeric'});
-    const first=new Date(y,m,1), last=new Date(y,m+1,0);
-    const startDay=(first.getDay()+7)%7; // make Monday=1? Keeping Sunday=0 default
-    const names=['Su','Mo','Tu','We','Th','Fr','Sa'];
-    names.forEach(n=>{ const h=document.createElement('div'); h.className='cal-head'; h.textContent=n; grid.appendChild(h); });
-    for(let i=0;i<startDay;i++){ const c=document.createElement('div'); c.className='cal-cell muted'; c.textContent=''; grid.appendChild(c); }
-    const today=new Date(); const todayKey=today.toDateString();
-    for(let d=1; d<=last.getDate(); d++){ const cell=document.createElement('div'); cell.className='cal-cell'; cell.textContent=d;
-      const thisKey=new Date(y,m,d).toDateString(); if(thisKey===todayKey) cell.classList.add('today'); grid.appendChild(cell); }
-  }
+  /* ========= Calendar (Today only) ========= */
+/* ========= Calendar (Today card styled like AQI) ========= */
+/* ========= Calendar (Today simplified, AQI-style colors) ========= */
+/* ========= Calendar (Today vibrant style) ========= */
+function renderCalendar() {
+  const now = new Date();
+  const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
+  const daynum  = now.getDate();
+  const month   = now.toLocaleDateString(undefined,{ month: 'short' });
+
+  // Badge text
+  document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
+
+  // Vibrant day number
+  const todayDay = document.getElementById('todayDay');
+  todayDay.textContent = daynum;
+  todayDay.style.color = "#ffffff";   // white
+
+  // Vibrant weekday
+  const todayWeekday = document.getElementById('todayWeekday');
+  todayWeekday.textContent = weekday;
+  todayWeekday.style.color = "#ee0979";  // pink accent
+}
+
+
+
+
   </script>
 </body>
 </html>

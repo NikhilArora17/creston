@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Slideshow + Widgets</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg-color:#0b0c10;
@@ -16,18 +16,21 @@
 
       /* Global widget scale + margins (screen-px) */
       --ui-scale: 2.0;
-      --left-top-gap: 500px;   /* vertical gap for left column */
-      --right-top-gap: 500px;  /* vertical gap for right column */
-      --left-gap: 24px;       /* left column distance from edge */
-      --right-gap: 24px;      /* right column distance from edge */
+      --left-top-gap: 387px;
+      --right-top-gap: 387px;
+      --left-gap: 24px;
+      --right-gap: 24px;
 
       /* Card widths (unscaled logical px) */
-      --widget-width: 164px;  /* Weather / Time / AQI */
-      --news-width:   164px;  /* News / QR / Calendar */
+      --widget-width: 264px;  /* Weather / Time / AQI */
+      --news-width:   264px;  /* News / QR / Calendar / Extras */
 
       /* Logo placement (top-center) */
-      --logo-top-gap:  150px;
+      --logo-top-gap:  250px;
       --logo-height:   40px;
+
+      /* Bottom widgets row */
+      --bottom-gap: 80px; /* distance from bottom edge for the 4 new boxes */
     }
 
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:400 14px/1.4 Manrope,system-ui,sans-serif;overflow:hidden}
@@ -55,9 +58,21 @@
     }
     .logo-wrap img{ height:var(--logo-height); width:auto; display:block; }
 
+    /* Top-left caption aligned to the logo row */
+    .logo-caption{
+      position:fixed;
+      top:var(--logo-top-gap);
+      left:var(--left-gap);
+      z-index:1200;
+      font-size:40px;
+      font-weight:400;
+      color:#ffffff;
+      line-height:1;
+      pointer-events:none;
+      transform: translateY(4px); /* small nudge to sit nicely next to logo */
+    }
 
-
-    /* ===== LEFT column (DAY/DATE → TIME → NEWS) ===== */
+    /* ===== LEFT column ===== */
     .widgets-left{
       position:fixed;
       top:calc((var(--left-top-gap) + var(--logo-height) + 10px) / var(--ui-scale));
@@ -68,7 +83,7 @@
       transform-origin:top left;
     }
 
-    /* ===== RIGHT column (WEATHER → AQI → INSTA) ===== */
+    /* ===== RIGHT column ===== */
     .widgets-right{
       position:fixed;
       top:calc(var(--right-top-gap) / var(--ui-scale));
@@ -79,6 +94,17 @@
       transform-origin:top right;
     }
 
+    /* ===== New bottom row of 4 boxes ===== */
+    .widgets-bottom{
+      position:fixed;
+      left:50%;
+      bottom:var(--bottom-gap);
+      transform:translateX(-50%) scale(var(--ui-scale));
+      transform-origin:bottom center;
+      z-index:1000;
+      display:flex; gap:14px; align-items:flex-end;
+    }
+
     /* ===== Card base ===== */
     .card{
       border-radius:22px; padding:10px;
@@ -87,6 +113,7 @@
       border:1px solid rgba(255,255,255,.12);
       box-shadow:0 8px 28px rgba(0,0,0,.25);
       font-weight:200; color:#eef1f5;
+      width:var(--news-width);
     }
     .card-header{
       display:flex; justify-content:space-between; align-items:center;
@@ -110,45 +137,22 @@
     #weatherCard .weather-temp{ font-size:42px; line-height:1; font-weight:200; margin-top:2px; }
     #weatherCard .weather-desc{ font-size:13px; opacity:.92; }
     #weatherCard .weather-forecast{ display:grid; grid-template-columns:1fr; gap:8px; }
-   #weatherCard .forecast-item{
-  display:grid;
-  grid-template-columns:1fr 56px 48px;  /* icon chip = 56px */
-  align-items:center;
-  padding:8px 10px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:14px;
-}
-
+    #weatherCard .forecast-item{
+      display:grid; grid-template-columns:1fr 56px 48px; align-items:center;
+      padding:8px 10px; background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10); border-radius:14px;
+    }
     #weatherCard .forecast-time{ font-size:12px; opacity:.9; }
-    #weatherCard .wx{
-  /* center perfectly */
-  display:grid;
-  place-items:center;
-
-  /* make the chip itself */
-  width:36px;
-  height:32px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:10px;
-
-  /* kill baseline shift on emoji */
-  line-height:0;
-  font-size:20px;
-
-  /* tiny vertical nudge for optical centering (emoji fonts vary) */
-  transform:translateY(1px);
-}
-
-
+    #weatherCard .wx{ display:grid; place-items:center; width:36px; height:32px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:10px;
+      line-height:0; font-size:20px; transform:translateY(1px); }
     #weatherCard .forecast-temp{
       justify-self:end; font-size:13px; padding:6px 8px; min-width:42px; text-align:center;
       background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12); border-radius:10px; opacity:.95;
     }
 
-    /* ===== TIME (visible again) ===== */
-    #timeCard{ width:var(--widget-width); }  /* removed display:none */
+    /* ===== TIME ===== */
+    #timeCard{ width:var(--widget-width); }
     .time-body{
       padding:12px; background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
@@ -161,30 +165,41 @@
     .clock .hhmm{ font-size:36px; line-height:1; }
     .clock .ss{ font-size:16px; opacity:.85; }
     .clock .ampm{ font-size:14px; opacity:.85; }
-    
+    /* (you previously asked to remove date text; leaving .clock-date unused) */
+    .clock-date{ display:none; }
 
-    /* ===== AQI (minimal) ===== */
+    /* ===== AQI ===== */
     #aqiCard{ width:var(--widget-width); }
-    #aqiCard .card-header{ display:none; }
-    #aqiCat, #pm25, #pm10, #aqiPointer,
-    #aqiCard .aqi-bar, #aqiCard .aqi-metrics{ display:none !important; }
     #aqiCard .aqi-body{
       display:flex; flex-direction:column; gap:8px; align-items:center;
       padding:12px; background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
     }
-    #aqiBadge{ font-size:14px; padding:6px 10px; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); line-height:1; }
-    #aqiValue{ font-size:42px; line-height:1; }
+    #aqiValue{ font-size:40px; line-height:1; }
+    #aqiBadge{ font-size:12px; padding:4px 8px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); line-height:1; }
+    .aqi-bar{ width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
+    .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
 
-    /* ===== News (taller) ===== */
+    /* ===== News (with image) ===== */
     #newsCard{ width:var(--news-width); }
     #newsCard .card-header{ margin-bottom:6px; }
     .news-slide{
       position:relative; padding:10px 12px;
       background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; overflow:hidden;
     }
-    .news-media{ width:100%; aspect-ratio:6/7; object-fit:cover; border-radius:12px; background:#222; margin-bottom:10px; }
-    .news-title{ font-size:18px; line-height:1.28; font-weight:300; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin:0 0 8px 0; color:#eef1f5; text-decoration:none; }
+    .news-media{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; background:#222; margin-bottom:8px; }
+.news-title{
+  font-size:18px;            /* make text a bit larger */
+  line-height:1.4;           /* more breathing room */
+  font-weight:400;
+  display:-webkit-box;
+  -webkit-line-clamp:3;      /* 👈 allow 3 lines instead of 2 */
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  margin:0 0 10px 0;
+  color:#eef1f5;
+  text-decoration:none;
+}
     .news-title:hover{ text-decoration:underline; }
     .news-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; }
     .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius:2px; display:inline-block; }
@@ -205,65 +220,11 @@
     #qrCaption{ font-size:13px; opacity:.9; }
     #qrLink{ color:#eef1f5; text-decoration:underline; }
 
-    /* ===== Today card base (unchanged) ===== */
+    /* ===== Calendar (Today card) ===== */
     #calendarCard{ width:var(--news-width); }
     .cal-body{
       padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
     }
-    .cal-grid{
-      display:grid; grid-template-columns:repeat(7,1fr); gap:6px; font-size:12px;
-    }
-    .cal-head{ opacity:.75; text-align:center; }
-    .cal-cell{
-      text-align:center; padding:6px 0; border-radius:10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
-    }
-    .cal-cell.muted{ opacity:.45; }
-    .cal-cell.today{ background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.35); font-weight:600; }
-
-    /* ===== Bottom-center Quote ===== */
-    .quote-heading {
-  font-size: 46px;
-  font-style: normal;   /* heading normal */
-  font-weight: 400;
-  color: #b34805;
-  margin-bottom: 14px;
-}
-.quote-text {
-  font-size: 42px;     
-  font-weight: 500;
-  color: #ffffff;
-  line-height: 1.4;
-}
-/* Position the whole quote block at the bottom center */
-.quote-wrap {
-  position: fixed;
-  bottom: 30px;         /* distance from bottom edge */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1200;
-  text-align: center;
-  max-width: 80%;
-  pointer-events: none;
-}
-
-.logo2-wrap {
-  margin-bottom: 18px;    /* spacing between logo2 and "Quote of the Day" */
-}
-.logo2-wrap img {
-  height: var(--logo-height);  /* 👈 same as top logo */
-  width: auto;
-  display: block;
-  margin: 0 auto;         /* keep it centered */
-}
-
-.quote-author {
-  margin-top: 8px;
-  font-size: 36px;
-  font-weight: 300;
-  color: #ffffff;
-}
-     
-
   </style>
 </head>
 <body>
@@ -273,24 +234,23 @@
 
     <!-- TOP-CENTER LOGO -->
     <div class="logo-wrap"><img src="images/logo1.png" alt="Logo" id="logo1" /></div>
+    <div class="logo-caption">CONFERENCE ROOM : BEEHIVE</div>
 
-    <!-- LEFT column: Today → Time → News -->
+    <!-- LEFT column (DATE → TIME → NEWS) -->
     <div class="widgets-left">
-      <!-- TODAY -->
+      <!-- CALENDAR (Today) -->
       <div class="card" id="calendarCard">
         <div class="card-header"><span>Today</span></div>
         <div class="cal-body today-body">
           <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
-        background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
-        font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">
-        —
-      </div>
+            background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
+            font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">—</div>
           <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
           <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
         </div>
       </div>
 
-      <!-- TIME (restored) -->
+      <!-- TIME -->
       <div class="card" id="timeCard">
         <div class="card-header"><span>Time</span><span id="tzName" class="muted">—</span></div>
         <div class="time-body">
@@ -299,7 +259,7 @@
             <div class="ss"   id="clockSS">--</div>
             <div class="ampm" id="ampm">—</div>
           </div>
-          
+          <div class="clock-date" id="clockDate">—</div>
         </div>
       </div>
 
@@ -319,7 +279,7 @@
       </div>
     </div>
 
-    <!-- RIGHT column: Weather → AQI → Insta -->
+    <!-- RIGHT column (WEATHER → AQI → INSTAGRAM) -->
     <div class="widgets-right">
       <!-- Weather -->
       <div class="card" id="weatherCard">
@@ -337,29 +297,48 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
-      <!-- AQI (minimal) -->
+      <!-- AQI -->
       <div class="card" id="aqiCard">
+        <div class="card-header">
+          <span>Air Quality</span><span id="aqiCity">Sultanpur, India</span>
+        </div>
         <div class="aqi-body">
           <div id="aqiBadge">AQI —</div>
           <div id="aqiValue">--</div>
-          <div id="aqiCat">Loading…</div>
           <div class="aqi-bar"><div class="aqi-pointer" id="aqiPointer"></div></div>
-          <div class="aqi-metrics">
-            <div class="pill">PM2.5<strong id="pm25">—</strong></div>
-            <div class="pill">PM10<strong id="pm10">—</strong></div>
-          </div>
         </div>
       </div>
 
       <!-- Instagram QR -->
       <div class="card" id="qrCard">
-        <div class="card-header"><span>Follow us on Insta</span></div>
+        <div class="card-header"><span>Follow us on Instagram</span><span class="muted"></span></div>
         <div class="qr-body">
           <img id="qrImage" alt="QR to Instagram" />
           <div id="qrCaption">Scan or visit <a id="qrLink" href="https://www.instagram.com/mcbee.in/" target="_blank" rel="noopener noreferrer">instagram.com/mcbee.in</a></div>
         </div>
       </div>
     </div>
+
+    <!-- NEW BOTTOM ROW: Four extra boxes (placeholders) -->
+    <div class="widgets-bottom">
+      <div class="card" id="extra1">
+        <div class="card-header"><span>Info 1</span></div>
+        <div class="cal-body">Add content here.</div>
+      </div>
+      <div class="card" id="extra2">
+        <div class="card-header"><span>Info 2</span></div>
+        <div class="cal-body">Add content here.</div>
+      </div>
+      <div class="card" id="extra3">
+        <div class="card-header"><span>Info 3</span></div>
+        <div class="cal-body">Add content here.</div>
+      </div>
+      <div class="card" id="extra4">
+        <div class="card-header"><span>Info 4</span></div>
+        <div class="cal-body">Add content here.</div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -370,7 +349,7 @@
   const ANIMATION_MODE = 'crossfade';
   const RENDER_SCALE   = 1.00;
 
-  const IMAGES = ["images/slide5.png","images/slide6.png","images/slide1.png","images/slide2.png","images/slide3.png","images/slide4.png","images/slide7.png","images/slide8.png","images/slide9.png"];    
+  const IMAGES = ["images/slide5.png","images/slide1.png","images/slide2.png","images/slide5.png","images/slide3.png","images/slide4.png","images/slide5.png","images/slide6.png","images/slide7.png","images/slide8.png"];    
 
   function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function readSeconds(n,f){ const v=cssVar(n), x=parseFloat((v||'').replace('s','')); return isFinite(x)?x*1000:f*1000; }
@@ -412,8 +391,12 @@
   function loadImg(src){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
   let tex=[], idx=0, next=1, phase='dwell', end=performance.now();
   (async()=>{ try{ const imgs=await Promise.all(IMAGES.map(loadImg)); tex=imgs.map(makeTex);}catch{ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); tex=[t,t]; } start();})();
+
   function bind(i0,i1){ gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex[i0%tex.length]); gl.uniform1i(loc.a,0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,tex[i1%tex.length]); gl.uniform1i(loc.b,1); }
-  function start(){ bind(idx,next); phase='dwell'; end=performance.now()+SLIDE_MS; gl.uniform1f(loc.t,0); requestAnimationFrame(loop); initWeatherAndAQI(); initNews(); initQR(); initClock(); renderCalendar(new Date()); setDailyQuote(); }
+  function start(){ bind(idx,next); phase='dwell'; end=performance.now()+SLIDE_MS; gl.uniform1f(loc.t,0);
+    requestAnimationFrame(loop);
+    initWeatherAndAQI(); initNews(); initQR(); initClock(); renderCalendar(new Date());
+  }
   function loop(now){ gl.uniform2f(loc.res,canvas.width,canvas.height);
     if(now>=end){ if(phase==='dwell'){ phase='transition'; end=now+TRANSITION_MS; bind(idx,next);} else { idx=next; next=(idx+1)%tex.length; bind(idx,next); phase='dwell'; end=now+SLIDE_MS; gl.uniform1f(loc.t,0);} }
     gl.uniform1f(loc.t, phase==='transition' ? 1 - Math.max(0,(end-now))/Math.max(1,TRANSITION_MS) : 0 );
@@ -423,13 +406,13 @@
   /* ========= Weather + AQI ========= */
   async function initWeatherAndAQI(){
     document.getElementById('weatherCity').textContent = CITY_LABEL;
-    document.getElementById('aqiCity') && (document.getElementById('aqiCity').textContent = CITY_LABEL);
+    document.getElementById('aqiCity').textContent     = CITY_LABEL;
     try{
       const wurl=`https://api.open-meteo.com/v1/forecast?latitude=${COORDS.lat}&longitude=${COORDS.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
       const w=await fetch(wurl,{cache:'no-cache'}).then(r=>r.json());
       renderWeather(w);
       await fetchAQI(COORDS.lat,COORDS.lon);
-    }catch{ document.getElementById('weatherDesc').textContent='Weather unavailable'; document.getElementById('aqiCat').textContent='Unavailable'; }
+    }catch{ document.getElementById('weatherDesc').textContent='Weather unavailable'; }
   }
   function wxIcon(c){ if(c===0)return'☀️'; if([1,2].includes(c))return'🌤️'; if(c===3)return'☁️'; if([45,48].includes(c))return'🌫️'; if([51,53,55,56,57].includes(c))return'🌦️'; if([61,63,65].includes(c))return'🌧️'; if([66,67,71,73,75,77].includes(c))return'🌨️'; if([80,81,82].includes(c))return'🌧️'; if([95,96,99].includes(c))return'⛈️'; return'☁️'; }
   function wxText(c){ const m={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'}; return m[c]||'—'; }
@@ -440,7 +423,8 @@
     document.getElementById('weatherIcon').textContent=wxIcon(c.weather_code);
     const fc=document.getElementById('weatherForecast'); fc.innerHTML='';
     const idx=d.hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
-    for(let i=0;i<2;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
+    for(let i=0;i<2;i++){ // next 2 hours
+      const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
       const temp=Math.round(d.hourly.temperature_2m[j]); const w=d.hourly.weather_code[j];
       const div=document.createElement('div'); div.className='forecast-item';
       div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span><span class="wx">${wxIcon(w)}</span><span class="forecast-temp">${temp}°</span>`;
@@ -463,33 +447,72 @@
       document.getElementById('aqiBadge').style.boxShadow=`inset 0 0 0 1px ${info.color}22`;
       document.getElementById('aqiBadge').textContent=`AQI ${Math.round(a)}`;
       document.getElementById('aqiValue').textContent=Math.round(a);
+      document.getElementById('aqiPointer').style.left=`${info.pos}%`;
+      // (removed location, PM metrics, and category label per your request)
     }catch{}
   }
 
-  /* ========= NEWS ========= */
+  /* ========= NEWS (Times of India -> fallbacks) ========= */
   const NEWS_ROTATE_MS=10000;
   function prettyTime(ds){ if(!ds) return "just now"; const d=new Date(ds); if(isNaN(d)) return "—"; const s=(Date.now()-d)/1000; if(s<60) return "just now"; if(s<3600) return Math.floor(s/60)+"m ago"; if(s<86400) return Math.floor(s/3600)+"h ago"; return d.toLocaleDateString(); }
-  async function fetchGuardian(n=24){ const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
+
+  // TOI via rss2json (avoids many CORS issues)
+  async function fetchTOI(n=24){
+    const feed = 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms';
+    const url = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed);
+    const j = await fetch(url,{cache:'no-cache'}).then(r=>r.json());
+    const items = j.items || [];
+    return items.slice(0,n).map(it=>{
+      // try enclosure, then attempt to extract an <img> from content
+      let img = it.enclosure?.link || '';
+      if(!img && it.content){
+        const m = it.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if(m) img = m[1];
+      }
+      return {
+        title: it.title,
+        link: it.link,
+        date: it.pubDate,
+        source: 'Times of India',
+        image: img || ''
+      };
+    });
+  }
+
+  async function fetchGuardian(n=24){ // fallback
+    const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
     const j=await fetch(url,{cache:'no-cache'}).then(r=>r.json()); const a=j.response?.results||[];
-    return a.map(r=>({title:r.webTitle, link:r.webUrl, date:r.webPublicationDate, source:'The Guardian', image:r.fields?.thumbnail||''})); }
+    return a.map(r=>({title:r.webTitle, link:r.webUrl, date:r.webPublicationDate, source:'The Guardian', image:r.fields?.thumbnail||''}));
+  }
+
   function cleanUrl(u){ return (u||'').replace(/&amp;/g,'&'); }
-  async function fetchRedditNews(n=24){ const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json()); const p=j.data?.children||[];
-    return p.map(({data})=>({ title:data.title, link:data.url_overridden_by_dest||('https://www.reddit.com'+data.permalink), date:data.created_utc?new Date(data.created_utc*1000).toISOString():'', source:'Reddit', image:cleanUrl(data.preview?.images?.[0]?.source?.url|| (data.thumbnail||'').startsWith('http')?data.thumbnail:'' ) })); }
+  async function fetchRedditNews(n=24){ // fallback 2
+    const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json()); const p=j.data?.children||[];
+    return p.map(({data})=>({ title:data.title, link:data.url_overridden_by_dest||('https://www.reddit.com'+data.permalink), date:data.created_utc?new Date(data.created_utc*1000).toISOString():'', source:'Reddit', image:cleanUrl(data.preview?.images?.[0]?.source?.url|| (data.thumbnail||'').startsWith('http')?data.thumbnail:'' ) }));
+  }
 
   let newsList=[], newsIndex=0, newsTimer;
   function buildDots(){ const box=document.getElementById('newsDots'); box.innerHTML=''; newsList.forEach((_,i)=>{ const d=document.createElement('div'); d.className='news-dot'+(i===newsIndex?' active':''); d.onclick=()=>{ newsIndex=i; renderNews(); resetNewsTimer(); }; box.appendChild(d); }); }
   function updateDots(){ document.querySelectorAll('#newsDots .news-dot').forEach((el,i)=>el.classList.toggle('active',i===newsIndex)); }
-  function setNewsSlide(it){ const link=document.getElementById('newsLink'), src=document.getElementById('newsSourceInline'), tim=document.getElementById('newsTime'), hdr=document.getElementById('newsSource'), img=document.getElementById('newsImg');
+  function setNewsSlide(it){
+    const link=document.getElementById('newsLink'), src=document.getElementById('newsSourceInline'), tim=document.getElementById('newsTime'), hdr=document.getElementById('newsSource'), img=document.getElementById('newsImg');
     link.textContent=it.title||'—'; link.href=it.link||'#'; src.textContent=it.source||'—'; hdr.textContent=it.source||'Headlines'; tim.textContent=prettyTime(it.date);
-    if(it.image){ img.src=it.image; img.style.display='block'; } else { img.removeAttribute('src'); img.style.display='none'; } }
-  function renderNews(){ if(!newsList.length)return; const cont=document.getElementById('newsContainer'); cont.classList.add('news-fade-leave'); setTimeout(()=>{ setNewsSlide(newsList[newsIndex]); cont.classList.remove('news-fade-leave'); cont.classList.add('news-fade-enter'); setTimeout(()=>cont.classList.remove('news-fade-enter'),130); updateDots(); },130); }
+    if(it.image){ img.src=it.image; img.style.display='block'; } else { img.removeAttribute('src'); img.style.display='none'; }
+  }
+  function renderNews(){ if(!newsList.length)return; const cont=document.getElementById('newsContainer'); cont.classList.add('news-fade-leave');
+    setTimeout(()=>{ setNewsSlide(newsList[newsIndex]); cont.classList.remove('news-fade-leave'); cont.classList.add('news-fade-enter'); setTimeout(()=>cont.classList.remove('news-fade-enter'),130); updateDots(); },130);
+  }
   function stepNews(){ if(!newsList.length)return; newsIndex=(newsIndex+1)%newsList.length; renderNews(); }
   function resetNewsTimer(){ clearInterval(newsTimer); newsTimer=setInterval(stepNews,NEWS_ROTATE_MS); }
+
   async function initNews(){
-    let all=[]; try{ all=await fetchGuardian(24);}catch(e){console.warn('Guardian failed',e);}
-    if(!all.length){ try{ all=await fetchRedditNews(24);}catch(e){console.warn('Reddit fallback failed',e);} }
+    let all=[];
+    try{ all=await fetchTOI(24);}catch(e){ console.warn('TOI failed',e); }
+    if(!all.length){ try{ all=await fetchGuardian(24);}catch(e){ console.warn('Guardian failed',e); } }
+    if(!all.length){ try{ all=await fetchRedditNews(24);}catch(e){ console.warn('Reddit fallback failed',e); } }
     if(!all.length){ all=[{title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local', image:''}]; }
-    all.sort((a,b)=>new Date(b.date)-new Date(a.date)); newsList=all.slice(0,8); newsIndex=0; setNewsSlide(newsList[0]); buildDots(); resetNewsTimer();
+    all.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    newsList=all.slice(0,8); newsIndex=0; setNewsSlide(newsList[0]); buildDots(); resetNewsTimer();
   }
 
   /* ========= QR ========= */
@@ -504,81 +527,22 @@
     document.getElementById('clockHHMM').textContent = `${pad(hh)}:${pad(m)}`;
     document.getElementById('clockSS').textContent   = pad(s);
     document.getElementById('ampm').textContent      = ampm;
-    //document.getElementById('clockDate').textContent = d.toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    // date hidden by CSS (.clock-date { display:none })
     try{ document.getElementById('tzName').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch{}
   }
   function initClock(){ tickClock(); setInterval(tickClock,1000); }
 
-  /* ========= Today (badge text) ========= */
+  /* ========= Calendar (Today only) ========= */
   function renderCalendar() {
     const now = new Date();
     const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
     const daynum  = now.getDate();
     const month   = now.toLocaleDateString(undefined,{ month: 'short' });
+
     document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
-    const todayDay = document.getElementById('todayDay');
-    todayDay.textContent = daynum;
-    todayDay.style.color = "#ffffff";
-    const todayWeekday = document.getElementById('todayWeekday');
-    todayWeekday.textContent = weekday;
-    todayWeekday.style.color = "#ee0979";
+    document.getElementById('todayDay').textContent = daynum;
+    document.getElementById('todayWeekday').textContent = weekday;
   }
-
-  /* ========= Daily Quote ========= */
-  const QUOTES = [
-    {t:"Innovation distinguishes between a leader and a follower.", a:"Steve Jobs"},
-    {t:"The best way to predict the future is to invent it.", a:"Alan Kay"},
-    {t:"Your most unhappy customers are your greatest source of learning.", a:"Bill Gates"},
-    {t:"First, solve the problem. Then, write the code.", a:"John Johnson"},
-    {t:"Programs must be written for people to read, and only incidentally for machines to execute.", a:"Harold Abelson"},
-    {t:"Any sufficiently advanced technology is indistinguishable from magic.", a:"Arthur C. Clarke"},
-    {t:"Creativity is intelligence having fun.", a:"Albert Einstein"},
-    {t:"Design is intelligence made visible.", a:"Alina Wheeler"},
-    {t:"Design creates culture. Culture shapes values. Values determine the future.", a:"Robert L. Peters"},
-    {t:"Move fast and break things.", a:"Mark Zuckerberg"},
-    {t:"Simplicity is the ultimate sophistication.", a:"Leonardo da Vinci"},
-    {t:"The details are not the details. They make the design.", a:"Charles Eames"},
-    {t:"The only way to do great work is to love what you do.", a:"Steve Jobs"},
-    {t:"Technology like art is a soaring exercise of the human imagination.", a:"Daniel Bell"},
-    {t:"If you can't measure it, you can't improve it.", a:"Peter Drucker"},
-    {t:"Good design is as little design as possible.", a:"Dieter Rams"},
-    {t:"Fall in love with the problem, not the solution.", a:"Uri Levine"},
-    {t:"The only constant in the technology industry is change.", a:"Marc Benioff"},
-    {t:"It’s not a faith in technology. It’s faith in people.", a:"Steve Jobs"},
-    {t:"The question isn’t who is going to let me; it’s who is going to stop me.", a:"Ayn Rand"},
-    {t:"Great things are done by a series of small things brought together.", a:"Vincent van Gogh"},
-    {t:"The real test is not whether you avoid failure, but whether you learn from it.", a:"Barack Obama"},
-    {t:"If you are not embarrassed by the first version of your product, you’ve launched too late.", a:"Reid Hoffman"},
-    {t:"Innovation is saying no to a thousand things.", a:"Steve Jobs"},
-    {t:"Design is not just what it looks like and feels like. Design is how it works.", a:"Steve Jobs"},
-    {t:"The most dangerous phrase in the language is: 'We've always done it this way.'", a:"Grace Hopper"},
-    {t:"What one programmer can do in one month, two programmers can do in two months.", a:"Fred Brooks"},
-    {t:"Stay hungry, stay foolish.", a:"Steve Jobs"},
-    {t:"The true sign of intelligence is not knowledge but imagination.", a:"Albert Einstein"},
-    {t:"Success is a lousy teacher. It seduces smart people into thinking they can't lose.", a:"Bill Gates"},
-    {t:"Art challenges technology, and technology inspires art.", a:"John Lasseter"}
-  ];
-
-  function setDailyQuote(){
-    const d = new Date().getDate();
-    const idx = (d - 1) % QUOTES.length;
-    const q = QUOTES[idx];
-    document.getElementById('quoteText').textContent = `“${q.t}”`;
-    document.getElementById('quoteAuthor').textContent = `— ${q.a}`;
-  }
-
   </script>
-
-  <!-- BOTTOM-CENTER DAILY QUOTE -->
-<div class="quote-wrap">
-  <div class="logo2-wrap">
-    <img src="images/logo2.png" alt="Logo 2" id="logo2">
-  </div>
-  <div class="quote-heading">Quote of the Day</div>
-  <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
-  <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
-</div>
-
-
 </body>
 </html>

@@ -16,8 +16,8 @@
 
       /* Global widget scale + margins (screen-px) */
       --ui-scale: 2.0;
-      --left-top-gap: 340px;   /* vertical gap for left column */
-    --right-top-gap: 500px;  /* vertical gap for right column */     /* vertical gap for both columns */
+      --left-top-gap: 500px;   /* vertical gap for left column */
+      --right-top-gap: 500px;  /* vertical gap for right column */
       --left-gap: 24px;       /* left column distance from edge */
       --right-gap: 24px;      /* right column distance from edge */
 
@@ -26,7 +26,7 @@
       --news-width:   164px;  /* News / QR / Calendar */
 
       /* Logo placement (top-center) */
-      --logo-top-gap:  250px;
+      --logo-top-gap:  150px;
       --logo-height:   40px;
     }
 
@@ -57,11 +57,10 @@
 
 
 
-    /* ===== LEFT column (Weather → Time → AQI) ===== */
+    /* ===== LEFT column (DAY/DATE → TIME → NEWS) ===== */
     .widgets-left{
       position:fixed;
       top:calc((var(--left-top-gap) + var(--logo-height) + 10px) / var(--ui-scale));
-
       left:calc(var(--left-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-start;
@@ -69,7 +68,7 @@
       transform-origin:top left;
     }
 
-    /* ===== RIGHT column (News → QR → Calendar) ===== */
+    /* ===== RIGHT column (WEATHER → AQI → INSTA) ===== */
     .widgets-right{
       position:fixed;
       top:calc(var(--right-top-gap) / var(--ui-scale));
@@ -148,8 +147,8 @@
       background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12); border-radius:10px; opacity:.95;
     }
 
-    /* ===== TIME (replaces old left extra) ===== */
-    #timeCard{ width:var(--widget-width); }
+    /* ===== TIME (visible again) ===== */
+    #timeCard{ width:var(--widget-width); }  /* removed display:none */
     .time-body{
       padding:12px; background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
@@ -164,31 +163,28 @@
     .clock .ampm{ font-size:14px; opacity:.85; }
     .clock-date{ font-size:13px; opacity:.9; }
 
-    /* ===== AQI ===== */
+    /* ===== AQI (minimal) ===== */
     #aqiCard{ width:var(--widget-width); }
+    #aqiCard .card-header{ display:none; }
+    #aqiCat, #pm25, #pm10, #aqiPointer,
+    #aqiCard .aqi-bar, #aqiCard .aqi-metrics{ display:none !important; }
     #aqiCard .aqi-body{
       display:flex; flex-direction:column; gap:8px; align-items:center;
       padding:12px; background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
     }
-    #aqiValue{ font-size:40px; line-height:1; }
-    #aqiCat{ font-size:13px; opacity:.92; }
-    #aqiBadge{ font-size:12px; padding:4px 8px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); line-height:1; }
-    .aqi-bar{ width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
-    .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
-    .aqi-metrics{ margin-top:6px; display:flex; gap:8px; }
-    .pill{ font-size:11px; padding:6px 8px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
-    .pill strong{ font-weight:400; margin-left:6px; }
+    #aqiBadge{ font-size:14px; padding:6px 10px; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); line-height:1; }
+    #aqiValue{ font-size:42px; line-height:1; }
 
-    /* ===== News (with image) ===== */
+    /* ===== News (taller) ===== */
     #newsCard{ width:var(--news-width); }
     #newsCard .card-header{ margin-bottom:6px; }
     .news-slide{
       position:relative; padding:10px 12px;
       background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; overflow:hidden;
     }
-    .news-media{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; background:#222; margin-bottom:8px; }
-    .news-title{ font-size:16px; line-height:1.25; font-weight:300; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin:0 0 6px 0; color:#eef1f5; text-decoration:none; }
+    .news-media{ width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:12px; background:#222; margin-bottom:10px; }
+    .news-title{ font-size:18px; line-height:1.28; font-weight:300; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin:0 0 8px 0; color:#eef1f5; text-decoration:none; }
     .news-title:hover{ text-decoration:underline; }
     .news-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; }
     .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius:2px; display:inline-block; }
@@ -209,7 +205,7 @@
     #qrCaption{ font-size:13px; opacity:.9; }
     #qrLink{ color:#eef1f5; text-decoration:underline; }
 
-    /* ===== Calendar (replaces old right extra) ===== */
+    /* ===== Today card base (unchanged) ===== */
     #calendarCard{ width:var(--news-width); }
     .cal-body{
       padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
@@ -224,9 +220,8 @@
     .cal-cell.muted{ opacity:.45; }
     .cal-cell.today{ background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.35); font-weight:600; }
 
-    /* ===== Bottom-center Quote (no box) ===== */
-   /* ===== Quote (BOTTOM–CENTER) ===== */
-.quote-heading {
+    /* ===== Bottom-center Quote ===== */
+    .quote-heading {
   font-size: 46px;
   font-style: normal;   /* heading normal */
   font-weight: 400;
@@ -270,8 +265,53 @@
     <!-- TOP-CENTER LOGO -->
     <div class="logo-wrap"><img src="images/logo1.png" alt="Logo" id="logo1" /></div>
 
-    <!-- LEFT column -->
+    <!-- LEFT column: Today → Time → News -->
     <div class="widgets-left">
+      <!-- TODAY -->
+      <div class="card" id="calendarCard">
+        <div class="card-header"><span>Today</span></div>
+        <div class="cal-body today-body">
+          <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
+        background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
+        font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">
+        —
+      </div>
+          <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
+          <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
+        </div>
+      </div>
+
+      <!-- TIME (restored) -->
+      <div class="card" id="timeCard">
+        <div class="card-header"><span>Time</span><span id="tzName" class="muted">—</span></div>
+        <div class="time-body">
+          <div class="clock">
+            <div class="hhmm" id="clockHHMM">--:--</div>
+            <div class="ss"   id="clockSS">--</div>
+            <div class="ampm" id="ampm">—</div>
+          </div>
+          <div class="clock-date" id="clockDate">—</div>
+        </div>
+      </div>
+
+      <!-- NEWS -->
+      <div class="card" id="newsCard">
+        <div class="card-header"><span>Headlines</span><span id="newsSource">updating…</span></div>
+        <div class="news-slide">
+          <img id="newsImg" class="news-media" alt="" referrerpolicy="no-referrer">
+          <div id="newsContainer" class="news-fade">
+            <a id="newsLink" href="#" target="_blank" rel="noopener noreferrer" class="news-title">Loading headlines…</a>
+            <div class="news-meta">
+              <span id="newsSourceInline">—</span><span class="dot"></span><span id="newsTime">—</span>
+            </div>
+          </div>
+          <div class="news-dots" id="newsDots"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT column: Weather → AQI → Insta -->
+    <div class="widgets-right">
       <!-- Weather -->
       <div class="card" id="weatherCard">
         <div class="card-header">
@@ -288,24 +328,8 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
-      <!-- TIME -->
-      <div class="card" id="timeCard">
-        <div class="card-header"><span>Time</span><span id="tzName" class="muted">—</span></div>
-        <div class="time-body">
-          <div class="clock">
-            <div class="hhmm" id="clockHHMM">--:--</div>
-            <div class="ss"   id="clockSS">--</div>
-            <div class="ampm" id="ampm">—</div>
-          </div>
-          <div class="clock-date" id="clockDate">—</div>
-        </div>
-      </div>
-
-      <!-- AQI -->
+      <!-- AQI (minimal) -->
       <div class="card" id="aqiCard">
-        <div class="card-header">
-          <span>Air Quality</span><span id="aqiCity">Sultanpur, India</span>
-        </div>
         <div class="aqi-body">
           <div id="aqiBadge">AQI —</div>
           <div id="aqiValue">--</div>
@@ -317,49 +341,16 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- RIGHT column -->
-    <div class="widgets-right">
-      <!-- News -->
-      <div class="card" id="newsCard">
-        <div class="card-header"><span>Headlines</span><span id="newsSource">updating…</span></div>
-        <div class="news-slide">
-          <img id="newsImg" class="news-media" alt="" referrerpolicy="no-referrer">
-          <div id="newsContainer" class="news-fade">
-            <a id="newsLink" href="#" target="_blank" rel="noopener noreferrer" class="news-title">Loading headlines…</a>
-            <div class="news-meta">
-              <span id="newsSourceInline">—</span><span class="dot"></span><span id="newsTime">—</span>
-            </div>
-          </div>
-          <div class="news-dots" id="newsDots"></div>
-        </div>
-      </div>
 
       <!-- Instagram QR -->
       <div class="card" id="qrCard">
-        <div class="card-header"><span>Follow us on Instagram</span><span class="muted">@mcbee.in</span></div>
+        <div class="card-header"><span>Follow us on Insta</span></div>
         <div class="qr-body">
           <img id="qrImage" alt="QR to Instagram" />
           <div id="qrCaption">Scan or visit <a id="qrLink" href="https://www.instagram.com/mcbee.in/" target="_blank" rel="noopener noreferrer">instagram.com/mcbee.in</a></div>
         </div>
       </div>
-
-      <!-- CALENDAR -->
-      <!-- CALENDAR -->
-<!-- CALENDAR -->
-<div class="card" id="calendarCard">
-  <div class="card-header"><span>Today</span></div>
-  <div class="cal-body today-body">
-    <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
-  background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
-  font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">
-  —
-</div>
-    <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
-    <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
-  </div>
-</div>
+    </div>
   </div>
 
   <script>
@@ -378,7 +369,7 @@
   const SLIDE_MS = readSeconds('--slide-duration', 6);
   const TRANSITION_MS = readSeconds('--transition-duration', 1.2);
 
-  /* ========= WebGL slideshow (same as before, trimmed) ========= */
+  /* ========= WebGL slideshow ========= */
   const canvas=document.getElementById('glcanvas');
   const gl=canvas.getContext('webgl2',{premultipliedAlpha:true,antialias:true});
   function sizeGLBuffer(){ const vw=Math.max(1,Math.floor(innerWidth*RENDER_SCALE)), vh=Math.max(1,Math.floor(innerHeight*RENDER_SCALE)); canvas.width=vw; canvas.height=vh; gl.viewport(0,0,vw,vh); }
@@ -423,7 +414,7 @@
   /* ========= Weather + AQI ========= */
   async function initWeatherAndAQI(){
     document.getElementById('weatherCity').textContent = CITY_LABEL;
-    document.getElementById('aqiCity').textContent     = CITY_LABEL;
+    document.getElementById('aqiCity') && (document.getElementById('aqiCity').textContent = CITY_LABEL);
     try{
       const wurl=`https://api.open-meteo.com/v1/forecast?latitude=${COORDS.lat}&longitude=${COORDS.lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto`;
       const w=await fetch(wurl,{cache:'no-cache'}).then(r=>r.json());
@@ -440,7 +431,7 @@
     document.getElementById('weatherIcon').textContent=wxIcon(c.weather_code);
     const fc=document.getElementById('weatherForecast'); fc.innerHTML='';
     const idx=d.hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
-    for(let i=0;i<3;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
+    for(let i=0;i<2;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
       const temp=Math.round(d.hourly.temperature_2m[j]); const w=d.hourly.weather_code[j];
       const div=document.createElement('div'); div.className='forecast-item';
       div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span><span class="wx">${wxIcon(w)}</span><span class="forecast-temp">${temp}°</span>`;
@@ -458,19 +449,15 @@
     try{
       const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
       const d=await fetch(url,{cache:'no-cache'}).then(r=>r.json());
-      const a=d?.current?.us_aqi, p25=d?.current?.pm2_5, p10=d?.current?.pm10, info=aqiInfo(a);
+      const a=d?.current?.us_aqi, info=aqiInfo(a);
       document.getElementById('aqiBadge').style.borderColor=info.color;
       document.getElementById('aqiBadge').style.boxShadow=`inset 0 0 0 1px ${info.color}22`;
       document.getElementById('aqiBadge').textContent=`AQI ${Math.round(a)}`;
       document.getElementById('aqiValue').textContent=Math.round(a);
-      document.getElementById('aqiCat').textContent=info.label;
-      document.getElementById('aqiPointer').style.left=`${info.pos}%`;
-      document.getElementById('pm25').textContent=(p25!=null)?`${Math.round(p25)} µg/m³`:'—';
-      document.getElementById('pm10').textContent=(p10!=null)?`${Math.round(p10)} µg/m³`:'—';
     }catch{}
   }
 
-  /* ========= NEWS with images (Guardian -> Reddit fallback) ========= */
+  /* ========= NEWS ========= */
   const NEWS_ROTATE_MS=10000;
   function prettyTime(ds){ if(!ds) return "just now"; const d=new Date(ds); if(isNaN(d)) return "—"; const s=(Date.now()-d)/1000; if(s<60) return "just now"; if(s<3600) return Math.floor(s/60)+"m ago"; if(s<86400) return Math.floor(s/3600)+"h ago"; return d.toLocaleDateString(); }
   async function fetchGuardian(n=24){ const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
@@ -513,29 +500,22 @@
   }
   function initClock(){ tickClock(); setInterval(tickClock,1000); }
 
-  /* ========= Calendar ========= */
-  /* ========= Calendar (Today only) ========= */
-function renderCalendar() {
-  const now = new Date();
-  const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
-  const daynum  = now.getDate();
-  const month   = now.toLocaleDateString(undefined,{ month: 'short' });
+  /* ========= Today (badge text) ========= */
+  function renderCalendar() {
+    const now = new Date();
+    const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
+    const daynum  = now.getDate();
+    const month   = now.toLocaleDateString(undefined,{ month: 'short' });
+    document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
+    const todayDay = document.getElementById('todayDay');
+    todayDay.textContent = daynum;
+    todayDay.style.color = "#ffffff";
+    const todayWeekday = document.getElementById('todayWeekday');
+    todayWeekday.textContent = weekday;
+    todayWeekday.style.color = "#ee0979";
+  }
 
-  // Badge text
-  document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
-
-  // Vibrant day number
-  const todayDay = document.getElementById('todayDay');
-  todayDay.textContent = daynum;
-  todayDay.style.color = "#ffffff";   // white
-
-  // Vibrant weekday
-  const todayWeekday = document.getElementById('todayWeekday');
-  todayWeekday.textContent = weekday;
-  todayWeekday.style.color = "#ee0979";  // pink accent
-}
-
-  /* ========= Daily Quote (no box) ========= */
+  /* ========= Daily Quote ========= */
   const QUOTES = [
     {t:"Innovation distinguishes between a leader and a follower.", a:"Steve Jobs"},
     {t:"The best way to predict the future is to invent it.", a:"Alan Kay"},
@@ -579,13 +559,13 @@ function renderCalendar() {
   }
 
   </script>
-    <!-- BOTTOM-CENTER DAILY QUOTE -->
-  <div class="quote-wrap">
-  <div class="quote-heading">Quote of the Day</div>
-  <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
-  <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
-</div>
 
+  <!-- BOTTOM-CENTER DAILY QUOTE -->
+  <div class="quote-wrap">
+    <div class="quote-heading">Quote of the Day</div>
+    <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
+    <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
+  </div>
 
 </body>
 </html>

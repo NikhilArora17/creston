@@ -246,6 +246,15 @@
   pointer-events: none;
 }
 
+.logo2-wrap {
+  margin-bottom: 18px;    /* spacing between logo2 and "Quote of the Day" */
+}
+.logo2-wrap img {
+  height: var(--logo-height);  /* 👈 same as top logo */
+  width: auto;
+  display: block;
+  margin: 0 auto;         /* keep it centered */
+}
 
 .quote-author {
   margin-top: 8px;
@@ -561,11 +570,15 @@
   </script>
 
   <!-- BOTTOM-CENTER DAILY QUOTE -->
-  <div class="quote-wrap">
-    <div class="quote-heading">Quote of the Day</div>
-    <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
-    <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
+<div class="quote-wrap">
+  <div class="logo2-wrap">
+    <img src="images/logo2.png" alt="Logo 2" id="logo2">
   </div>
+  <div class="quote-heading">Quote of the Day</div>
+  <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
+  <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
+</div>
+
 
 </body>
 </html>

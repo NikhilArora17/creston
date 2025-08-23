@@ -431,7 +431,7 @@
     document.getElementById('weatherIcon').textContent=wxIcon(c.weather_code);
     const fc=document.getElementById('weatherForecast'); fc.innerHTML='';
     const idx=d.hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
-    for(let i=0;i<2;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
+    for(let i=0;i<3;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
       const temp=Math.round(d.hourly.temperature_2m[j]); const w=d.hourly.weather_code[j];
       const div=document.createElement('div'); div.className='forecast-item';
       div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span><span class="wx">${wxIcon(w)}</span><span class="forecast-temp">${temp}°</span>`;

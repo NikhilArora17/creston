@@ -161,7 +161,7 @@
     .clock .hhmm{ font-size:36px; line-height:1; }
     .clock .ss{ font-size:16px; opacity:.85; }
     .clock .ampm{ font-size:14px; opacity:.85; }
-    .clock-date{ font-size:13px; opacity:.9; }
+    
 
     /* ===== AQI (minimal) ===== */
     #aqiCard{ width:var(--widget-width); }
@@ -290,7 +290,7 @@
             <div class="ss"   id="clockSS">--</div>
             <div class="ampm" id="ampm">—</div>
           </div>
-          <div class="clock-date" id="clockDate">—</div>
+          
         </div>
       </div>
 
@@ -495,7 +495,7 @@
     document.getElementById('clockHHMM').textContent = `${pad(hh)}:${pad(m)}`;
     document.getElementById('clockSS').textContent   = pad(s);
     document.getElementById('ampm').textContent      = ampm;
-    document.getElementById('clockDate').textContent = d.toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    //document.getElementById('clockDate').textContent = d.toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
     try{ document.getElementById('tzName').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch{}
   }
   function initClock(){ tickClock(); setInterval(tickClock,1000); }

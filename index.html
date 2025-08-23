@@ -104,12 +104,38 @@
     #weatherCard .weather-temp{ font-size:42px; line-height:1; font-weight:200; margin-top:2px; }
     #weatherCard .weather-desc{ font-size:13px; opacity:.92; }
     #weatherCard .weather-forecast{ display:grid; grid-template-columns:1fr; gap:8px; }
-    #weatherCard .forecast-item{
-      display:grid; grid-template-columns:1fr 40px 48px; align-items:center; padding:8px 10px;
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:14px;
-    }
+   #weatherCard .forecast-item{
+  display:grid;
+  grid-template-columns:1fr 56px 48px;  /* icon chip = 56px */
+  align-items:center;
+  padding:8px 10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+}
+
     #weatherCard .forecast-time{ font-size:12px; opacity:.9; }
-    #weatherCard .wx{ display:flex; align-items:center; justify-content:center; width:40px; height:20px; }
+    #weatherCard .wx{
+  /* center perfectly */
+  display:grid;
+  place-items:center;
+
+  /* make the chip itself */
+  width:36px;
+  height:32px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
+
+  /* kill baseline shift on emoji */
+  line-height:0;
+  font-size:20px;
+
+  /* tiny vertical nudge for optical centering (emoji fonts vary) */
+  transform:translateY(1px);
+}
+
+
     #weatherCard .forecast-temp{
       justify-self:end; font-size:13px; padding:6px 8px; min-width:42px; text-align:center;
       background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12); border-radius:10px; opacity:.95;

@@ -183,7 +183,7 @@
       position:relative; padding:10px 12px;
       background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; overflow:hidden;
     }
-    .news-media{ width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:12px; background:#222; margin-bottom:10px; }
+    .news-media{ width:100%; aspect-ratio:6/7; object-fit:cover; border-radius:12px; background:#222; margin-bottom:10px; }
     .news-title{ font-size:18px; line-height:1.28; font-weight:300; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin:0 0 8px 0; color:#eef1f5; text-decoration:none; }
     .news-title:hover{ text-decoration:underline; }
     .news-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; }
@@ -431,7 +431,7 @@
     document.getElementById('weatherIcon').textContent=wxIcon(c.weather_code);
     const fc=document.getElementById('weatherForecast'); fc.innerHTML='';
     const idx=d.hourly.time.findIndex(t=>new Date(t).getTime()>=Date.now());
-    for(let i=0;i<3;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
+    for(let i=0;i<2;i++){ const j=Math.min(idx+i,d.hourly.time.length-1); const t=new Date(d.hourly.time[j]);
       const temp=Math.round(d.hourly.temperature_2m[j]); const w=d.hourly.weather_code[j];
       const div=document.createElement('div'); div.className='forecast-item';
       div.innerHTML=`<span class="forecast-time">${String(t.getHours()).padStart(2,'0')}:00</span><span class="wx">${wxIcon(w)}</span><span class="forecast-temp">${temp}°</span>`;

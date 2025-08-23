@@ -25,6 +25,31 @@
       --widget-width: 200px;  /* Weather / Time / AQI */
       --news-width:   200px;  /* News / QR / Calendar / Extras */
 
+      /* Per-widget widths (you can tweak individually) */
+      --w-calendar: 200px;
+      --w-time:     200px;
+      --w-news:     200px;
+      --w-weather:  200px;
+      --w-aqi:      200px;
+      --w-qr:       200px;
+
+      /* Bottom mini cards (individual widths) */
+      --w-extra1:   260px;
+      --w-extra2:   300px;
+      --w-extra3:   300px;
+      --w-extra4:   160px; /* ↓ narrower HDMI */
+
+      /* Per-widget min-heights (optional) */
+      --h-calendar: 120px;
+      --h-time:     120px;
+      --h-news:     260px;
+      --h-weather:  180px;
+      --h-aqi:      140px;
+      --h-qr:       220px;
+
+      /* Bottom widgets equal height */
+      --h-bottom:   140px;
+
       /* Logo placement (top-center) */
       --logo-top-gap:  250px;
       --logo-height:   40px;
@@ -93,28 +118,65 @@
     }
 
     /* ===== New bottom row of 4 boxes ===== */
-    .widgets-bottom{
-      position:fixed;
-      left:50%;
-      bottom:var(--bottom-gap);
-      transform:translateX(-50%) scale(var(--ui-scale));
-      transform-origin:bottom center;
-      z-index:1000;
-      display:flex; gap:14px; align-items:flex-end;
-    }
-/* Force equal height for bottom mini widgets */
-.widgets-bottom .card {
-  display: flex;
-  align-items: stretch;
+    /* ===== Bottom row of 4 boxes (FIXED) ===== */
+.widgets-bottom{
+  position:fixed;
+  left:50%;
+  bottom:var(--bottom-gap);
+  transform:translateX(-50%) scale(var(--ui-scale));
+  transform-origin:bottom center;
+  z-index:1000;
+  display:flex; gap:14px; align-items:stretch;
 }
 
-.widgets-bottom .mini {
-  flex: 1;
-  min-height: 100px;   /* adjust this number until all 4 look even */
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+.widgets-bottom .card{
+  height:var(--h-bottom);
+  display:flex;
+  padding:10px;                 /* a bit less padding */
+  box-sizing:border-box;
+  overflow:hidden;              /* keep inner box inside rounded corners */
 }
+
+/* individual widths */
+#extra1{ width:var(--w-extra1) !important; height:var(--h-bottom) !important; }
+#extra2{ width:var(--w-extra2) !important; height:var(--h-bottom) !important; }
+#extra3{ width:var(--w-extra3) !important; height:var(--h-bottom) !important; }
+#extra4{ width:var(--w-extra4) !important; height:var(--h-bottom) !important; }  /* HDMI narrower */
+
+.widgets-bottom .mini{
+  flex:1;
+  height:100%;
+  display:flex; align-items:center; gap:10px;
+  padding:10px;                 /* inner padding trimmed too */
+  box-sizing:border-box;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  overflow:hidden;              /* no bleed */
+}
+
+/* text stays inside & wraps neatly */
+.mini .mini-body{
+  flex:1; min-width:0;          /* allow wrapping */
+  display:flex; flex-direction:column; gap:4px;
+  justify-content:center;
+}
+.mini .mini-head{ color:#b1b5c0; font-size:13px; letter-spacing:.2px; line-height:1.15; }
+.mini .mini-line{
+  color:#fff;
+  font-size:15px;               /* slightly smaller */
+  line-height:1.2;              /* tighter line height */
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.mini .mini-icon{
+  flex:0 0 auto; width:36px; height:36px;
+  display:grid; place-items:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+}
+.mini .mini-icon svg{ width:22px; height:22px; }
 
 
     /* ===== Card base ===== */
@@ -137,6 +199,24 @@
       #newsSource{ margin-left:auto; text-align:right; }
     }
     .muted{opacity:.7}
+
+    /* ===== Map per-widget width & height ===== */
+    #calendarCard { width: var(--w-calendar); min-height: var(--h-calendar); }
+    #timeCard     { width: var(--w-time);     min-height: var(--h-time); }
+    #newsCard     { width: var(--w-news);     min-height: var(--h-news); }
+    #weatherCard  { width: var(--w-weather);  min-height: var(--h-weather); }
+    #aqiCard      { width: var(--w-aqi);      min-height: var(--h-aqi); }
+    #qrCard       { width: var(--w-qr);       min-height: var(--h-qr); }
+
+    /* Bottom mini-widgets: individual widths + enforced equal height */
+    #extra1 { width: var(--w-extra1); height: var(--h-bottom); }
+    #extra2 { width: var(--w-extra2); height: var(--h-bottom); }
+    #extra3 { width: var(--w-extra3); height: var(--h-bottom); }
+    #extra4 { width: var(--w-extra4); height: var(--h-bottom); } /* HDMI narrower */
+
+    /* Make bottom cards act as containers so inner content fills height */
+    .widgets-bottom .card { display:flex; }
+    .widgets-bottom .mini { flex:1; height:100%; display:flex; gap:12px; align-items:flex-start; }
 
     /* ===== Weather ===== */
     #weatherCard{ width:var(--widget-width); }
@@ -237,7 +317,7 @@
       padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
     }
 
-    /* ====== Bottom mini-widgets styling (NEW) ====== */
+    /* ====== Bottom mini-widgets styling ====== */
     .mini{
       display:flex; gap:12px; align-items:flex-start;
       padding:12px;
@@ -456,21 +536,45 @@
   const vs=`#version 300 es
   precision highp float; const vec2 P[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.)); out vec2 uv;
   void main(){ vec2 p=P[gl_VertexID]; uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.);} `;
-  function fsFor(mode){ if(mode==='crossfade') return `#version 300 es
-    precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
-    vec2 cover(vec2 u, vec2 ts, vec2 rs){ float rt=ts.x/ts.y, rc=rs.x/rs.y; if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; } return u; }
-    void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
-      vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); frag=mix(c0,c1,clamp(t,0.,1.)); }`;
+  function fsFor(mode){
+    if(mode==='crossfade') return `#version 300 es
+      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      vec2 cover(vec2 u, vec2 ts, vec2 rs){
+        float rt=ts.x/ts.y, rc=rs.x/rs.y;
+        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
+        return u;
+      }
+      void main(){
+        vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+        vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res));
+        frag=mix(c0,c1,clamp(t,0.,1.));
+      }`;
     if(mode==='wipe') return `#version 300 es
-    precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
-    vec2 cover(vec2 u, vec2 ts, vec2 rs){ float rt=ts.x/ts.y, rc=rs.x/rs.y; if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; } return u; }
-    void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
-      vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); float e=.01; float m=smoothstep(t-e,t+e,uv.x); frag=mix(c0,c1,m);}`;
+      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      vec2 cover(vec2 u, vec2 ts, vec2 rs){
+        float rt=ts.x/ts.y, rc=rs.x/rs.y;
+        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
+        return u;
+      }
+      void main(){
+        vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+        vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res));
+        float e=.01; float m=smoothstep(t-e,t+e,uv.x);
+        frag=mix(c0,c1,m);
+      }`;
     return `#version 300 es
-    precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
-    vec2 cover(vec2 u, vec2 ts, vec2 rs){ float rt=ts.x/ts.y, rc=rs.x/rs.y; if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; } return u; }
-    void main(){ vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
-      vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res)); frag = (t<.999)?c0:c1; }`; }
+      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      vec2 cover(vec2 u, vec2 ts, vec2 rs){
+        float rt=ts.x/ts.y, rc=rs.x/rs.y;
+        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
+        return u;
+      }
+      void main(){
+        vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+        vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res));
+        frag = (t<.999)?c0:c1;
+      }`;
+  }
   function compile(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
   function program(vsSrc,fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc)); gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
   const prog=program(vs,fsFor(ANIMATION_MODE)); gl.useProgram(prog);

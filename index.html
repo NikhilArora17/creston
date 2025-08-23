@@ -224,9 +224,24 @@
 
     /* ===== Bottom-center Quote (no box) ===== */
    /* ===== Quote (BOTTOM–CENTER) ===== */
+.quote-heading {
+  font-size: 46px;
+  font-style: normal;   /* heading normal */
+  font-weight: 400;
+  color: #ffffff;
+  margin-bottom: 14px;
+}
+.quote-text {
+  font-size: 42px;     
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.4;
+  font-style: italic;   /* quote in italics */
+}
+/* Position the whole quote block at the bottom center */
 .quote-wrap {
   position: fixed;
-  bottom: 100px;        /* distance from bottom edge */
+  bottom: 100px;         /* distance from bottom edge */
   left: 50%;
   transform: translateX(-50%);
   z-index: 1200;
@@ -234,17 +249,15 @@
   max-width: 80%;
   pointer-events: none;
 }
-.quote-text {
-  font-size: 42px;     /* size of the quote text */
-  font-weight: 500;
-  color: #ffffff;
-  line-height: 1.4;
-}
+
+
 .quote-author {
   margin-top: 8px;
-  font-size: 36px;     /* size of the author name */
+  font-size: 36px;
   font-weight: 300;
-  color: #b1b5c0;      
+  color: #b1b5c0;
+}
+     
 
   </style>
 </head>
@@ -567,9 +580,11 @@ function renderCalendar() {
   </script>
     <!-- BOTTOM-CENTER DAILY QUOTE -->
   <div class="quote-wrap">
-    <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
-    <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
-  </div>
+  <div class="quote-heading">Quote of the Day</div>
+  <div id="quoteText" class="quote-text">“The best way to predict the future is to invent it.”</div>
+  <div id="quoteAuthor" class="quote-author">— Alan Kay</div>
+</div>
+
 
 </body>
 </html>

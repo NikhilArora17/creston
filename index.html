@@ -59,6 +59,11 @@
 
       /* Bottom widgets row */
       --bottom-gap: 80px;
+
+      /* >>> NEW: micro-gap logic for bottom minis <<< */
+      --mini-gap-x: 12px;      /* icon <-> text */
+      --mini-gap-y: 1.6px;     /* heading <-> first body line */
+      --mini-line-gap: 1.6px;  /* gap between body lines (incl. <br>) */
     }
 
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:400 14px/1.4 Manrope,system-ui,sans-serif;overflow:hidden}
@@ -136,6 +141,7 @@
       padding:10px;
       box-sizing:border-box;
       overflow:hidden;
+      align-items:flex-start; /* TOP align the inner mini */
     }
 
     /* individual widths */
@@ -144,44 +150,81 @@
     #extra3{ width:var(--w-extra3) !important; height:var(--h-bottom) !important; }
     #extra4{ width:var(--w-extra4) !important; height:var(--h-bottom) !important; }
 
+    /* Base card visuals */
     .widgets-bottom .mini{
       flex:1;
-      height:100%;
-      display:flex; align-items:center; gap:10px;
-      padding:10px;
+      display:flex;
+      align-items:flex-start;      /* TOP align icon + text */
+      justify-content:flex-start;  /* start from left */
+      gap:var(--mini-gap-x);       /* 12px between icon and text */
+      padding:8px;                 /* hug content—reduced from 10px */
       box-sizing:border-box;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.12);
       border-radius:16px;
-      overflow:hidden;
     }
 
-    /* text stays inside & wraps neatly */
-    .mini .mini-body{
-      flex:1; min-width:0;
-      display:flex; flex-direction:column;
-      gap:6px;                    /* even spacing between head / lines */
-      justify-content:center;
-    }
-    .mini .mini-head{
-      color:#b1b5c0; font-size:13px; letter-spacing:.2px; line-height:1.2; margin:0;
-    }
-    .mini .mini-line{
-      color:#fff;
-      font-size:14px;
-      line-height:1.5;           /* balanced line height */
-      word-break:break-word;
-      overflow-wrap:anywhere;
-      margin:0;
-    }
+    /* Icon “chip” hugs SVG */
     .mini .mini-icon{
-      flex:0 0 auto; width:36px; height:36px;
+      flex:0 0 auto;
+      width:auto; height:auto;
       display:grid; place-items:center;
+      padding:6px;                          /* tight chip around icon */
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.12);
       border-radius:10px;
     }
     .mini .mini-icon svg{ width:22px; height:22px; }
+
+    /* Text column — left aligned, no extra vertical gaps */
+    .mini .mini-body{
+      flex:0 1 auto;              /* don’t stretch, shrink-to-fit */
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;      /* left align heading + lines */
+      gap:0;                       /* control spacing precisely below */
+    }
+
+    /* Heading top-aligned with icon; tiny gap to first line */
+    .mini .mini-head{
+      margin:0 0 var(--mini-gap-y) 0; /* 1.6px to first body line */
+      color:#b1b5c0;
+      font-size:13px;
+      line-height:1;                  /* no extra vertical slack */
+    }
+
+    /* Body lines: strict rhythm; each line “block” with exact gap */
+    .mini .mini-line{
+      display:block;
+      margin:0;             /* no default margins */
+      line-height:1;        /* keep the inside tight */
+      color:#fff;
+      font-size:14px;
+    }
+    .mini .mini-line + .mini-line{
+      margin-top:var(--mini-line-gap);  /* 1.6px between lines */
+    }
+    /* If a <br> is used inside a body line, match the same 1.6px spacing */
+    .mini .mini-line br{
+      content:"";
+      display:block;
+      height:0;
+      margin-top:var(--mini-line-gap);
+    }
+
+    /* “kbd” chips shouldn’t expand line height */
+    .kbd{
+      display:inline-block;
+      padding:2px 6px;
+      border-radius:6px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:13px;
+      line-height:1;
+      vertical-align:middle;
+      margin:0;
+    }
 
     /* ===== Card base ===== */
     .card{
@@ -219,7 +262,7 @@
 
     /* Bottom mini-widgets containers */
     .widgets-bottom .card { display:flex; }
-    .widgets-bottom .mini { flex:1; height:100%; display:flex; gap:12px; align-items:flex-start; }
+    .widgets-bottom .mini { flex:1; height:100%; }
 
     /* ===== Weather ===== */
     #weatherCard{ width:var(--widget-width); }
@@ -247,13 +290,12 @@
     }
 
     /* ===== TIME ===== */
-    /* Center the time block vertically within the card area */
     #timeCard{ width:var(--widget-width); display:flex; flex-direction:column; }
     .time-body{
       padding:12px; background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
-      flex:1; justify-content:center;   /* vertical centering */
+      flex:1; justify-content:center;
     }
     .clock{
       font-weight:400; letter-spacing:.5px;
@@ -276,7 +318,7 @@
     .aqi-bar{ width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
     .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
 
-    /* ===== News (fixed-height outer; inner scroll) ===== */
+    /* ===== News ===== */
     #newsCard{
       width:var(--news-width);
       height:var(--h-news);
@@ -315,7 +357,7 @@
     #qrCard .qr-body{
       display:flex; flex-direction:column; align-items:center; gap:10px;
       padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; text-align:center;
-      flex:1; justify-content:center;   /* vertical centering */
+      flex:1; justify-content:center;
     }
     #qrImage{ width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:12px; background:#fff; padding:10px; }
     #qrCaption{ font-size:13px; opacity:.9; }
@@ -323,17 +365,15 @@
 
     /* ===== Calendar (Today card) ===== */
     #calendarCard{ width:var(--news-width); }
-    /* Inner box so it visibly looks like a panel */
     #calendarCard .cal-body{
-  margin-top:6px;
-  padding:12px 12px 14px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  box-shadow:none;
-}
+      margin-top:6px;
+      padding:12px 12px 14px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      box-shadow:none;
+    }
 
-    /* ====== (end styles) ====== */
     .kbd{
       display:inline-block; padding:2px 6px; border-radius:6px;
       background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
@@ -462,7 +502,7 @@
           </div>
           <div class="mini-body">
             <div class="mini-head">Windows with Miracast</div>
-            <div class="mini-line">Keyboard shortcut<br> <span class="kbd">⊞ Win</span> + <span class="kbd">K</span></div>
+            <div class="mini-line">Keyboard shortcut<br><span class="kbd">⊞ Win</span> + <span class="kbd">K</span></div>
             <div class="mini-line">Select <strong>BEEHIVE</strong></div>
           </div>
         </div>

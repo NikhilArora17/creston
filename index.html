@@ -21,6 +21,9 @@
       --left-gap: 60px;
       --right-gap: 60px;
 
+      /* NEW: shared top gap so left/right rows center-align */
+      --column-top-gap: 740px;
+
       /* Card widths (unscaled logical px) */
       --widget-width: 200px;  /* Weather / Time / AQI */
       --news-width:   200px;  /* News / QR / Calendar / Extras */
@@ -98,7 +101,8 @@
     /* ===== LEFT column ===== */
     .widgets-left{
       position:fixed;
-      top:calc((var(--left-top-gap) + var(--logo-height) + 10px) / var(--ui-scale));
+      /* CHANGED: use shared top so left/right rows align */
+      top:calc(var(--column-top-gap) / var(--ui-scale));
       left:calc(var(--left-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-start;
@@ -109,7 +113,8 @@
     /* ===== RIGHT column ===== */
     .widgets-right{
       position:fixed;
-      top:calc(var(--right-top-gap) / var(--ui-scale));
+      /* CHANGED: use shared top so left/right rows align */
+      top:calc(var(--column-top-gap) / var(--ui-scale));
       right:calc(var(--right-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
       display:flex; flex-direction:column; gap:14px; align-items:flex-end;
@@ -149,8 +154,8 @@
   display:flex; align-items:center; gap:10px;
   padding:10px;                 /* inner padding trimmed too */
   box-sizing:border-box;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
   border-radius:16px;
   overflow:hidden;              /* no bleed */
 }
@@ -207,6 +212,11 @@
     #weatherCard  { width: var(--w-weather);  min-height: var(--h-weather); }
     #aqiCard      { width: var(--w-aqi);      min-height: var(--h-aqi); }
     #qrCard       { width: var(--w-qr);       min-height: var(--h-qr); }
+
+    /* ===== Force equal heights per row so centers align (NEW) ===== */
+    #calendarCard, #weatherCard { min-height: max(var(--h-calendar), var(--h-weather)); }
+    #timeCard,     #aqiCard     { min-height: max(var(--h-time),     var(--h-aqi));     }
+    #newsCard,     #qrCard      { min-height: max(var(--h-news),     var(--h-qr));      }
 
     /* Bottom mini-widgets: individual widths + enforced equal height */
     #extra1 { width: var(--w-extra1); height: var(--h-bottom); }
@@ -272,31 +282,41 @@
     .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
 
     /* ===== News (with image) ===== */
-    #newsCard{ width:var(--news-width); }
+    /* CHANGED: fixed card height; inner scroll area keeps image visible */
+    #newsCard{
+      width:var(--news-width);
+      height:var(--h-news);
+      display:flex; flex-direction:column;
+    }
     #newsCard .card-header{ margin-bottom:6px; }
     .news-slide{
-      position:relative; padding:10px 12px;
-      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; overflow:visible;
+      position:relative;
+      padding:10px 12px;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
+      overflow:hidden;            /* contain inner scroll */
+      flex:1; display:flex; flex-direction:column;
     }
-    .news-media{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; background:#222; margin-bottom:8px; }
+    .news-media{
+      width:100%; aspect-ratio:16/9; object-fit:cover;
+      border-radius:12px; background:#222; margin-bottom:8px;
+    }
+    /* scrollable text/meta under image; card height never grows */
+    #newsContainer{
+      flex:1; min-height:0;
+      overflow:auto;
+    }
     .news-title{
-  font-size:18px;
-  line-height:1.4;
-  font-weight:400;
-  margin:0 0 10px 0;
-  color:#eef1f5;
-  text-decoration:none;
-  white-space:normal;        /* allow wrapping */
-  overflow-wrap:break-word;  /* break long words if needed */
-}
-
+      font-size:18px; line-height:1.4; font-weight:400;
+      margin:0 0 10px 0; color:#eef1f5; text-decoration:none;
+      white-space:normal; overflow-wrap:break-word;
+    }
     .news-title:hover{ text-decoration:underline; }
     .news-meta{ font-size:12px; opacity:.85; display:flex; gap:8px; align-items:center; }
     .news-meta .dot{ width:4px; height:4px; background:#fff9; border-radius:2px; display:inline-block; }
     .news-fade-enter{ opacity:0; transform:translateY(6px); }
     .news-fade-leave{ opacity:0; transform:translateY(-6px); }
     .news-fade{ transition:opacity .35s ease, transform .35s ease; }
-    .news-dots{ display:flex; gap:6px; justify-content:center; margin-top:10px; }
+    .news-dots{ display:flex; gap:6px; justify-content:center; margin-top:10px; flex:0 0 auto; }
     .news-dot{ width:6px; height:6px; border-radius:3px; background:#fff6; cursor:pointer; transition:transform .2s ease, background .2s ease; }
     .news-dot.active{ background:#fff; transform:scale(1.25); }
 
@@ -309,12 +329,6 @@
     #qrImage{ width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:12px; background:#fff; padding:10px; }
     #qrCaption{ font-size:13px; opacity:.9; }
     #qrLink{ color:#eef1f5; text-decoration:underline; }
-
-    /* ===== Calendar (Today card) ===== */
-    #calendarCard{ width:var(--news-width); }
-    .cal-body{
-      padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
-    }
 
     /* ====== Bottom mini-widgets styling ====== */
     .mini{

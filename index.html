@@ -21,14 +21,14 @@
       --left-gap: 60px;
       --right-gap: 60px;
 
-      /* NEW: shared top gap so left/right rows center-align */
-      --column-top-gap: 740px;
+      /* shared top gap so left/right rows center-align */
+      --column-top-gap: 440px;
 
       /* Card widths (unscaled logical px) */
       --widget-width: 200px;  /* Weather / Time / AQI */
       --news-width:   200px;  /* News / QR / Calendar / Extras */
 
-      /* Per-widget widths (you can tweak individually) */
+      /* Per-widget widths */
       --w-calendar: 200px;
       --w-time:     200px;
       --w-news:     200px;
@@ -40,9 +40,9 @@
       --w-extra1:   300px;
       --w-extra2:   300px;
       --w-extra3:   300px;
-      --w-extra4:   300px; /* ↓ narrower HDMI */
+      --w-extra4:   300px;
 
-      /* Per-widget min-heights (optional) */
+      /* Per-widget min-heights */
       --h-calendar: 120px;
       --h-time:     120px;
       --h-news:     360px;
@@ -54,11 +54,11 @@
       --h-bottom:   140px;
 
       /* Logo placement (top-center) */
-      --logo-top-gap:  250px;
+      --logo-top-gap:  120px;
       --logo-height:   40px;
 
       /* Bottom widgets row */
-      --bottom-gap: 80px; /* distance from bottom edge for the 4 new boxes */
+      --bottom-gap: 80px;
     }
 
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:400 14px/1.4 Manrope,system-ui,sans-serif;overflow:hidden}
@@ -87,7 +87,7 @@
 
     .logo-caption{
       position:fixed;
-      top:var(--logo-top-gap);
+      top:120px;
       left:var(--left-gap);
       z-index:1200;
       font-size:40px;
@@ -101,7 +101,6 @@
     /* ===== LEFT column ===== */
     .widgets-left{
       position:fixed;
-      /* CHANGED: use shared top so left/right rows align */
       top:calc(var(--column-top-gap) / var(--ui-scale));
       left:calc(var(--left-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
@@ -113,7 +112,6 @@
     /* ===== RIGHT column ===== */
     .widgets-right{
       position:fixed;
-      /* CHANGED: use shared top so left/right rows align */
       top:calc(var(--column-top-gap) / var(--ui-scale));
       right:calc(var(--right-gap) / var(--ui-scale));
       z-index:1000; pointer-events:auto;
@@ -122,67 +120,68 @@
       transform-origin:top right;
     }
 
-    /* ===== New bottom row of 4 boxes ===== */
-    /* ===== Bottom row of 4 boxes (FIXED) ===== */
-.widgets-bottom{
-  position:fixed;
-  left:50%;
-  bottom:var(--bottom-gap);
-  transform:translateX(-50%) scale(var(--ui-scale));
-  transform-origin:bottom center;
-  z-index:1000;
-  display:flex; gap:14px; align-items:stretch;
-}
+    /* ===== Bottom row of 4 boxes ===== */
+    .widgets-bottom{
+      position:fixed;
+      left:50%;
+      bottom:var(--bottom-gap);
+      transform:translateX(-50%) scale(var(--ui-scale));
+      transform-origin:bottom center;
+      z-index:1000;
+      display:flex; gap:14px; align-items:stretch;
+    }
+    .widgets-bottom .card{
+      height:var(--h-bottom);
+      display:flex;
+      padding:10px;
+      box-sizing:border-box;
+      overflow:hidden;
+    }
 
-.widgets-bottom .card{
-  height:var(--h-bottom);
-  display:flex;
-  padding:10px;                 /* a bit less padding */
-  box-sizing:border-box;
-  overflow:hidden;              /* keep inner box inside rounded corners */
-}
+    /* individual widths */
+    #extra1{ width:var(--w-extra1) !important; height:var(--h-bottom) !important; }
+    #extra2{ width:var(--w-extra2) !important; height:var(--h-bottom) !important; }
+    #extra3{ width:var(--w-extra3) !important; height:var(--h-bottom) !important; }
+    #extra4{ width:var(--w-extra4) !important; height:var(--h-bottom) !important; }
 
-/* individual widths */
-#extra1{ width:var(--w-extra1) !important; height:var(--h-bottom) !important; }
-#extra2{ width:var(--w-extra2) !important; height:var(--h-bottom) !important; }
-#extra3{ width:var(--w-extra3) !important; height:var(--h-bottom) !important; }
-#extra4{ width:var(--w-extra4) !important; height:var(--h-bottom) !important; }  /* HDMI narrower */
+    .widgets-bottom .mini{
+      flex:1;
+      height:100%;
+      display:flex; align-items:center; gap:10px;
+      padding:10px;
+      box-sizing:border-box;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      overflow:hidden;
+    }
 
-.widgets-bottom .mini{
-  flex:1;
-  height:100%;
-  display:flex; align-items:center; gap:10px;
-  padding:10px;                 /* inner padding trimmed too */
-  box-sizing:border-box;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:16px;
-  overflow:hidden;              /* no bleed */
-}
-
-/* text stays inside & wraps neatly */
-.mini .mini-body{
-  flex:1; min-width:0;          /* allow wrapping */
-  display:flex; flex-direction:column; gap:4px;
-  justify-content:center;
-}
-.mini .mini-head{ color:#b1b5c0; font-size:13px; letter-spacing:.2px; line-height:1.15; }
-.mini .mini-line{
-  color:#fff;
-  font-size:15px;               /* slightly smaller */
-  line-height:1.2;              /* tighter line height */
-  word-break:break-word;
-  overflow-wrap:anywhere;
-}
-.mini .mini-icon{
-  flex:0 0 auto; width:36px; height:36px;
-  display:grid; place-items:center;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:10px;
-}
-.mini .mini-icon svg{ width:22px; height:22px; }
-
+    /* text stays inside & wraps neatly */
+    .mini .mini-body{
+      flex:1; min-width:0;
+      display:flex; flex-direction:column;
+      gap:6px;                    /* even spacing between head / lines */
+      justify-content:center;
+    }
+    .mini .mini-head{
+      color:#b1b5c0; font-size:13px; letter-spacing:.2px; line-height:1.2; margin:0;
+    }
+    .mini .mini-line{
+      color:#fff;
+      font-size:15px;
+      line-height:1.35;           /* balanced line height */
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      margin:0;
+    }
+    .mini .mini-icon{
+      flex:0 0 auto; width:36px; height:36px;
+      display:grid; place-items:center;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;
+    }
+    .mini .mini-icon svg{ width:22px; height:22px; }
 
     /* ===== Card base ===== */
     .card{
@@ -205,7 +204,7 @@
     }
     .muted{opacity:.7}
 
-    /* ===== Map per-widget width & height ===== */
+    /* Map per-widget width & height */
     #calendarCard { width: var(--w-calendar); min-height: var(--h-calendar); }
     #timeCard     { width: var(--w-time);     min-height: var(--h-time); }
     #newsCard     { width: var(--w-news);     min-height: var(--h-news); }
@@ -213,18 +212,12 @@
     #aqiCard      { width: var(--w-aqi);      min-height: var(--h-aqi); }
     #qrCard       { width: var(--w-qr);       min-height: var(--h-qr); }
 
-    /* ===== Force equal heights per row so centers align (NEW) ===== */
+    /* Force equal heights per row so centers align */
     #calendarCard, #weatherCard { min-height: max(var(--h-calendar), var(--h-weather)); }
     #timeCard,     #aqiCard     { min-height: max(var(--h-time),     var(--h-aqi));     }
     #newsCard,     #qrCard      { min-height: max(var(--h-news),     var(--h-qr));      }
 
-    /* Bottom mini-widgets: individual widths + enforced equal height */
-    #extra1 { width: var(--w-extra1); height: var(--h-bottom); }
-    #extra2 { width: var(--w-extra2); height: var(--h-bottom); }
-    #extra3 { width: var(--w-extra3); height: var(--h-bottom); }
-    #extra4 { width: var(--w-extra4); height: var(--h-bottom); } /* HDMI narrower */
-
-    /* Make bottom cards act as containers so inner content fills height */
+    /* Bottom mini-widgets containers */
     .widgets-bottom .card { display:flex; }
     .widgets-bottom .mini { flex:1; height:100%; display:flex; gap:12px; align-items:flex-start; }
 
@@ -254,11 +247,13 @@
     }
 
     /* ===== TIME ===== */
-    #timeCard{ width:var(--widget-width); }
+    /* Center the time block vertically within the card area */
+    #timeCard{ width:var(--widget-width); display:flex; flex-direction:column; }
     .time-body{
       padding:12px; background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10); border-radius:16px;
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
+      flex:1; justify-content:center;   /* vertical centering */
     }
     .clock{
       font-weight:400; letter-spacing:.5px;
@@ -281,8 +276,7 @@
     .aqi-bar{ width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#2ecc71,#f1c40f,#e67e22,#e74c3c,#9b59b6,#7f1d1d); opacity:.75; position:relative; overflow:hidden; }
     .aqi-pointer{ position:absolute; top:-3px; width:2px; height:12px; background:#fff; border-radius:1px; opacity:.9; left:0%; }
 
-    /* ===== News (with image) ===== */
-    /* CHANGED: fixed card height; inner scroll area keeps image visible */
+    /* ===== News (fixed-height outer; inner scroll) ===== */
     #newsCard{
       width:var(--news-width);
       height:var(--h-news);
@@ -293,18 +287,14 @@
       position:relative;
       padding:10px 12px;
       background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px;
-      overflow:hidden;            /* contain inner scroll */
+      overflow:hidden;
       flex:1; display:flex; flex-direction:column;
     }
     .news-media{
       width:100%; aspect-ratio:16/9; object-fit:cover;
       border-radius:12px; background:#222; margin-bottom:8px;
     }
-    /* scrollable text/meta under image; card height never grows */
-    #newsContainer{
-      flex:1; min-height:0;
-      overflow:auto;
-    }
+    #newsContainer{ flex:1; min-height:0; overflow:auto; }
     .news-title{
       font-size:18px; line-height:1.4; font-weight:400;
       margin:0 0 10px 0; color:#eef1f5; text-decoration:none;
@@ -321,35 +311,29 @@
     .news-dot.active{ background:#fff; transform:scale(1.25); }
 
     /* ===== QR ===== */
-    #qrCard{ width:var(--news-width); }
+    #qrCard{ width:var(--news-width); display:flex; flex-direction:column; }
     #qrCard .qr-body{
       display:flex; flex-direction:column; align-items:center; gap:10px;
       padding:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; text-align:center;
+      flex:1; justify-content:center;   /* vertical centering */
     }
     #qrImage{ width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:12px; background:#fff; padding:10px; }
     #qrCaption{ font-size:13px; opacity:.9; }
     #qrLink{ color:#eef1f5; text-decoration:underline; }
 
-    /* ====== Bottom mini-widgets styling ====== */
-    .mini{
-      display:flex; gap:12px; align-items:flex-start;
-      padding:12px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-    }
-    .mini .mini-icon{
-      flex:0 0 auto;
-      width:36px; height:36px;
-      display:grid; place-items:center;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:10px;
-    }
-    .mini .mini-icon svg{ width:22px; height:22px }
-    .mini .mini-body{ display:flex; flex-direction:column; gap:4px }
-    .mini .mini-head{ color:#b1b5c0; font-size:13px; letter-spacing:.2px }
-    .mini .mini-line{ color:#ffffff; font-size:16px }
+    /* ===== Calendar (Today card) ===== */
+    #calendarCard{ width:var(--news-width); }
+    /* Inner box so it visibly looks like a panel */
+    #calendarCard .cal-body{
+  margin-top:6px;
+  padding:12px 12px 14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  box-shadow:none;
+}
+
+    /* ====== (end styles) ====== */
     .kbd{
       display:inline-block; padding:2px 6px; border-radius:6px;
       background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
@@ -455,7 +439,6 @@
       <div class="card" id="extra1">
         <div class="mini">
           <div class="mini-icon">
-            <!-- screen mirroring icon -->
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="12" rx="2"></rect>
               <path d="M8 20h8M10 16l2 2 2-2"></path>
@@ -473,7 +456,6 @@
       <div class="card" id="extra2">
         <div class="mini">
           <div class="mini-icon">
-            <!-- Windows logo -->
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 4l8-1v9H3V4zm10-1l8-1v10h-8V3zM3 13h8v8l-8-1v-7zm10 0h8v9l-8-1v-8z"/>
             </svg>
@@ -490,7 +472,6 @@
       <div class="card" id="extra3">
         <div class="mini">
           <div class="mini-icon">
-            <!-- plug icon -->
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 7v6a4 4 0 0 0 8 0V7M9 7h8M12 3v4M16 3v4M7 13l-3 3M4 16H2"></path>
             </svg>
@@ -507,7 +488,6 @@
       <div class="card" id="extra4">
         <div class="mini">
           <div class="mini-icon">
-            <!-- HDMI icon -->
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="8" width="18" height="6" rx="1.5"></rect>
               <path d="M7 8v6M10 8v6M14 8v6M17 8v6"></path>
@@ -559,8 +539,8 @@
       }
       void main(){
         vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
-        vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res));
-        frag=mix(c0,c1,clamp(t,0.,1.));
+        vec4 c0=texture(a,cover(uv,s0,res)), c4=texture(b,cover(uv,s1,res));
+        frag=mix(c0,c4,clamp(t,0.,1.));
       }`;
     if(mode==='wipe') return `#version 300 es
       precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
@@ -623,15 +603,12 @@
   function wxIcon(c){ if(c===0)return'☀️'; if([1,2].includes(c))return'🌤️'; if(c===3)return'☁️'; if([45,48].includes(c))return'🌫️'; if([51,53,55,56,57].includes(c))return'🌦️'; if([61,63,65].includes(c))return'🌧️'; if([66,67,71,73,75,77].includes(c))return'🌨️'; if([80,81,82].includes(c))return'🌧️'; if([95,96,99].includes(c))return'⛈️'; return'☁️'; }
   function wxText(c){ const m={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'}; return m[c]||'—'; }
   function renderWeather(d){
-  const c = d.current;
-  document.getElementById('weatherTemp').textContent = Math.round(c.temperature_2m) + '°';
-  document.getElementById('weatherDesc').textContent = wxText(c.weather_code);
-  document.getElementById('weatherIcon').textContent = wxIcon(c.weather_code);
-
-  // Remove the forecast completely
-  const fc = document.getElementById('weatherForecast');
-  fc.innerHTML = ''; // keep empty
-}
+    const c = d.current;
+    document.getElementById('weatherTemp').textContent = Math.round(c.temperature_2m) + '°';
+    document.getElementById('weatherDesc').textContent = wxText(c.weather_code);
+    document.getElementById('weatherIcon').textContent = wxIcon(c.weather_code);
+    const fc = document.getElementById('weatherForecast'); fc.innerHTML = '';
+  }
 
   function aqiInfo(a){ if(a==null||!isFinite(a)) return {label:'—',color:'rgba(255,255,255,.12)',pos:0};
     if(a<=50) return{label:'Good',color:'#2ecc71',pos:(a/500)*100};
@@ -653,7 +630,7 @@
     }catch{}
   }
 
-  /* ========= NEWS (Times of India -> fallbacks) ========= */
+  /* ========= NEWS ========= */
   const NEWS_ROTATE_MS=10000;
   function prettyTime(ds){ if(!ds) return "just now"; const d=new Date(ds); if(isNaN(d)) return "—"; const s=(Date.now()-d)/1000; if(s<60) return "just now"; if(s<3600) return Math.floor(s/60)+"m ago"; if(s<86400) return Math.floor(s/3600)+"h ago"; return d.toLocaleDateString(); }
 
@@ -677,13 +654,11 @@
       };
     });
   }
-
   async function fetchGuardian(n=24){
     const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
     const j=await fetch(url,{cache:'no-cache'}).then(r=>r.json()); const a=j.response?.results||[];
     return a.map(r=>({title:r.webTitle, link:r.webUrl, date:r.webPublicationDate, source:'The Guardian', image:r.fields?.thumbnail||''}));
   }
-
   function cleanUrl(u){ return (u||'').replace(/&amp;/g,'&'); }
   async function fetchRedditNews(n=24){
     const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json()); const p=j.data?.children||[];

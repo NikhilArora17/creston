@@ -601,18 +601,79 @@
   }
 
   function playBootLight(){
-    return new Promise((resolve) => {
-      const overlay = document.getElementById("bootOverlay");
-      const frameEl = document.getElementById("bootFrame");
-      const skipBtn = document.getElementById("bootSkip");
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("bootOverlay");
+    const frameEl = document.getElementById("bootFrame");
+    const skipBtn = document.getElementById("bootSkip");
 
-      let done = false;
-      const finish = () => {
-        if(done) return;
-        done = true;
-        overlay.classList.add("hide");
-        resolve();
-      };
+    let done = false;
+    const finish = () => {
+      if(done) return;
+      done = true;
+      overlay.classList.add("hide");
+      resolve();
+    };
+
+    skipBtn?.addEventListener("click", finish, { once:true });
+
+    // Keep last good frame if a frame fails to load (don’t cut the whole boot)
+    let lastGoodSrc = "";
+    frameEl.onerror = () => {
+      if(lastGoodSrc) frameEl.src = lastGoodSrc;
+      // DO NOT call finish here
+    };
+    frameEl.onload = () => {
+      lastGoodSrc = frameEl.currentSrc || frameEl.src;
+    };
+
+    const frameDuration = 1000 / BOOT.fps;
+    const t0 = performance.now();
+
+    let lastIndex = -1;
+
+    function setFrame(i){
+      // guard
+      if(i < 0) i = 0;
+      if(i >= BOOT.count) i = BOOT.count - 1;
+
+      const src = bootFrameUrl(i);
+      // avoid redundant assignments
+      if(frameEl.src !== src) frameEl.src = src;
+    }
+
+    // show first frame immediately
+    setFrame(0);
+
+    function tick(now){
+      if(done) return;
+
+      const elapsed = now - t0;
+      const i = Math.floor(elapsed / frameDuration);
+
+      if(i !== lastIndex){
+        lastIndex = i;
+
+        if(i >= BOOT.count){
+          // show last frame, then finish
+          setFrame(BOOT.count - 1);
+          setTimeout(finish, BOOT.holdLastMs);
+          return;
+        }
+
+        setFrame(i);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+
+    // ✅ Hard cap based on actual duration + buffer (instead of 20s)
+    const expectedMs = (BOOT.count / BOOT.fps) * 1000;
+    setTimeout(() => { if(!done) finish(); }, expectedMs + 5000);
+  });
+}
+
 
       // If boot frames path is wrong, don’t brick: just skip to app.
       frameEl.onerror = finish;

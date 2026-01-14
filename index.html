@@ -61,9 +61,9 @@
       --bottom-gap: 80px;
 
       /* >>> micro-gap logic for bottom minis <<< */
-      --mini-gap-x: 12px;      /* icon <-> text */
-      --mini-gap-y: 12px;      /* heading <-> first body line */
-      --mini-line-gap: 3px;    /* gap between body lines (incl. <br>) */
+      --mini-gap-x: 12px;
+      --mini-gap-y: 12px;
+      --mini-line-gap: 3px;
     }
 
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:400 14px/1.4 Manrope,system-ui,sans-serif;overflow:hidden}
@@ -166,7 +166,6 @@
 
     .mini .mini-icon{
       flex:0 0 auto;
-      width:auto; height:auto;
       display:grid; place-items:center;
       padding:6px;
       background:rgba(255,255,255,.06);
@@ -235,9 +234,6 @@
       padding:8px 12px; margin:-2px -2px 10px;
       background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
       border-radius:16px; font-size:13px; letter-spacing:.3px;
-      #aqiCity{ margin-left:auto; text-align:right; }
-      #weatherCity{ margin-left:auto; text-align:right; }
-      #newsSource{ margin-left:auto; text-align:right; }
     }
     .muted{opacity:.7}
 
@@ -290,10 +286,7 @@
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
       flex:1; justify-content:center;
     }
-    .clock{
-      font-weight:400; letter-spacing:.5px;
-      display:flex; align-items:baseline; gap:6px;
-    }
+    .clock{ font-weight:400; letter-spacing:.5px; display:flex; align-items:baseline; gap:6px; }
     .clock .hhmm{ font-size:36px; line-height:1; }
     .clock .ss{ font-size:16px; opacity:.85; }
     .clock .ampm{ font-size:14px; opacity:.85; }
@@ -367,7 +360,7 @@
       box-shadow:none;
     }
 
-    /* ===== BOOT IMAGE SEQUENCE OVERLAY (NEW) ===== */
+    /* ===== BOOT IMAGE SEQUENCE OVERLAY ===== */
     .boot-overlay{
       position:fixed;
       inset:0;
@@ -384,11 +377,10 @@
       visibility:hidden;
       pointer-events:none;
     }
-    /* Reuse class name for the <img> to keep CSS simple */
-    .boot-video{
+    .boot-frame{
       width:100%;
       height:100%;
-      object-fit:cover; /* change to contain if you prefer letterboxing */
+      object-fit:cover; /* change to contain if you want letterbox */
     }
     .boot-skip{
       position:fixed;
@@ -407,14 +399,11 @@
     }
   </style>
 </head>
-<body>
 
-  <!-- BOOT IMAGE SEQUENCE OVERLAY (NEW)
-       Put your frames in: images/boot/
-       Names like: boot_0001.jpg, boot_0002.jpg, ...
-  -->
+<body>
+  <!-- BOOT OVERLAY -->
   <div id="bootOverlay" class="boot-overlay">
-    <img id="bootFrame" class="boot-video" alt="Boot" />
+    <img id="bootFrame" class="boot-frame" alt="Boot" />
     <button id="bootSkip" class="boot-skip" type="button">Skip</button>
   </div>
 
@@ -428,7 +417,6 @@
 
     <!-- LEFT column (DATE → TIME → NEWS) -->
     <div class="widgets-left">
-      <!-- CALENDAR (Today) -->
       <div class="card" id="calendarCard">
         <div class="card-header"><span>Today</span></div>
         <div class="cal-body today-body">
@@ -440,7 +428,6 @@
         </div>
       </div>
 
-      <!-- TIME -->
       <div class="card" id="timeCard">
         <div class="card-header"><span>Time</span><span id="tzName" class="muted">—</span></div>
         <div class="time-body">
@@ -453,7 +440,6 @@
         </div>
       </div>
 
-      <!-- NEWS -->
       <div class="card" id="newsCard">
         <div class="card-header"><span>Headlines</span><span id="newsSource">updating…</span></div>
         <div class="news-slide">
@@ -471,7 +457,6 @@
 
     <!-- RIGHT column (WEATHER → AQI → INSTAGRAM) -->
     <div class="widgets-right">
-      <!-- Weather -->
       <div class="card" id="weatherCard">
         <div class="card-header">
           <span>Weather</span>
@@ -487,7 +472,6 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
-      <!-- AQI -->
       <div class="card" id="aqiCard">
         <div class="card-header">
           <span>Air Quality</span><span id="aqiCity">Sultanpur, India</span>
@@ -499,7 +483,6 @@
         </div>
       </div>
 
-      <!-- Instagram QR -->
       <div class="card" id="qrCard">
         <div class="card-header"><span>Follow us on Instagram</span><span class="muted"></span></div>
         <div class="qr-body">
@@ -509,9 +492,8 @@
       </div>
     </div>
 
-    <!-- BOTTOM ROW: Four mini-widgets -->
+    <!-- BOTTOM ROW -->
     <div class="widgets-bottom">
-      <!-- 1) Screen Mirroring (Apple) -->
       <div class="card" id="extra1">
         <div class="mini">
           <div class="mini-icon">
@@ -528,7 +510,6 @@
         </div>
       </div>
 
-      <!-- 2) Windows with Miracast -->
       <div class="card" id="extra2">
         <div class="mini">
           <div class="mini-icon">
@@ -544,7 +525,6 @@
         </div>
       </div>
 
-      <!-- 3) Connect Adapter -->
       <div class="card" id="extra3">
         <div class="mini">
           <div class="mini-icon">
@@ -560,7 +540,6 @@
         </div>
       </div>
 
-      <!-- 4) Wired (HDMI) -->
       <div class="card" id="extra4">
         <div class="mini">
           <div class="mini-icon">
@@ -576,7 +555,6 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
@@ -585,11 +563,18 @@
   const COORDS = { lat: 28.4959, lon: 77.1500 };
   const INSTA_URL = "https://www.instagram.com/mcbee.in/";
   const ANIMATION_MODE = 'crossfade';
-  const RENDER_SCALE   = 1.00;
 
-  const IMAGES = ["images/slide5.png","images/slide1.png","images/slide2.png","images/slide5.png","images/slide3.png","images/slide4.png","images/slide5.png","images/slide6.png","images/slide11.png","images/slide5.png","images/slide10.png","images/slide9.png"];
+  // Slightly lower render scale helps embedded devices a lot.
+  // You can set back to 1.00 later.
+  const RENDER_SCALE = 0.85;
 
-  // ===== BOOT IMAGE SEQUENCE CONFIG (NEW) =====
+  const IMAGES = [
+    "images/slide5.png","images/slide1.png","images/slide2.png","images/slide5.png",
+    "images/slide3.png","images/slide4.png","images/slide5.png","images/slide6.png",
+    "images/slide11.png","images/slide5.png","images/slide10.png","images/slide9.png"
+  ];
+
+  // ===== BOOT IMAGE SEQUENCE CONFIG =====
   // Put frames in: images/boot/  named: boot_0001.jpg, boot_0002.jpg, ...
   const BOOT = {
     folder: "images/boot/",
@@ -597,7 +582,7 @@
     ext: ".jpg",
     digits: 4,
     start: 1,
-    count: 2314,       // <-- CHANGE THIS to your total frames
+    count: 2314,      // <-- SET THIS to your total frames
     fps: 24,
     holdLastMs: 250
   };
@@ -608,32 +593,105 @@
   const SLIDE_MS = readSeconds('--slide-duration', 6);
   const TRANSITION_MS = readSeconds('--transition-duration', 1.2);
 
-  /* ========= WebGL slideshow ========= */
-  const canvas=document.getElementById('glcanvas');
-  const gl=canvas.getContext('webgl2',{premultipliedAlpha:true,antialias:true});
-  function sizeGLBuffer(){ const vw=Math.max(1,Math.floor(innerWidth*RENDER_SCALE)), vh=Math.max(1,Math.floor(innerHeight*RENDER_SCALE)); canvas.width=vw; canvas.height=vh; gl.viewport(0,0,vw,vh); }
-  function fitCanvas(){ canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; }
-  function resize(){ sizeGLBuffer(); fitCanvas(); } resize(); addEventListener('resize',resize);
+  /* ========= BOOT (lightweight; no WebGL init during boot) ========= */
+  function padNum(n, digits){ return String(n).padStart(digits, "0"); }
+  function bootFrameUrl(i){
+    const num = BOOT.start + i;
+    return `${BOOT.folder}${BOOT.prefix}${padNum(num, BOOT.digits)}${BOOT.ext}`;
+  }
 
-  const vs=`#version 300 es
-  precision highp float; const vec2 P[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.)); out vec2 uv;
-  void main(){ vec2 p=P[gl_VertexID]; uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.);} `;
+  function playBootLight(){
+    return new Promise((resolve) => {
+      const overlay = document.getElementById("bootOverlay");
+      const frameEl = document.getElementById("bootFrame");
+      const skipBtn = document.getElementById("bootSkip");
 
-  function fsFor(mode){
-    if(mode==='crossfade') return `#version 300 es
-      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
-      vec2 cover(vec2 u, vec2 ts, vec2 rs){
-        float rt=ts.x/ts.y, rc=rs.x/rs.y;
-        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
-        return u;
+      let done = false;
+      const finish = () => {
+        if(done) return;
+        done = true;
+        overlay.classList.add("hide");
+        resolve();
+      };
+
+      // If boot frames path is wrong, don’t brick: just skip to app.
+      frameEl.onerror = finish;
+
+      skipBtn?.addEventListener("click", finish, { once:true });
+
+      // show first frame ASAP
+      frameEl.src = bootFrameUrl(0);
+
+      const frameDuration = 1000 / BOOT.fps;
+      const t0 = performance.now();
+
+      function tick(now){
+        if(done) return;
+        const elapsed = now - t0;
+        const i = Math.floor(elapsed / frameDuration);
+
+        if(i >= BOOT.count){
+          frameEl.src = bootFrameUrl(Math.max(0, BOOT.count - 1));
+          setTimeout(finish, BOOT.holdLastMs);
+          return;
+        }
+
+        frameEl.src = bootFrameUrl(i);
+        requestAnimationFrame(tick);
       }
-      void main(){
-        vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
-        vec4 c0=texture(a,cover(uv,s0,res)), c4=texture(b,cover(uv,s1,res));
-        frag=mix(c0,c4,clamp(t,0.,1.));
-      }`;
-    if(mode==='wipe') return `#version 300 es
-      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      requestAnimationFrame(tick);
+
+      // hard cap so overlay can never hang forever
+      setTimeout(() => { if(!done) finish(); }, 20000);
+    });
+  }
+
+  /* ========= WebGL slideshow (lazy init + progressive texture load) ========= */
+  let canvas, gl, isWebGL2 = false, prog, loc;
+  let tex = [];                 // same length as IMAGES
+  let idx = 0, next = 1;
+  let phase = 'dwell';
+  let end = performance.now();
+
+  function sizeGLBuffer(){
+    const vw=Math.max(1,Math.floor(innerWidth*RENDER_SCALE));
+    const vh=Math.max(1,Math.floor(innerHeight*RENDER_SCALE));
+    canvas.width=vw; canvas.height=vh;
+    gl.viewport(0,0,vw,vh);
+  }
+  function fitCanvas(){
+    canvas.style.width=innerWidth+'px';
+    canvas.style.height=innerHeight+'px';
+  }
+  function resize(){
+    if(!gl) return;
+    sizeGLBuffer(); fitCanvas();
+  }
+
+  const vs2 = `#version 300 es
+    precision highp float;
+    const vec2 P[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.));
+    out vec2 uv;
+    void main(){
+      vec2 p=P[gl_VertexID];
+      uv=p*0.5+0.5;
+      gl_Position=vec4(p,0.,1.);
+    }`;
+
+  // WebGL1 vertex shader
+  const vs1 = `
+    attribute vec2 position;
+    varying vec2 uv;
+    void main(){
+      uv = position * 0.5 + 0.5;
+      gl_Position = vec4(position, 0.0, 1.0);
+    }`;
+
+  function fsFor2(mode){
+    if(mode==='crossfade') return `#version 300 es
+      precision highp float;
+      in vec2 uv; out vec4 frag;
+      uniform sampler2D a,b; uniform vec2 res; uniform float t;
       vec2 cover(vec2 u, vec2 ts, vec2 rs){
         float rt=ts.x/ts.y, rc=rs.x/rs.y;
         if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
@@ -642,11 +700,12 @@
       void main(){
         vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
         vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res));
-        float e=.01; float m=smoothstep(t-e,t+e,uv.x);
-        frag=mix(c0,c1,m);
+        frag=mix(c0,c1,clamp(t,0.,1.));
       }`;
     return `#version 300 es
-      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      precision highp float;
+      in vec2 uv; out vec4 frag;
+      uniform sampler2D a,b; uniform vec2 res; uniform float t;
       vec2 cover(vec2 u, vec2 ts, vec2 rs){
         float rt=ts.x/ts.y, rc=rs.x/rs.y;
         if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
@@ -659,198 +718,242 @@
       }`;
   }
 
-  function compile(t,src){
-    const s=gl.createShader(t);
-    gl.shaderSource(s,src);
+  // WebGL1 fragment shader
+  function fsFor1(mode){
+    return `
+      precision highp float;
+      varying vec2 uv;
+      uniform sampler2D a;
+      uniform sampler2D b;
+      uniform vec2 res;
+      uniform float t;
+
+      vec2 cover(vec2 u, vec2 ts, vec2 rs){
+        float rt=ts.x/ts.y, rc=rs.x/rs.y;
+        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
+        return u;
+      }
+
+      void main(){
+        vec2 s0 = vec2(1.0); // not available in WebGL1, we avoid textureSize here
+        vec2 s1 = vec2(1.0);
+
+        // We'll sample without textureSize-based cover for WebGL1 fallback.
+        // It still works; just won’t be “perfect cover” on some aspect ratios.
+        vec4 c0 = texture2D(a, uv);
+        vec4 c1 = texture2D(b, uv);
+        gl_FragColor = mix(c0, c1, clamp(t, 0.0, 1.0));
+      }
+    `;
+  }
+
+  function compile2(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
     gl.compileShader(s);
-    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
     return s;
   }
-  function program(vsSrc,fsSrc){
-    const p=gl.createProgram();
-    gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc));
-    gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc));
+  function linkProgram2(vsSrc, fsSrc){
+    const p = gl.createProgram();
+    gl.attachShader(p, compile2(gl.VERTEX_SHADER, vsSrc));
+    gl.attachShader(p, compile2(gl.FRAGMENT_SHADER, fsSrc));
     gl.linkProgram(p);
-    if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
     return p;
   }
-  const prog=program(vs,fsFor(ANIMATION_MODE));
-  gl.useProgram(prog);
 
-  const loc={
-    a:gl.getUniformLocation(prog,'a'),
-    b:gl.getUniformLocation(prog,'b'),
-    res:gl.getUniformLocation(prog,'res'),
-    t:gl.getUniformLocation(prog,'t')
-  };
+  function initGL(){
+    canvas = document.getElementById('glcanvas');
 
-  gl.bindVertexArray(gl.createVertexArray());
-
-  function makeTex(img){
-    const t=gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D,t);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
-    return t;
-  }
-  function loadImg(src){
-    return new Promise((res,rej)=>{
-      const i=new Image();
-      i.crossOrigin='anonymous';
-      i.onload=()=>res(i);
-      i.onerror=rej;
-      i.src=src;
-    });
-  }
-
-  // ===== BOOT IMAGE SEQUENCE PLAYER (NEW) =====
-  function padNum(n, digits){
-    return String(n).padStart(digits, "0");
-  }
-  function bootFrameUrl(i){
-    const num = BOOT.start + i;
-    return `${BOOT.folder}${BOOT.prefix}${padNum(num, BOOT.digits)}${BOOT.ext}`;
-  }
-
-  async function preloadBootFrames(){
-    const urls = [];
-    for(let i=0;i<BOOT.count;i++) urls.push(bootFrameUrl(i));
-
-    // preload first ~1s worth
-    const preloadNow = Math.min(BOOT.count, 24);
-    await Promise.all(urls.slice(0, preloadNow).map(u => new Promise((res) => {
-      const img = new Image();
-      img.onload = () => res(true);
-      img.onerror = () => res(false);
-      img.src = u;
-    })));
-
-    // background preload remainder
-    setTimeout(() => {
-      for(let i=preloadNow;i<urls.length;i++){
-        const img = new Image();
-        img.decoding = "async";
-        img.loading = "eager";
-        img.src = urls[i];
-      }
-    }, 0);
-
-    return urls;
-  }
-
-  function playBootThenStart(){
-    return new Promise(async (resolve) => {
-      const overlay = document.getElementById("bootOverlay");
-      const frameEl = document.getElementById("bootFrame");
-      const skipBtn = document.getElementById("bootSkip");
-
-      let started = false;
-
-      const finish = () => {
-        if(started) return;
-        started = true;
-
-        overlay.classList.add("hide");
-        start();
-        resolve();
+    // Try WebGL2 first, then WebGL1
+    gl = canvas.getContext('webgl2', { premultipliedAlpha:true, antialias:true });
+    if(gl){
+      isWebGL2 = true;
+      prog = linkProgram2(vs2, fsFor2(ANIMATION_MODE));
+      gl.useProgram(prog);
+      loc = {
+        a: gl.getUniformLocation(prog,'a'),
+        b: gl.getUniformLocation(prog,'b'),
+        res: gl.getUniformLocation(prog,'res'),
+        t: gl.getUniformLocation(prog,'t')
       };
-
-      skipBtn?.addEventListener("click", finish, { once:true });
-      overlay.addEventListener("click", finish, { once:true }); // click anywhere to skip (optional)
-
-      const urls = await preloadBootFrames();
-      frameEl.src = urls[0];
-
-      const frameDuration = 1000 / BOOT.fps;
-      const t0 = performance.now();
-
-      function tick(now){
-        if(started) return;
-
-        const elapsed = now - t0;
-        const idx = Math.floor(elapsed / frameDuration);
-
-        if(idx >= urls.length){
-          frameEl.src = urls[urls.length - 1];
-          setTimeout(finish, BOOT.holdLastMs);
-          return;
-        }
-
-        const nextSrc = urls[idx];
-        if(frameEl.src !== nextSrc) frameEl.src = nextSrc;
-
-        requestAnimationFrame(tick);
-      }
-
-      requestAnimationFrame(tick);
-    });
-  }
-
-  let tex=[], idx=0, next=1, phase='dwell', end=performance.now();
-
-  (async()=>{
-    try{
-      const imgs=await Promise.all(IMAGES.map(loadImg));
-      tex=imgs.map(makeTex);
-    }catch{
-      const t=gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D,t);
-      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
-      tex=[t,t];
+      gl.bindVertexArray(gl.createVertexArray());
+      sizeGLBuffer(); fitCanvas();
+      addEventListener('resize', resize);
+      return true;
     }
 
-    // Boot sequence first, then start app
-    await playBootThenStart();
-  })();
+    gl = canvas.getContext('webgl', { premultipliedAlpha:true, antialias:false }) ||
+         canvas.getContext('experimental-webgl', { premultipliedAlpha:true, antialias:false });
 
-  function bind(i0,i1){
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D,tex[i0%tex.length]);
-    gl.uniform1i(loc.a,0);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D,tex[i1%tex.length]);
-    gl.uniform1i(loc.b,1);
+    if(!gl){
+      console.warn('No WebGL available. Widgets will still run.');
+      return false;
+    }
+
+    isWebGL2 = false;
+
+    // WebGL1 program
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, vs1);
+    gl.compileShader(vs);
+    if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(vs));
+
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, fsFor1(ANIMATION_MODE));
+    gl.compileShader(fs);
+    if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(fs));
+
+    prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+
+    loc = {
+      a: gl.getUniformLocation(prog,'a'),
+      b: gl.getUniformLocation(prog,'b'),
+      res: gl.getUniformLocation(prog,'res'),
+      t: gl.getUniformLocation(prog,'t')
+    };
+
+    // Quad buffer for WebGL1
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1,-1,  1,-1,  -1, 1,
+       1,-1,  1, 1,  -1, 1
+    ]), gl.STATIC_DRAW);
+
+    const posLoc = gl.getAttribLocation(prog, "position");
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    sizeGLBuffer(); fitCanvas();
+    addEventListener('resize', resize);
+    return true;
   }
 
-  function start(){
-    bind(idx,next);
-    phase='dwell';
-    end=performance.now()+SLIDE_MS;
-    gl.uniform1f(loc.t,0);
+  function make1x1(colorRGBA){
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(colorRGBA));
+    return t;
+  }
 
-    requestAnimationFrame(loop);
-    initWeatherAndAQI(); initNews(); initQR(); initClock(); renderCalendar(new Date());
+  function updateTextureFromImage(texObj, img){
+    gl.bindTexture(gl.TEXTURE_2D, texObj);
+    if(isWebGL2){
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+    }else{
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+    }
+  }
+
+  function loadImageAsync(src){
+    return new Promise((res, rej)=>{
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = src;
+    });
+  }
+
+  async function progressiveLoadSlides(){
+    // Create placeholders first (prevents “big burst” allocation)
+    tex = IMAGES.map(() => make1x1([0,0,0,255]));
+
+    // Load first two ASAP so slideshow can start
+    const firstBatch = Math.min(2, IMAGES.length);
+    for(let i=0;i<firstBatch;i++){
+      try{
+        const img = await loadImageAsync(IMAGES[i]);
+        updateTextureFromImage(tex[i], img);
+      }catch(e){
+        console.warn('Slide failed:', IMAGES[i], e);
+      }
+    }
+
+    // Load the rest in background, one-by-one (keeps Crestron alive)
+    setTimeout(async () => {
+      for(let i=firstBatch;i<IMAGES.length;i++){
+        try{
+          const img = await loadImageAsync(IMAGES[i]);
+          updateTextureFromImage(tex[i], img);
+          // tiny yield so we don’t hog the UI thread
+          await new Promise(r => setTimeout(r, 30));
+        }catch(e){
+          console.warn('Slide failed:', IMAGES[i], e);
+        }
+      }
+    }, 0);
+  }
+
+  function bindTextures(i0, i1){
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex[i0 % tex.length]);
+    gl.uniform1i(loc.a, 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, tex[i1 % tex.length]);
+    gl.uniform1i(loc.b, 1);
   }
 
   function loop(now){
-    gl.uniform2f(loc.res,canvas.width,canvas.height);
+    gl.uniform2f(loc.res, canvas.width, canvas.height);
 
-    if(now>=end){
-      if(phase==='dwell'){
-        phase='transition';
-        end=now+TRANSITION_MS;
-        bind(idx,next);
+    if(now >= end){
+      if(phase === 'dwell'){
+        phase = 'transition';
+        end = now + TRANSITION_MS;
+        bindTextures(idx, next);
       }else{
-        idx=next;
-        next=(idx+1)%tex.length;
-        bind(idx,next);
-        phase='dwell';
-        end=now+SLIDE_MS;
-        gl.uniform1f(loc.t,0);
+        idx = next;
+        next = (idx + 1) % tex.length;
+        bindTextures(idx, next);
+        phase = 'dwell';
+        end = now + SLIDE_MS;
+        gl.uniform1f(loc.t, 0);
       }
     }
 
-    gl.uniform1f(loc.t, phase==='transition' ? 1 - Math.max(0,(end-now))/Math.max(1,TRANSITION_MS) : 0 );
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    const tt = (phase === 'transition')
+      ? 1 - Math.max(0, (end - now)) / Math.max(1, TRANSITION_MS)
+      : 0;
+
+    gl.uniform1f(loc.t, tt);
+
+    if(isWebGL2){
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }else{
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
     requestAnimationFrame(loop);
   }
 
-  /* ========= Weather + AQI ========= */
+  function startSlideshow(){
+    if(!gl || !tex.length) return;
+    idx = 0;
+    next = (idx + 1) % tex.length;
+    bindTextures(idx, next);
+    phase = 'dwell';
+    end = performance.now() + SLIDE_MS;
+    gl.uniform1f(loc.t, 0);
+    requestAnimationFrame(loop);
+  }
+
+  /* ========= Widgets (unchanged) ========= */
   async function initWeatherAndAQI(){
     document.getElementById('weatherCity').textContent = CITY_LABEL;
     document.getElementById('aqiCity').textContent     = CITY_LABEL;
@@ -871,7 +974,7 @@
     document.getElementById('weatherTemp').textContent = Math.round(c.temperature_2m) + '°';
     document.getElementById('weatherDesc').textContent = wxText(c.weather_code);
     document.getElementById('weatherIcon').textContent = wxIcon(c.weather_code);
-    const fc = document.getElementById('weatherForecast'); fc.innerHTML = '';
+    document.getElementById('weatherForecast').innerHTML = '';
   }
 
   function aqiInfo(a){
@@ -883,7 +986,6 @@
     if(a<=300)return{label:'Very Unhealthy',color:'#9b59b6',pos:(a/500)*100};
     return{label:'Hazardous',color:'#7f1d1d',pos:Math.min(100,(a/500)*100)};
   }
-
   async function fetchAQI(lat,lon){
     try{
       const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
@@ -897,7 +999,6 @@
     }catch{}
   }
 
-  /* ========= NEWS ========= */
   const NEWS_ROTATE_MS=10000;
   function prettyTime(ds){
     if(!ds) return "just now";
@@ -924,16 +1025,13 @@
       return { title: it.title, link: it.link, date: it.pubDate, source: 'Times of India', image: img || '' };
     });
   }
-
   async function fetchGuardian(n=24){
     const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
     const j=await fetch(url,{cache:'no-cache'}).then(r=>r.json());
     const a=j.response?.results||[];
     return a.map(r=>({title:r.webTitle, link:r.webUrl, date:r.webPublicationDate, source:'The Guardian', image:r.fields?.thumbnail||''}));
   }
-
   function cleanUrl(u){ return (u||'').replace(/&amp;/g,'&'); }
-
   async function fetchRedditNews(n=24){
     const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json());
     const p=j.data?.children||[];
@@ -948,8 +1046,7 @@
 
   let newsList=[], newsIndex=0, newsTimer;
   function buildDots(){
-    const box=document.getElementById('newsDots');
-    box.innerHTML='';
+    const box=document.getElementById('newsDots'); box.innerHTML='';
     newsList.forEach((_,i)=>{
       const d=document.createElement('div');
       d.className='news-dot'+(i===newsIndex?' active':'');
@@ -957,28 +1054,21 @@
       box.appendChild(d);
     });
   }
-
   function updateDots(){
     document.querySelectorAll('#newsDots .news-dot').forEach((el,i)=>el.classList.toggle('active',i===newsIndex));
   }
-
   function setNewsSlide(it){
-    const link=document.getElementById('newsLink'),
-          src=document.getElementById('newsSourceInline'),
-          tim=document.getElementById('newsTime'),
-          hdr=document.getElementById('newsSource'),
-          img=document.getElementById('newsImg');
-
-    link.textContent=it.title||'—';
-    link.href=it.link||'#';
-    src.textContent=it.source||'—';
-    hdr.textContent=it.source||'Headlines';
+    const link=document.getElementById('newsLink');
+    const src=document.getElementById('newsSourceInline');
+    const tim=document.getElementById('newsTime');
+    const hdr=document.getElementById('newsSource');
+    const img=document.getElementById('newsImg');
+    link.textContent=it.title||'—'; link.href=it.link||'#';
+    src.textContent=it.source||'—'; hdr.textContent=it.source||'Headlines';
     tim.textContent=prettyTime(it.date);
-
     if(it.image){ img.src=it.image; img.style.display='block'; }
     else { img.removeAttribute('src'); img.style.display='none'; }
   }
-
   function renderNews(){
     if(!newsList.length)return;
     const cont=document.getElementById('newsContainer');
@@ -991,41 +1081,24 @@
       updateDots();
     },130);
   }
-
-  function stepNews(){
-    if(!newsList.length)return;
-    newsIndex=(newsIndex+1)%newsList.length;
-    renderNews();
-  }
-
-  function resetNewsTimer(){
-    clearInterval(newsTimer);
-    newsTimer=setInterval(stepNews,NEWS_ROTATE_MS);
-  }
-
+  function stepNews(){ if(!newsList.length)return; newsIndex=(newsIndex+1)%newsList.length; renderNews(); }
+  function resetNewsTimer(){ clearInterval(newsTimer); newsTimer=setInterval(stepNews,NEWS_ROTATE_MS); }
   async function initNews(){
     let all=[];
     try{ all=await fetchTOI(24);}catch(e){ console.warn('TOI failed',e); }
     if(!all.length){ try{ all=await fetchGuardian(24);}catch(e){ console.warn('Guardian failed',e); } }
     if(!all.length){ try{ all=await fetchRedditNews(24);}catch(e){ console.warn('Reddit fallback failed',e); } }
     if(!all.length){ all=[{title:'No news feeds reachable right now.', link:'#', date:new Date().toISOString(), source:'Local', image:''}]; }
-
     all.sort((a,b)=>new Date(b.date)-new Date(a.date));
-    newsList=all.slice(0,8);
-    newsIndex=0;
-    setNewsSlide(newsList[0]);
-    buildDots();
-    resetNewsTimer();
+    newsList=all.slice(0,8); newsIndex=0; setNewsSlide(newsList[0]); buildDots(); resetNewsTimer();
   }
 
-  /* ========= QR ========= */
   function initQR(){
     const url=encodeURIComponent(INSTA_URL);
     document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${url}`;
     document.getElementById('qrLink').href=INSTA_URL;
   }
 
-  /* ========= Clock ========= */
   function pad(n){ return String(n).padStart(2,'0'); }
   function tickClock(){
     const d=new Date();
@@ -1039,17 +1112,35 @@
   }
   function initClock(){ tickClock(); setInterval(tickClock,1000); }
 
-  /* ========= Calendar (Today only) ========= */
-  function renderCalendar() {
+  function renderCalendar(){
     const now = new Date();
     const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
     const daynum  = now.getDate();
     const month   = now.toLocaleDateString(undefined,{ month: 'short' });
-
     document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
     document.getElementById('todayDay').textContent = daynum;
     document.getElementById('todayWeekday').textContent = weekday;
   }
+
+  /* ========= MAIN: boot first, then heavy stuff ========= */
+  (async function main(){
+    // 1) Boot overlay first (no WebGL work yet)
+    await playBootLight();
+
+    // 2) Start widgets immediately (light)
+    initWeatherAndAQI();
+    initNews();
+    initQR();
+    initClock();
+    renderCalendar();
+
+    // 3) Now init WebGL + load slides progressively (heavy delayed)
+    const ok = initGL();
+    if(ok){
+      await progressiveLoadSlides();
+      startSlideshow();
+    }
+  })();
   </script>
 </body>
 </html>

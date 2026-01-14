@@ -675,37 +675,7 @@
 }
 
 
-      // If boot frames path is wrong, don’t brick: just skip to app.
-      frameEl.onerror = finish;
 
-      skipBtn?.addEventListener("click", finish, { once:true });
-
-      // show first frame ASAP
-      frameEl.src = bootFrameUrl(0);
-
-      const frameDuration = 1000 / BOOT.fps;
-      const t0 = performance.now();
-
-      function tick(now){
-        if(done) return;
-        const elapsed = now - t0;
-        const i = Math.floor(elapsed / frameDuration);
-
-        if(i >= BOOT.count){
-          frameEl.src = bootFrameUrl(Math.max(0, BOOT.count - 1));
-          setTimeout(finish, BOOT.holdLastMs);
-          return;
-        }
-
-        frameEl.src = bootFrameUrl(i);
-        requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-
-      // hard cap so overlay can never hang forever
-      setTimeout(() => { if(!done) finish(); }, 20000);
-    });
-  }
 
   /* ========= WebGL slideshow (lazy init + progressive texture load) ========= */
   let canvas, gl, isWebGL2 = false, prog, loc;

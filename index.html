@@ -60,10 +60,10 @@
       /* Bottom widgets row */
       --bottom-gap: 80px;
 
-      /* >>> micro-gap logic for bottom minis <<< */
-      --mini-gap-x: 12px;
-      --mini-gap-y: 12px;
-      --mini-line-gap: 3px;
+      /* >>> NEW: micro-gap logic for bottom minis <<< */
+      --mini-gap-x: 12px;      /* icon <-> text */
+      --mini-gap-y: 12px;     /* heading <-> first body line */
+      --mini-line-gap: 3px;  /* gap between body lines (incl. <br>) */
     }
 
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:400 14px/1.4 Manrope,system-ui,sans-serif;overflow:hidden}
@@ -141,7 +141,7 @@
       padding:10px;
       box-sizing:border-box;
       overflow:hidden;
-      align-items:flex-start;
+      align-items:flex-start; /* TOP align the inner mini */
     }
 
     /* individual widths */
@@ -154,52 +154,58 @@
     .widgets-bottom .mini{
       flex:1;
       display:flex;
-      align-items:flex-start;
-      justify-content:flex-start;
-      gap:var(--mini-gap-x);
-      padding:8px;
+      align-items:flex-start;      /* TOP align icon + text */
+      justify-content:flex-start;  /* start from left */
+      gap:var(--mini-gap-x);       /* 12px between icon and text */
+      padding:8px;                 /* hug content—reduced from 10px */
       box-sizing:border-box;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.12);
       border-radius:16px;
     }
 
+    /* Icon “chip” hugs SVG */
     .mini .mini-icon{
       flex:0 0 auto;
+      width:auto; height:auto;
       display:grid; place-items:center;
-      padding:6px;
+      padding:6px;                          /* tight chip around icon */
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.12);
       border-radius:10px;
     }
     .mini .mini-icon svg{ width:22px; height:22px; }
 
+    /* Text column — left aligned, no extra vertical gaps */
     .mini .mini-body{
-      flex:0 1 auto;
+      flex:0 1 auto;              /* don’t stretch, shrink-to-fit */
       min-width:0;
       display:flex;
       flex-direction:column;
-      align-items:flex-start;
-      gap:0;
+      align-items:flex-start;      /* left align heading + lines */
+      gap:0;                       /* control spacing precisely below */
     }
 
+    /* Heading top-aligned with icon; tiny gap to first line */
     .mini .mini-head{
-      margin:0 0 var(--mini-gap-y) 0;
+      margin:0 0 var(--mini-gap-y) 0; /* 1.6px to first body line */
       color:#b1b5c0;
       font-size:13px;
-      line-height:1;
+      line-height:1;                  /* no extra vertical slack */
     }
 
+    /* Body lines: strict rhythm; each line “block” with exact gap */
     .mini .mini-line{
       display:block;
-      margin:0;
-      line-height:1;
+      margin:0;             /* no default margins */
+      line-height:1;        /* keep the inside tight */
       color:#fff;
       font-size:14px;
     }
     .mini .mini-line + .mini-line{
-      margin-top:var(--mini-line-gap);
+      margin-top:var(--mini-line-gap);  /* 1.6px between lines */
     }
+    /* If a <br> is used inside a body line, match the same 1.6px spacing */
     .mini .mini-line br{
       content:"";
       display:block;
@@ -207,6 +213,7 @@
       margin-top:var(--mini-line-gap);
     }
 
+    /* “kbd” chips shouldn’t expand line height */
     .kbd{
       display:inline-block;
       padding:2px 6px;
@@ -234,6 +241,9 @@
       padding:8px 12px; margin:-2px -2px 10px;
       background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
       border-radius:16px; font-size:13px; letter-spacing:.3px;
+      #aqiCity{ margin-left:auto; text-align:right; }
+      #weatherCity{ margin-left:auto; text-align:right; }
+      #newsSource{ margin-left:auto; text-align:right; }
     }
     .muted{opacity:.7}
 
@@ -250,6 +260,7 @@
     #timeCard,     #aqiCard     { min-height: max(var(--h-time),     var(--h-aqi));     }
     #newsCard,     #qrCard      { min-height: max(var(--h-news),     var(--h-qr));      }
 
+    /* Bottom mini-widgets containers */
     .widgets-bottom .card { display:flex; }
     .widgets-bottom .mini { flex:1; height:100%; }
 
@@ -286,7 +297,10 @@
       display:flex; flex-direction:column; gap:6px; align-items:flex-start;
       flex:1; justify-content:center;
     }
-    .clock{ font-weight:400; letter-spacing:.5px; display:flex; align-items:baseline; gap:6px; }
+    .clock{
+      font-weight:400; letter-spacing:.5px;
+      display:flex; align-items:baseline; gap:6px;
+    }
     .clock .hhmm{ font-size:36px; line-height:1; }
     .clock .ss{ font-size:16px; opacity:.85; }
     .clock .ampm{ font-size:14px; opacity:.85; }
@@ -360,53 +374,14 @@
       box-shadow:none;
     }
 
-    /* ===== BOOT IMAGE SEQUENCE OVERLAY ===== */
-    .boot-overlay{
-      position:fixed;
-      inset:0;
-      z-index:9999;
-      background:#000;
-      display:grid;
-      place-items:center;
-      opacity:1;
-      visibility:visible;
-      transition:opacity .5s ease, visibility .5s ease;
-    }
-    .boot-overlay.hide{
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-    }
-    .boot-frame{
-      width:100%;
-      height:100%;
-      object-fit:cover; /* change to contain if you want letterbox */
-    }
-    .boot-skip{
-      position:fixed;
-      right:24px;
-      bottom:24px;
-      z-index:10000;
-      padding:10px 14px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(6px);
-      -webkit-backdrop-filter:blur(6px);
-      color:#fff;
-      font:600 13px/1 Manrope,system-ui,sans-serif;
-      cursor:pointer;
+    .kbd{
+      display:inline-block; padding:2px 6px; border-radius:6px;
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+      font-size:13px; line-height:1.2; vertical-align:middle;
     }
   </style>
 </head>
-
 <body>
-  <!-- BOOT OVERLAY -->
-  <div id="bootOverlay" class="boot-overlay">
-    <img id="bootFrame" class="boot-frame" alt="Boot" />
-    <button id="bootSkip" class="boot-skip" type="button">Skip</button>
-  </div>
-
   <div class="stage vignette">
     <canvas id="glcanvas"></canvas>
     <div class="badge" id="badge"></div>
@@ -417,17 +392,19 @@
 
     <!-- LEFT column (DATE → TIME → NEWS) -->
     <div class="widgets-left">
+      <!-- CALENDAR (Today) -->
       <div class="card" id="calendarCard">
         <div class="card-header"><span>Today</span></div>
         <div class="cal-body today-body">
           <div id="todayBadge" style="font-size:13px; padding:4px 10px; border-radius:10px;
-            background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff;
+            background:linear-gradient(135deg,#ff6a00,#ee0979); color:#fff; 
             font-weight:600; letter-spacing:0.3px; display:inline-block; margin-bottom:10px;">—</div>
           <div id="todayDay" style="font-size:40px; font-weight:200; line-height:1;">--</div>
           <div id="todayWeekday" style="font-size:14px; opacity:.85;">—</div>
         </div>
       </div>
 
+      <!-- TIME -->
       <div class="card" id="timeCard">
         <div class="card-header"><span>Time</span><span id="tzName" class="muted">—</span></div>
         <div class="time-body">
@@ -440,6 +417,7 @@
         </div>
       </div>
 
+      <!-- NEWS -->
       <div class="card" id="newsCard">
         <div class="card-header"><span>Headlines</span><span id="newsSource">updating…</span></div>
         <div class="news-slide">
@@ -457,6 +435,7 @@
 
     <!-- RIGHT column (WEATHER → AQI → INSTAGRAM) -->
     <div class="widgets-right">
+      <!-- Weather -->
       <div class="card" id="weatherCard">
         <div class="card-header">
           <span>Weather</span>
@@ -472,6 +451,7 @@
         <div class="weather-forecast" id="weatherForecast"></div>
       </div>
 
+      <!-- AQI -->
       <div class="card" id="aqiCard">
         <div class="card-header">
           <span>Air Quality</span><span id="aqiCity">Sultanpur, India</span>
@@ -483,6 +463,7 @@
         </div>
       </div>
 
+      <!-- Instagram QR -->
       <div class="card" id="qrCard">
         <div class="card-header"><span>Follow us on Instagram</span><span class="muted"></span></div>
         <div class="qr-body">
@@ -492,8 +473,9 @@
       </div>
     </div>
 
-    <!-- BOTTOM ROW -->
+    <!-- BOTTOM ROW: Four mini-widgets -->
     <div class="widgets-bottom">
+      <!-- 1) Screen Mirroring (Apple) -->
       <div class="card" id="extra1">
         <div class="mini">
           <div class="mini-icon">
@@ -510,6 +492,7 @@
         </div>
       </div>
 
+      <!-- 2) Windows with Miracast -->
       <div class="card" id="extra2">
         <div class="mini">
           <div class="mini-icon">
@@ -525,6 +508,7 @@
         </div>
       </div>
 
+      <!-- 3) Connect Adapter -->
       <div class="card" id="extra3">
         <div class="mini">
           <div class="mini-icon">
@@ -540,6 +524,7 @@
         </div>
       </div>
 
+      <!-- 4) Wired (HDMI) -->
       <div class="card" id="extra4">
         <div class="mini">
           <div class="mini-icon">
@@ -555,6 +540,7 @@
         </div>
       </div>
     </div>
+
   </div>
 
   <script>
@@ -563,29 +549,9 @@
   const COORDS = { lat: 28.4959, lon: 77.1500 };
   const INSTA_URL = "https://www.instagram.com/mcbee.in/";
   const ANIMATION_MODE = 'crossfade';
+  const RENDER_SCALE   = 1.00;
 
-  // Slightly lower render scale helps embedded devices a lot.
-  // You can set back to 1.00 later.
-  const RENDER_SCALE = 0.85;
-
-  const IMAGES = [
-    "images/slide5.png","images/slide1.png","images/slide2.png","images/slide5.png",
-    "images/slide3.png","images/slide4.png","images/slide5.png","images/slide6.png",
-    "images/slide11.png","images/slide5.png","images/slide10.png","images/slide9.png"
-  ];
-
-  // ===== BOOT IMAGE SEQUENCE CONFIG =====
-  // Put frames in: images/boot/  named: boot_0001.jpg, boot_0002.jpg, ...
-  const BOOT = {
-    folder: "images/boot/",
-    prefix: "boot",
-    ext: ".jpg",
-    digits: 3,
-    start: 1,
-    count: 926,      // <-- SET THIS to your total frames
-    fps: 24,
-    holdLastMs: 250
-  };
+  const IMAGES = ["images/slide5.png","images/slide1.png","images/slide2.png","images/slide5.png","images/slide3.png","images/slide4.png","images/slide5.png","images/slide6.png","images/slide11.png","images/slide5.png","images/slide10.png","images/slide9.png"];    
 
   function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function readSeconds(n,f){ const v=cssVar(n), x=parseFloat((v||'').replace('s','')); return isFinite(x)?x*1000:f*1000; }
@@ -593,136 +559,31 @@
   const SLIDE_MS = readSeconds('--slide-duration', 6);
   const TRANSITION_MS = readSeconds('--transition-duration', 1.2);
 
-  /* ========= BOOT (lightweight; no WebGL init during boot) ========= */
-  function padNum(n, digits){ return String(n).padStart(digits, "0"); }
-  function bootFrameUrl(i){
-    const num = BOOT.start + i;
-    return `${BOOT.folder}${BOOT.prefix}${padNum(num, BOOT.digits)}${BOOT.ext}`;
-  }
+  /* ========= WebGL slideshow ========= */
+  const canvas=document.getElementById('glcanvas');
+  const gl=canvas.getContext('webgl2',{premultipliedAlpha:true,antialias:true});
+  function sizeGLBuffer(){ const vw=Math.max(1,Math.floor(innerWidth*RENDER_SCALE)), vh=Math.max(1,Math.floor(innerHeight*RENDER_SCALE)); canvas.width=vw; canvas.height=vh; gl.viewport(0,0,vw,vh); }
+  function fitCanvas(){ canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; }
+  function resize(){ sizeGLBuffer(); fitCanvas(); } resize(); addEventListener('resize',resize);
 
-  function playBootLight(){
-  return new Promise((resolve) => {
-    const overlay = document.getElementById("bootOverlay");
-    const frameEl = document.getElementById("bootFrame");
-    const skipBtn = document.getElementById("bootSkip");
-
-    let done = false;
-    const finish = () => {
-      if(done) return;
-      done = true;
-      overlay.classList.add("hide");
-      resolve();
-    };
-
-    skipBtn?.addEventListener("click", finish, { once:true });
-
-    // Keep last good frame if a frame fails to load (don’t cut the whole boot)
-    let lastGoodSrc = "";
-    frameEl.onerror = () => {
-      if(lastGoodSrc) frameEl.src = lastGoodSrc;
-      // DO NOT call finish here
-    };
-    frameEl.onload = () => {
-      lastGoodSrc = frameEl.currentSrc || frameEl.src;
-    };
-
-    const frameDuration = 1000 / BOOT.fps;
-    const t0 = performance.now();
-
-    let lastIndex = -1;
-
-    function setFrame(i){
-      // guard
-      if(i < 0) i = 0;
-      if(i >= BOOT.count) i = BOOT.count - 1;
-
-      const src = bootFrameUrl(i);
-      // avoid redundant assignments
-      if(frameEl.src !== src) frameEl.src = src;
-    }
-
-    // show first frame immediately
-    setFrame(0);
-
-    function tick(now){
-      if(done) return;
-
-      const elapsed = now - t0;
-      const i = Math.floor(elapsed / frameDuration);
-
-      if(i !== lastIndex){
-        lastIndex = i;
-
-        if(i >= BOOT.count){
-          // show last frame, then finish
-          setFrame(BOOT.count - 1);
-          setTimeout(finish, BOOT.holdLastMs);
-          return;
-        }
-
-        setFrame(i);
-      }
-
-      requestAnimationFrame(tick);
-    }
-
-    requestAnimationFrame(tick);
-
-    // ✅ Hard cap based on actual duration + buffer (instead of 20s)
-    const expectedMs = (BOOT.count / BOOT.fps) * 1000;
-    setTimeout(() => { if(!done) finish(); }, expectedMs + 5000);
-  });
-}
-
-
-
-
-  /* ========= WebGL slideshow (lazy init + progressive texture load) ========= */
-  let canvas, gl, isWebGL2 = false, prog, loc;
-  let tex = [];                 // same length as IMAGES
-  let idx = 0, next = 1;
-  let phase = 'dwell';
-  let end = performance.now();
-
-  function sizeGLBuffer(){
-    const vw=Math.max(1,Math.floor(innerWidth*RENDER_SCALE));
-    const vh=Math.max(1,Math.floor(innerHeight*RENDER_SCALE));
-    canvas.width=vw; canvas.height=vh;
-    gl.viewport(0,0,vw,vh);
-  }
-  function fitCanvas(){
-    canvas.style.width=innerWidth+'px';
-    canvas.style.height=innerHeight+'px';
-  }
-  function resize(){
-    if(!gl) return;
-    sizeGLBuffer(); fitCanvas();
-  }
-
-  const vs2 = `#version 300 es
-    precision highp float;
-    const vec2 P[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.));
-    out vec2 uv;
-    void main(){
-      vec2 p=P[gl_VertexID];
-      uv=p*0.5+0.5;
-      gl_Position=vec4(p,0.,1.);
-    }`;
-
-  // WebGL1 vertex shader
-  const vs1 = `
-    attribute vec2 position;
-    varying vec2 uv;
-    void main(){
-      uv = position * 0.5 + 0.5;
-      gl_Position = vec4(position, 0.0, 1.0);
-    }`;
-
-  function fsFor2(mode){
+  const vs=`#version 300 es
+  precision highp float; const vec2 P[4]=vec2[4](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(1.,1.)); out vec2 uv;
+  void main(){ vec2 p=P[gl_VertexID]; uv=p*0.5+0.5; gl_Position=vec4(p,0.,1.);} `;
+  function fsFor(mode){
     if(mode==='crossfade') return `#version 300 es
-      precision highp float;
-      in vec2 uv; out vec4 frag;
-      uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      vec2 cover(vec2 u, vec2 ts, vec2 rs){
+        float rt=ts.x/ts.y, rc=rs.x/rs.y;
+        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
+        return u;
+      }
+      void main(){
+        vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
+        vec4 c0=texture(a,cover(uv,s0,res)), c4=texture(b,cover(uv,s1,res));
+        frag=mix(c0,c4,clamp(t,0.,1.));
+      }`;
+    if(mode==='wipe') return `#version 300 es
+      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
       vec2 cover(vec2 u, vec2 ts, vec2 rs){
         float rt=ts.x/ts.y, rc=rs.x/rs.y;
         if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
@@ -731,12 +592,11 @@
       void main(){
         vec2 s0=vec2(textureSize(a,0)), s1=vec2(textureSize(b,0));
         vec4 c0=texture(a,cover(uv,s0,res)), c1=texture(b,cover(uv,s1,res));
-        frag=mix(c0,c1,clamp(t,0.,1.));
+        float e=.01; float m=smoothstep(t-e,t+e,uv.x);
+        frag=mix(c0,c1,m);
       }`;
     return `#version 300 es
-      precision highp float;
-      in vec2 uv; out vec4 frag;
-      uniform sampler2D a,b; uniform vec2 res; uniform float t;
+      precision highp float; in vec2 uv; out vec4 frag; uniform sampler2D a,b; uniform vec2 res; uniform float t;
       vec2 cover(vec2 u, vec2 ts, vec2 rs){
         float rt=ts.x/ts.y, rc=rs.x/rs.y;
         if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
@@ -748,243 +608,28 @@
         frag = (t<.999)?c0:c1;
       }`;
   }
+  function compile(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  function program(vsSrc,fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSrc)); gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSrc)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+  const prog=program(vs,fsFor(ANIMATION_MODE)); gl.useProgram(prog);
+  const loc={a:gl.getUniformLocation(prog,'a'), b:gl.getUniformLocation(prog,'b'), res:gl.getUniformLocation(prog,'res'), t:gl.getUniformLocation(prog,'t')};
+  gl.bindVertexArray(gl.createVertexArray());
+  function makeTex(img){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img); return t; }
+  function loadImg(src){ return new Promise((res,rej)=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+  let tex=[], idx=0, next=1, phase='dwell', end=performance.now();
+  (async()=>{ try{ const imgs=await Promise.all(IMAGES.map(loadImg)); tex=imgs.map(makeTex);}catch{ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); tex=[t,t]; } start();})();
 
-  // WebGL1 fragment shader
-  function fsFor1(mode){
-    return `
-      precision highp float;
-      varying vec2 uv;
-      uniform sampler2D a;
-      uniform sampler2D b;
-      uniform vec2 res;
-      uniform float t;
-
-      vec2 cover(vec2 u, vec2 ts, vec2 rs){
-        float rt=ts.x/ts.y, rc=rs.x/rs.y;
-        if(rt>rc){ float s=rt/rc; u.y=(u.y-.5)*s+.5; } else { float s=rc/rt; u.x=(u.x-.5)*s+.5; }
-        return u;
-      }
-
-      void main(){
-        vec2 s0 = vec2(1.0); // not available in WebGL1, we avoid textureSize here
-        vec2 s1 = vec2(1.0);
-
-        // We'll sample without textureSize-based cover for WebGL1 fallback.
-        // It still works; just won’t be “perfect cover” on some aspect ratios.
-        vec4 c0 = texture2D(a, uv);
-        vec4 c1 = texture2D(b, uv);
-        gl_FragColor = mix(c0, c1, clamp(t, 0.0, 1.0));
-      }
-    `;
-  }
-
-  function compile2(type, src){
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-    return s;
-  }
-  function linkProgram2(vsSrc, fsSrc){
-    const p = gl.createProgram();
-    gl.attachShader(p, compile2(gl.VERTEX_SHADER, vsSrc));
-    gl.attachShader(p, compile2(gl.FRAGMENT_SHADER, fsSrc));
-    gl.linkProgram(p);
-    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    return p;
-  }
-
-  function initGL(){
-    canvas = document.getElementById('glcanvas');
-
-    // Try WebGL2 first, then WebGL1
-    gl = canvas.getContext('webgl2', { premultipliedAlpha:true, antialias:true });
-    if(gl){
-      isWebGL2 = true;
-      prog = linkProgram2(vs2, fsFor2(ANIMATION_MODE));
-      gl.useProgram(prog);
-      loc = {
-        a: gl.getUniformLocation(prog,'a'),
-        b: gl.getUniformLocation(prog,'b'),
-        res: gl.getUniformLocation(prog,'res'),
-        t: gl.getUniformLocation(prog,'t')
-      };
-      gl.bindVertexArray(gl.createVertexArray());
-      sizeGLBuffer(); fitCanvas();
-      addEventListener('resize', resize);
-      return true;
-    }
-
-    gl = canvas.getContext('webgl', { premultipliedAlpha:true, antialias:false }) ||
-         canvas.getContext('experimental-webgl', { premultipliedAlpha:true, antialias:false });
-
-    if(!gl){
-      console.warn('No WebGL available. Widgets will still run.');
-      return false;
-    }
-
-    isWebGL2 = false;
-
-    // WebGL1 program
-    const vs = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vs, vs1);
-    gl.compileShader(vs);
-    if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(vs));
-
-    const fs = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fs, fsFor1(ANIMATION_MODE));
-    gl.compileShader(fs);
-    if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(fs));
-
-    prog = gl.createProgram();
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, fs);
-    gl.linkProgram(prog);
-    if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
-    gl.useProgram(prog);
-
-    loc = {
-      a: gl.getUniformLocation(prog,'a'),
-      b: gl.getUniformLocation(prog,'b'),
-      res: gl.getUniformLocation(prog,'res'),
-      t: gl.getUniformLocation(prog,'t')
-    };
-
-    // Quad buffer for WebGL1
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      -1,-1,  1,-1,  -1, 1,
-       1,-1,  1, 1,  -1, 1
-    ]), gl.STATIC_DRAW);
-
-    const posLoc = gl.getAttribLocation(prog, "position");
-    gl.enableVertexAttribArray(posLoc);
-    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
-    sizeGLBuffer(); fitCanvas();
-    addEventListener('resize', resize);
-    return true;
-  }
-
-  function make1x1(colorRGBA){
-    const t = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(colorRGBA));
-    return t;
-  }
-
-  function updateTextureFromImage(texObj, img){
-    gl.bindTexture(gl.TEXTURE_2D, texObj);
-    if(isWebGL2){
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-      gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
-      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
-    }else{
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
-    }
-  }
-
-  function loadImageAsync(src){
-    return new Promise((res, rej)=>{
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => res(img);
-      img.onerror = rej;
-      img.src = src;
-    });
-  }
-
-  async function progressiveLoadSlides(){
-    // Create placeholders first (prevents “big burst” allocation)
-    tex = IMAGES.map(() => make1x1([0,0,0,255]));
-
-    // Load first two ASAP so slideshow can start
-    const firstBatch = Math.min(2, IMAGES.length);
-    for(let i=0;i<firstBatch;i++){
-      try{
-        const img = await loadImageAsync(IMAGES[i]);
-        updateTextureFromImage(tex[i], img);
-      }catch(e){
-        console.warn('Slide failed:', IMAGES[i], e);
-      }
-    }
-
-    // Load the rest in background, one-by-one (keeps Crestron alive)
-    setTimeout(async () => {
-      for(let i=firstBatch;i<IMAGES.length;i++){
-        try{
-          const img = await loadImageAsync(IMAGES[i]);
-          updateTextureFromImage(tex[i], img);
-          // tiny yield so we don’t hog the UI thread
-          await new Promise(r => setTimeout(r, 30));
-        }catch(e){
-          console.warn('Slide failed:', IMAGES[i], e);
-        }
-      }
-    }, 0);
-  }
-
-  function bindTextures(i0, i1){
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, tex[i0 % tex.length]);
-    gl.uniform1i(loc.a, 0);
-
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, tex[i1 % tex.length]);
-    gl.uniform1i(loc.b, 1);
-  }
-
-  function loop(now){
-    gl.uniform2f(loc.res, canvas.width, canvas.height);
-
-    if(now >= end){
-      if(phase === 'dwell'){
-        phase = 'transition';
-        end = now + TRANSITION_MS;
-        bindTextures(idx, next);
-      }else{
-        idx = next;
-        next = (idx + 1) % tex.length;
-        bindTextures(idx, next);
-        phase = 'dwell';
-        end = now + SLIDE_MS;
-        gl.uniform1f(loc.t, 0);
-      }
-    }
-
-    const tt = (phase === 'transition')
-      ? 1 - Math.max(0, (end - now)) / Math.max(1, TRANSITION_MS)
-      : 0;
-
-    gl.uniform1f(loc.t, tt);
-
-    if(isWebGL2){
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }else{
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-    }
-
+  function bind(i0,i1){ gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,tex[i0%tex.length]); gl.uniform1i(loc.a,0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,tex[i1%tex.length]); gl.uniform1i(loc.b,1); }
+  function start(){ bind(idx,next); phase='dwell'; end=performance.now()+SLIDE_MS; gl.uniform1f(loc.t,0);
     requestAnimationFrame(loop);
+    initWeatherAndAQI(); initNews(); initQR(); initClock(); renderCalendar(new Date());
+  }
+  function loop(now){ gl.uniform2f(loc.res,canvas.width,canvas.height);
+    if(now>=end){ if(phase==='dwell'){ phase='transition'; end=now+TRANSITION_MS; bind(idx,next);} else { idx=next; next=(idx+1)%tex.length; bind(idx,next); phase='dwell'; end=now+SLIDE_MS; gl.uniform1f(loc.t,0);} }
+    gl.uniform1f(loc.t, phase==='transition' ? 1 - Math.max(0,(end-now))/Math.max(1,TRANSITION_MS) : 0 );
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4); requestAnimationFrame(loop);
   }
 
-  function startSlideshow(){
-    if(!gl || !tex.length) return;
-    idx = 0;
-    next = (idx + 1) % tex.length;
-    bindTextures(idx, next);
-    phase = 'dwell';
-    end = performance.now() + SLIDE_MS;
-    gl.uniform1f(loc.t, 0);
-    requestAnimationFrame(loop);
-  }
-
-  /* ========= Widgets (unchanged) ========= */
+  /* ========= Weather + AQI ========= */
   async function initWeatherAndAQI(){
     document.getElementById('weatherCity').textContent = CITY_LABEL;
     document.getElementById('aqiCity').textContent     = CITY_LABEL;
@@ -993,11 +638,8 @@
       const w=await fetch(wurl,{cache:'no-cache'}).then(r=>r.json());
       renderWeather(w);
       await fetchAQI(COORDS.lat,COORDS.lon);
-    }catch{
-      document.getElementById('weatherDesc').textContent='Weather unavailable';
-    }
+    }catch{ document.getElementById('weatherDesc').textContent='Weather unavailable'; }
   }
-
   function wxIcon(c){ if(c===0)return'☀️'; if([1,2].includes(c))return'🌤️'; if(c===3)return'☁️'; if([45,48].includes(c))return'🌫️'; if([51,53,55,56,57].includes(c))return'🌦️'; if([61,63,65].includes(c))return'🌧️'; if([66,67,71,73,75,77].includes(c))return'🌨️'; if([80,81,82].includes(c))return'🌧️'; if([95,96,99].includes(c))return'⛈️'; return'☁️'; }
   function wxText(c){ const m={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Rime fog',51:'Drizzle',53:'Drizzle',55:'Drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'}; return m[c]||'—'; }
   function renderWeather(d){
@@ -1005,18 +647,16 @@
     document.getElementById('weatherTemp').textContent = Math.round(c.temperature_2m) + '°';
     document.getElementById('weatherDesc').textContent = wxText(c.weather_code);
     document.getElementById('weatherIcon').textContent = wxIcon(c.weather_code);
-    document.getElementById('weatherForecast').innerHTML = '';
+    const fc = document.getElementById('weatherForecast'); fc.innerHTML = '';
   }
 
-  function aqiInfo(a){
-    if(a==null||!isFinite(a)) return {label:'—',color:'rgba(255,255,255,.12)',pos:0};
+  function aqiInfo(a){ if(a==null||!isFinite(a)) return {label:'—',color:'rgba(255,255,255,.12)',pos:0};
     if(a<=50) return{label:'Good',color:'#2ecc71',pos:(a/500)*100};
     if(a<=100)return{label:'Moderate',color:'#f1c40f',pos:(a/500)*100};
     if(a<=150)return{label:'Unhealthy (Sensitive)',color:'#e67e22',pos:(a/500)*100};
     if(a<=200)return{label:'Unhealthy',color:'#e74c3c',pos:(a/500)*100};
     if(a<=300)return{label:'Very Unhealthy',color:'#9b59b6',pos:(a/500)*100};
-    return{label:'Hazardous',color:'#7f1d1d',pos:Math.min(100,(a/500)*100)};
-  }
+    return{label:'Hazardous',color:'#7f1d1d',pos:Math.min(100,(a/500)*100)}; }
   async function fetchAQI(lat,lon){
     try{
       const url=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10`;
@@ -1030,17 +670,9 @@
     }catch{}
   }
 
+  /* ========= NEWS ========= */
   const NEWS_ROTATE_MS=10000;
-  function prettyTime(ds){
-    if(!ds) return "just now";
-    const d=new Date(ds);
-    if(isNaN(d)) return "—";
-    const s=(Date.now()-d)/1000;
-    if(s<60) return "just now";
-    if(s<3600) return Math.floor(s/60)+"m ago";
-    if(s<86400) return Math.floor(s/3600)+"h ago";
-    return d.toLocaleDateString();
-  }
+  function prettyTime(ds){ if(!ds) return "just now"; const d=new Date(ds); if(isNaN(d)) return "—"; const s=(Date.now()-d)/1000; if(s<60) return "just now"; if(s<3600) return Math.floor(s/60)+"m ago"; if(s<86400) return Math.floor(s/3600)+"h ago"; return d.toLocaleDateString(); }
 
   async function fetchTOI(n=24){
     const feed = 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms';
@@ -1053,67 +685,40 @@
         const m = it.content.match(/<img[^>]+src=["']([^"']+)["']/i);
         if(m) img = m[1];
       }
-      return { title: it.title, link: it.link, date: it.pubDate, source: 'Times of India', image: img || '' };
+      return {
+        title: it.title,
+        link: it.link,
+        date: it.pubDate,
+        source: 'Times of India',
+        image: img || ''
+      };
     });
   }
   async function fetchGuardian(n=24){
     const url='https://content.guardianapis.com/search?order-by=newest&section=(world|news|sport|culture|business)&show-fields=thumbnail,trailText,byline&page-size='+n+'&api-key=test';
-    const j=await fetch(url,{cache:'no-cache'}).then(r=>r.json());
-    const a=j.response?.results||[];
+    const j=await fetch(url,{cache:'no-cache'}).then(r=>r.json()); const a=j.response?.results||[];
     return a.map(r=>({title:r.webTitle, link:r.webUrl, date:r.webPublicationDate, source:'The Guardian', image:r.fields?.thumbnail||''}));
   }
   function cleanUrl(u){ return (u||'').replace(/&amp;/g,'&'); }
   async function fetchRedditNews(n=24){
-    const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json());
-    const p=j.data?.children||[];
-    return p.map(({data})=>({
-      title:data.title,
-      link:data.url_overridden_by_dest||('https://www.reddit.com'+data.permalink),
-      date:data.created_utc?new Date(data.created_utc*1000).toISOString():'',
-      source:'Reddit',
-      image:cleanUrl(data.preview?.images?.[0]?.source?.url || ((data.thumbnail||'').startsWith('http')?data.thumbnail:''))
-    }));
+    const j=await fetch(`https://www.reddit.com/r/news+worldnews/top.json?limit=${n}&t=day`,{cache:'no-cache'}).then(r=>r.json()); const p=j.data?.children||[];
+    return p.map(({data})=>({ title:data.title, link:data.url_overridden_by_dest||('https://www.reddit.com'+data.permalink), date:data.created_utc?new Date(data.created_utc*1000).toISOString():'', source:'Reddit', image:cleanUrl(data.preview?.images?.[0]?.source?.url|| (data.thumbnail||'').startsWith('http')?data.thumbnail:'' ) }));
   }
 
   let newsList=[], newsIndex=0, newsTimer;
-  function buildDots(){
-    const box=document.getElementById('newsDots'); box.innerHTML='';
-    newsList.forEach((_,i)=>{
-      const d=document.createElement('div');
-      d.className='news-dot'+(i===newsIndex?' active':'');
-      d.onclick=()=>{ newsIndex=i; renderNews(); resetNewsTimer(); };
-      box.appendChild(d);
-    });
-  }
-  function updateDots(){
-    document.querySelectorAll('#newsDots .news-dot').forEach((el,i)=>el.classList.toggle('active',i===newsIndex));
-  }
+  function buildDots(){ const box=document.getElementById('newsDots'); box.innerHTML=''; newsList.forEach((_,i)=>{ const d=document.createElement('div'); d.className='news-dot'+(i===newsIndex?' active':''); d.onclick=()=>{ newsIndex=i; renderNews(); resetNewsTimer(); }; box.appendChild(d); }); }
+  function updateDots(){ document.querySelectorAll('#newsDots .news-dot').forEach((el,i)=>el.classList.toggle('active',i===newsIndex)); }
   function setNewsSlide(it){
-    const link=document.getElementById('newsLink');
-    const src=document.getElementById('newsSourceInline');
-    const tim=document.getElementById('newsTime');
-    const hdr=document.getElementById('newsSource');
-    const img=document.getElementById('newsImg');
-    link.textContent=it.title||'—'; link.href=it.link||'#';
-    src.textContent=it.source||'—'; hdr.textContent=it.source||'Headlines';
-    tim.textContent=prettyTime(it.date);
-    if(it.image){ img.src=it.image; img.style.display='block'; }
-    else { img.removeAttribute('src'); img.style.display='none'; }
+    const link=document.getElementById('newsLink'), src=document.getElementById('newsSourceInline'), tim=document.getElementById('newsTime'), hdr=document.getElementById('newsSource'), img=document.getElementById('newsImg');
+    link.textContent=it.title||'—'; link.href=it.link||'#'; src.textContent=it.source||'—'; hdr.textContent=it.source||'Headlines'; tim.textContent=prettyTime(it.date);
+    if(it.image){ img.src=it.image; img.style.display='block'; } else { img.removeAttribute('src'); img.style.display='none'; }
   }
-  function renderNews(){
-    if(!newsList.length)return;
-    const cont=document.getElementById('newsContainer');
-    cont.classList.add('news-fade-leave');
-    setTimeout(()=>{
-      setNewsSlide(newsList[newsIndex]);
-      cont.classList.remove('news-fade-leave');
-      cont.classList.add('news-fade-enter');
-      setTimeout(()=>cont.classList.remove('news-fade-enter'),130);
-      updateDots();
-    },130);
+  function renderNews(){ if(!newsList.length)return; const cont=document.getElementById('newsContainer'); cont.classList.add('news-fade-leave');
+    setTimeout(()=>{ setNewsSlide(newsList[newsIndex]); cont.classList.remove('news-fade-leave'); cont.classList.add('news-fade-enter'); setTimeout(()=>cont.classList.remove('news-fade-enter'),130); updateDots(); },130);
   }
   function stepNews(){ if(!newsList.length)return; newsIndex=(newsIndex+1)%newsList.length; renderNews(); }
   function resetNewsTimer(){ clearInterval(newsTimer); newsTimer=setInterval(stepNews,NEWS_ROTATE_MS); }
+
   async function initNews(){
     let all=[];
     try{ all=await fetchTOI(24);}catch(e){ console.warn('TOI failed',e); }
@@ -1124,18 +729,15 @@
     newsList=all.slice(0,8); newsIndex=0; setNewsSlide(newsList[0]); buildDots(); resetNewsTimer();
   }
 
-  function initQR(){
-    const url=encodeURIComponent(INSTA_URL);
-    document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${url}`;
-    document.getElementById('qrLink').href=INSTA_URL;
-  }
+  /* ========= QR ========= */
+  function initQR(){ const url=encodeURIComponent(INSTA_URL); document.getElementById('qrImage').src=`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${url}`; document.getElementById('qrLink').href=INSTA_URL; }
 
+  /* ========= Clock ========= */
   function pad(n){ return String(n).padStart(2,'0'); }
   function tickClock(){
     const d=new Date();
     let h=d.getHours(), m=d.getMinutes(), s=d.getSeconds();
-    const ampm = h>=12?'PM':'AM';
-    const hh = ((h+11)%12)+1;
+    const ampm = h>=12?'PM':'AM'; const hh = ((h+11)%12)+1;
     document.getElementById('clockHHMM').textContent = `${pad(hh)}:${pad(m)}`;
     document.getElementById('clockSS').textContent   = pad(s);
     document.getElementById('ampm').textContent      = ampm;
@@ -1143,35 +745,18 @@
   }
   function initClock(){ tickClock(); setInterval(tickClock,1000); }
 
-  function renderCalendar(){
+  /* ========= Calendar (Today only) ========= */
+  function renderCalendar() {
     const now = new Date();
     const weekday = now.toLocaleDateString(undefined,{ weekday: 'long' });
     const daynum  = now.getDate();
     const month   = now.toLocaleDateString(undefined,{ month: 'short' });
+
     document.getElementById('todayBadge').textContent = `${month} ${daynum}`;
     document.getElementById('todayDay').textContent = daynum;
     document.getElementById('todayWeekday').textContent = weekday;
   }
-
-  /* ========= MAIN: boot first, then heavy stuff ========= */
-  (async function main(){
-    // 1) Boot overlay first (no WebGL work yet)
-    await playBootLight();
-
-    // 2) Start widgets immediately (light)
-    initWeatherAndAQI();
-    initNews();
-    initQR();
-    initClock();
-    renderCalendar();
-
-    // 3) Now init WebGL + load slides progressively (heavy delayed)
-    const ok = initGL();
-    if(ok){
-      await progressiveLoadSlides();
-      startSlideshow();
-    }
-  })();
   </script>
 </body>
 </html>
+
